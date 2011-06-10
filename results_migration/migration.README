@@ -1,0 +1,8 @@
+# 1. separefactors_concat_clean.sh
+# 2. plotAll.sh
+
+# receives a simulation output and plot some statistics on file granularity
+# plot_all_files.sh machine5-co-balance-workingset-50-true-1-20-5-11892.out
+
+# receives a cleaned concat file (of simulation samples)
+

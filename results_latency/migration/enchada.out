@@ -1,0 +1,32 @@
+[1] "30-machine5-co-random-50-true-1-1-30true-10187.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       8    1022    1160    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-1023.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       8     979    1157    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-12793.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       9     985    1158    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-12834.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       8    1186    1174    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-17111.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       9    1398    1194    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-18016.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       8    1186    1171    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-1953.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       9    1165    1170    2048 3714000 
+[1] "------------"
+[1] "30-machine5-co-random-50-true-1-1-30true-29597.out.latency"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       8    1398    1189    2048 3714000 
+[1] "------------"
