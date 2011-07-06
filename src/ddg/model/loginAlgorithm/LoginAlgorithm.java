@@ -17,19 +17,18 @@ package ddg.model.loginAlgorithm;
 
 import ddg.model.DDGClient;
 
-
 /**
  * TODO make doc
- *
+ * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public abstract class LoginAlgorithm {
-	
+
 	private final long mSecondsBetweenLogins;
-	
+
 	private long lastStamp = -1;
 	private DDGClient lastSampledClient;
-	
+
 	public LoginAlgorithm(long mSecondsBetweenLogins, DDGClient firstClient) {
 		this.mSecondsBetweenLogins = mSecondsBetweenLogins;
 		this.lastSampledClient = firstClient;
@@ -41,17 +40,18 @@ public abstract class LoginAlgorithm {
 	 * @return
 	 */
 	public DDGClient sampleClient(long now) {
-		
+
 		if (lastStamp == -1) {
 			lastStamp = now;
 		}
-		
-		lastSampledClient = ( ( (now - lastStamp) < mSecondsBetweenLogins)) ? lastSampledClient : pickAClient(now);
+
+		lastSampledClient = (((now - lastStamp) < mSecondsBetweenLogins)) ? lastSampledClient
+				: pickAClient(now);
 		lastStamp = now;
-		
+
 		return lastSampledClient;
 	}
-	
+
 	/**
 	 * 
 	 * @param now

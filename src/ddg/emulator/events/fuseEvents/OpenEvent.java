@@ -25,11 +25,11 @@ import ddg.model.DDGClient;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class OpenEvent extends TransactionalDataEvent {
-	
+
 	public static final String EVENT_NAME = "open";
 	private final DDGClient client;
 	private final int fileDescriptor;
@@ -42,27 +42,28 @@ public class OpenEvent extends TransactionalDataEvent {
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public OpenEvent(String fileName, int fileDescriptor, DDGClient client, JEEventHandler handler, JETime scheduledTime) {
+	public OpenEvent(String fileName, int fileDescriptor, DDGClient client,
+			JEEventHandler handler, JETime scheduledTime) {
 		super(EVENT_NAME, handler, scheduledTime);
 		this.fileName = fileName;
 		this.fileDescriptor = fileDescriptor;
 		this.client = client;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public String getFileName() {
 		return fileName;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public int getFileDescriptor() {
 		return fileDescriptor;
 	}
-	
+
 	/**
 	 * @return
 	 */

@@ -26,41 +26,48 @@ import ddg.util.Pair;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class CoLocatedWithSecondariesLoadBalance implements DataPlacementAlgorithm {
+public class CoLocatedWithSecondariesLoadBalance implements
+		DataPlacementAlgorithm {
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pair<DataServer, List<DataServer>> createFile(String fileName, int replicationLevel, List<DataServer> availableDataServers, DDGClient client) {
-		
+	@Override
+	public Pair<DataServer, List<DataServer>> createFile(String fileName,
+			int replicationLevel, List<DataServer> availableDataServers,
+			DDGClient client) {
+
 		List<DataServer> dataServersToRequest = fromLessToMoreOccupied(availableDataServers);
 
-		//choose one oh the co-located data servers
+		// choose one oh the co-located data servers
 		List<DataServer> dss = client.getMachine().getDeployedDataServers();
-		DataServer coAllocated = dss.get( new Random().nextInt( dss.size() ) );
-		
-		if ( dataServersToRequest.contains( coAllocated ) ) {
-			dataServersToRequest.remove( coAllocated );
+		DataServer coAllocated = dss.get(new Random().nextInt(dss.size()));
+
+		if (dataServersToRequest.contains(coAllocated)) {
+			dataServersToRequest.remove(coAllocated);
 		} else {
-			dataServersToRequest.remove( dataServersToRequest.size() - 1 );
-		}
-		
-		while (dataServersToRequest.size() > ( replicationLevel - 1)) {
 			dataServersToRequest.remove(dataServersToRequest.size() - 1);
 		}
 
-		return new Pair<DataServer, List<DataServer>>(coAllocated, dataServersToRequest);
+		while (dataServersToRequest.size() > (replicationLevel - 1)) {
+			dataServersToRequest.remove(dataServersToRequest.size() - 1);
+		}
+
+		return new Pair<DataServer, List<DataServer>>(coAllocated,
+				dataServersToRequest);
 	}
-	
-	private List<DataServer> fromLessToMoreOccupied(List<DataServer> availableDataServers) {
-		
-		List<DataServer> copiedList = new LinkedList<DataServer>(availableDataServers);
-		
+
+	private List<DataServer> fromLessToMoreOccupied(
+			List<DataServer> availableDataServers) {
+
+		List<DataServer> copiedList = new LinkedList<DataServer>(
+				availableDataServers);
+
 		Collections.sort(copiedList);
-		
+
 		return copiedList;
 	}
 

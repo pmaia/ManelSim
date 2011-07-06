@@ -29,14 +29,19 @@ import ddg.util.Pair;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgorithm {
+public class CoLocatedWithSecondaryRandomPlacement implements
+		DataPlacementAlgorithm {
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pair<DataServer, List<DataServer>> createFile(String fileName, int replicationLevel, List<DataServer> availableDataServers, DDGClient client) {
+	@Override
+	public Pair<DataServer, List<DataServer>> createFile(String fileName,
+			int replicationLevel, List<DataServer> availableDataServers,
+			DDGClient client) {
 
-		List<DataServer> dataServersToRequest = chooseRandomDataServers(availableDataServers, replicationLevel);
+		List<DataServer> dataServersToRequest = chooseRandomDataServers(
+				availableDataServers, replicationLevel);
 
 		// choose one of the co-located data servers
 		List<DataServer> dss = client.getMachine().getDeployedDataServers();
@@ -48,7 +53,8 @@ public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgor
 			dataServersToRequest.remove(0);
 		}
 
-		return new Pair<DataServer, List<DataServer>>(coAllocated, dataServersToRequest);
+		return new Pair<DataServer, List<DataServer>>(coAllocated,
+				dataServersToRequest);
 	}
 
 }

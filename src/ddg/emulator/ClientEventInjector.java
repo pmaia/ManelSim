@@ -19,7 +19,7 @@ import ddg.kernel.JEEvent;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public interface ClientEventInjector {
@@ -28,5 +28,5 @@ public interface ClientEventInjector {
 	 * @return
 	 */
 	JEEvent getNextEvent();
-	
+
 }

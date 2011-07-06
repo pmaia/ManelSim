@@ -32,9 +32,9 @@ public class MetadataServer extends JEEventHandler {
 	private final Map<String, ReplicationGroup> files;
 	private final Map<Integer, ReplicationGroup> openFiles;
 	private final PopulateAlgorithm populateAlgorithm;
-	
+
 	public final static int ONE_DAY = 1000 * 60 * 60 * 24;
-	
+
 	/**
 	 * Default constructor using fields.
 	 * 
@@ -42,10 +42,14 @@ public class MetadataServer extends JEEventHandler {
 	 * @param dataServers
 	 * @param dataPlacementAlgorithm
 	 * @param fileSizeDistribution
-	 * @param popAlgorithm TODO
+	 * @param popAlgorithm
+	 *            TODO
 	 */
-	public MetadataServer(JEEventScheduler scheduler, List<DataServer> dataServers, DataPlacementAlgorithm dataPlacementAlgorithm,
-			FileSizeDistribution fileSizeDistribution, PopulateAlgorithm popAlgorithm) {
+	public MetadataServer(JEEventScheduler scheduler,
+			List<DataServer> dataServers,
+			DataPlacementAlgorithm dataPlacementAlgorithm,
+			FileSizeDistribution fileSizeDistribution,
+			PopulateAlgorithm popAlgorithm) {
 
 		super(scheduler);
 
@@ -76,11 +80,13 @@ public class MetadataServer extends JEEventHandler {
 	 */
 	@Override
 	public void event_handler(JEEvent anEvent) {
-		
+
 		if (anEvent.getName().equals(MigrateEvent.EVENT_NAME)) {
-			ReplicationGroup group = files.get( ((MigrateEvent)anEvent).getFileName());
-			if (group == null) throw new RuntimeException();
-			group.migrate(((MigrateEvent)anEvent).getDataServer());
+			ReplicationGroup group = files.get(((MigrateEvent) anEvent)
+					.getFileName());
+			if (group == null)
+				throw new RuntimeException();
+			group.migrate(((MigrateEvent) anEvent).getDataServer());
 		} else {
 			throw new RuntimeException();
 		}
@@ -92,15 +98,17 @@ public class MetadataServer extends JEEventHandler {
 	 * @param client
 	 * @return
 	 */
-	public ReplicationGroup openPath(String fileName, Integer fileDescriptor, DDGClient client) {
+	public ReplicationGroup openPath(String fileName, Integer fileDescriptor,
+			DDGClient client) {
 
 		if (!files.containsKey(fileName)) {
-			createFile(fileName, 2, client);//FIXME externalize
+			createFile(fileName, 2, client);// FIXME externalize
 		}
-		
+
 		ReplicationGroup replicationGroup = files.get(fileName);
-		openFiles.put(fileDescriptor, replicationGroup);// FIXME do release memory leak
-		
+		openFiles.put(fileDescriptor, replicationGroup);// FIXME do release
+														// memory leak
+
 		return replicationGroup;
 	}
 
@@ -113,8 +121,9 @@ public class MetadataServer extends JEEventHandler {
 		ReplicationGroup group = openFiles.get(fileDescriptor);
 
 		if (group == null) {
-			throw new RuntimeException("The file descriptor: " + fileDescriptor + " is not open on this client: " + this + " Open descriptors: "
-					+ openFiles.keySet());
+			throw new RuntimeException("The file descriptor: " + fileDescriptor
+					+ " is not open on this client: " + this
+					+ " Open descriptors: " + openFiles.keySet());
 		}
 
 		return group;
@@ -125,27 +134,34 @@ public class MetadataServer extends JEEventHandler {
 	 * @param replicationLevel
 	 * @param dataServers
 	 */
-	public void populateNamespace(int numOfFullDataServers, int replicationLevel, List<DataServer> dataServers) {
-		populateAlgorithm.populateNamespace(numOfFullDataServers, replicationLevel, dataServers, fileSizeDistribution, files);
+	public void populateNamespace(int numOfFullDataServers,
+			int replicationLevel, List<DataServer> dataServers) {
+		populateAlgorithm.populateNamespace(numOfFullDataServers,
+				replicationLevel, dataServers, fileSizeDistribution, files);
 	}
-	
+
 	/**
 	 * @param placement
 	 * @param fileName
 	 * @param replicationLevel
 	 * @param nonFullDataServers
-	 * @param client 
+	 * @param client
 	 * @return
 	 */
-	private ReplicationGroup createReplicationGroup(DataPlacementAlgorithm placement, String fileName, int replicationLevel, 
-														List<DataServer> nonFullDataServers, DDGClient client ) {
-	
-		Pair<DataServer, List<DataServer>> group = placement.createFile(fileName, replicationLevel, nonFullDataServers, client);
+	private ReplicationGroup createReplicationGroup(
+			DataPlacementAlgorithm placement, String fileName,
+			int replicationLevel, List<DataServer> nonFullDataServers,
+			DDGClient client) {
+
+		Pair<DataServer, List<DataServer>> group = placement.createFile(
+				fileName, replicationLevel, nonFullDataServers, client);
 
 		DataServer primaryDataServer = group.first;
-		long fileSize = (long) Math.min(fileSizeDistribution.nextSampleSize(), primaryDataServer.getAvailableDiskSize());
+		long fileSize = (long) Math.min(fileSizeDistribution.nextSampleSize(),
+				primaryDataServer.getAvailableDiskSize());
 
-		return new ReplicationGroup(fileName, fileSize, replicationLevel, primaryDataServer, group.second);
+		return new ReplicationGroup(fileName, fileSize, replicationLevel,
+				primaryDataServer, group.second);
 	}
 
 	/**
@@ -155,13 +171,16 @@ public class MetadataServer extends JEEventHandler {
 	 * @param client
 	 * @return
 	 */
-	private ReplicationGroup createFile(String fileName, int replicationLevel, DDGClient client) {
+	private ReplicationGroup createFile(String fileName, int replicationLevel,
+			DDGClient client) {
 
 		if (files.containsKey(fileName)) {
 			return null;
 		}
-		
-		ReplicationGroup replicationGroup =  createReplicationGroup(dataPlacement, fileName, replicationLevel, this.availableDataServers, client);
+
+		ReplicationGroup replicationGroup = createReplicationGroup(
+				dataPlacement, fileName, replicationLevel,
+				this.availableDataServers, client);
 		files.put(fileName, replicationGroup);
 
 		return replicationGroup;
@@ -181,18 +200,20 @@ public class MetadataServer extends JEEventHandler {
 	 * @param offset
 	 * @param length
 	 */
-	public void write(DDGClient ddgClient, String fileName, long offset, long length) {
+	public void write(DDGClient ddgClient, String fileName, long offset,
+			long length) {
 		ReplicationGroup replicationGroup = files.get(fileName);
 		replicationGroup.writeFile(fileName, offset, length, ddgClient);
 	}
-	
+
 	/**
 	 * @param ddgClient
 	 * @param fileName
 	 * @param offset
 	 * @param size
 	 */
-	public void read(DDGClient ddgClient, String fileName, long offset, long size) {
+	public void read(DDGClient ddgClient, String fileName, long offset,
+			long size) {
 		ReplicationGroup replicationGroup = files.get(fileName);
 		replicationGroup.read(fileName, offset, size, ddgClient);
 	}

@@ -24,11 +24,11 @@ import ddg.kernel.JETime;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class ReleaseEvent extends TransactionalDataEvent {
-	
+
 	public static final String EVENT_NAME = "release";
 
 	/**
@@ -36,7 +36,8 @@ public class ReleaseEvent extends TransactionalDataEvent {
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public ReleaseEvent(String fileName, JEEventHandler handler, JETime scheduledTime) {
+	public ReleaseEvent(String fileName, JEEventHandler handler,
+			JETime scheduledTime) {
 		super(EVENT_NAME, handler, scheduledTime);
 	}
 

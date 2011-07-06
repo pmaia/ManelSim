@@ -24,7 +24,7 @@ import ddg.kernel.JETime;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class TransactionalDataEvent extends JEEvent {
@@ -34,7 +34,8 @@ public class TransactionalDataEvent extends JEEvent {
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public TransactionalDataEvent(String name, JEEventHandler handler, JETime scheduledTime) {
+	public TransactionalDataEvent(String name, JEEventHandler handler,
+			JETime scheduledTime) {
 		super(name, handler, scheduledTime);
 	}
 

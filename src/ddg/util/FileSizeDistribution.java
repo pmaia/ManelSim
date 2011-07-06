@@ -4,7 +4,7 @@ import eduni.distributions.LogNormal;
 
 /**
  * TODO make doc
- *
+ * 
  * @author Thiago Emmanuel, thiagoepdc@lsd.ufcg.edu.br
  */
 public class FileSizeDistribution {
@@ -15,7 +15,8 @@ public class FileSizeDistribution {
 	/**
 	 * @param mean
 	 * @param variance
-	 * @param maxSize TODO
+	 * @param maxSize
+	 *            TODO
 	 */
 	public FileSizeDistribution(double mean, double variance, double maxSize) {
 		this.maxSize = maxSize;

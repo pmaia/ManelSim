@@ -11,7 +11,7 @@ import ddg.util.Pair;
 
 /**
  * @author manel
- *
+ * 
  */
 public abstract class AbstractPopulateAlgorithm implements PopulateAlgorithm {
 
@@ -20,19 +20,23 @@ public abstract class AbstractPopulateAlgorithm implements PopulateAlgorithm {
 	 * @param fileName
 	 * @param replicationLevel
 	 * @param nonFullDataServers
-	 * @param client 
-	 * @param fileSizeDistribution 
+	 * @param client
+	 * @param fileSizeDistribution
 	 * @return
 	 */
-	protected ReplicationGroup createReplicationGroup(DataPlacementAlgorithm placement, String fileName, int replicationLevel, 
-														List<DataServer> nonFullDataServers, DDGClient client,
-															FileSizeDistribution fileSizeDistribution ) {
-	
-		Pair<DataServer, List<DataServer>> group = placement.createFile(fileName, replicationLevel, nonFullDataServers, client);
+	protected ReplicationGroup createReplicationGroup(
+			DataPlacementAlgorithm placement, String fileName,
+			int replicationLevel, List<DataServer> nonFullDataServers,
+			DDGClient client, FileSizeDistribution fileSizeDistribution) {
+
+		Pair<DataServer, List<DataServer>> group = placement.createFile(
+				fileName, replicationLevel, nonFullDataServers, client);
 
 		DataServer primaryDataServer = group.first;
-		long fileSize = (long) Math.min(fileSizeDistribution.nextSampleSize(), primaryDataServer.getAvailableDiskSize());
+		long fileSize = (long) Math.min(fileSizeDistribution.nextSampleSize(),
+				primaryDataServer.getAvailableDiskSize());
 
-		return new ReplicationGroup(fileName, fileSize, replicationLevel, primaryDataServer, group.second);
+		return new ReplicationGroup(fileName, fileSize, replicationLevel,
+				primaryDataServer, group.second);
 	}
 }

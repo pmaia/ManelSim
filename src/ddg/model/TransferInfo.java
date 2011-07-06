@@ -4,8 +4,8 @@ import ddg.kernel.JEEvent;
 import ddg.kernel.JETime;
 
 /**
- * It gathers all information about a transfer between a client and a data server or 
- * between two data servers. 
+ * It gathers all information about a transfer between a client and a data
+ * server or between two data servers.
  * 
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
@@ -23,7 +23,8 @@ public class TransferInfo {
 	 * @param fileSize
 	 * @param event
 	 */
-	public TransferInfo( JETime time, long transactionID, long fileSize, JEEvent event ) {
+	public TransferInfo(JETime time, long transactionID, long fileSize,
+			JEEvent event) {
 
 		this.time = time;
 		this.transactionID = transactionID;
@@ -54,7 +55,7 @@ public class TransferInfo {
 	}
 
 	public boolean isOver(long currentTransfer) {
-		return fileSize - (amountTransfered + currentTransfer)<= 0;
+		return fileSize - (amountTransfered + currentTransfer) <= 0;
 	}
 
 	/**

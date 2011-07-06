@@ -22,38 +22,39 @@ import ddg.model.data.DataServer;
 
 /**
  * TODO make doc
- *
+ * 
  */
 public class MigrateEvent extends JEEvent {
 
 	public static final String EVENT_NAME = "MIGRATE";
 	private final String file;
 	private final DataServer dataServer;
-	
+
 	/**
 	 * @param file
 	 * @param dataServer
 	 * @param aHandler
 	 * @param aScheduledTime
 	 */
-	public MigrateEvent(String file, DataServer dataServer, JEEventHandler aHandler, JETime aScheduledTime) {
+	public MigrateEvent(String file, DataServer dataServer,
+			JEEventHandler aHandler, JETime aScheduledTime) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 		this.file = file;
 		this.dataServer = dataServer;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public DataServer getDataServer() {
 		return dataServer;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public String getFileName() {
 		return file;
 	}
-	
+
 }

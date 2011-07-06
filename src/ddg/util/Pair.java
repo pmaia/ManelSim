@@ -17,7 +17,7 @@ package ddg.util;
 
 /**
  * An immutable pair of objects.
- *
+ * 
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
 public class Pair<T, V> {
@@ -39,7 +39,7 @@ public class Pair<T, V> {
 	 */
 	@Override
 	public final String toString() {
-		return "("+first+","+second+")";
+		return "(" + first + "," + second + ")";
 	}
 
 	/**

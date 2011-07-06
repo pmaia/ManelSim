@@ -31,7 +31,7 @@ public class HomeLessLoginAlgorithm extends LoginAlgorithm {
 	private final double swapMachineProb;
 	private final Random random;
 	private final List<DDGClient> clients;
-	
+
 	private DDGClient lastSampledClient;
 
 	/**
@@ -40,7 +40,9 @@ public class HomeLessLoginAlgorithm extends LoginAlgorithm {
 	 * @param firstClient
 	 * @param clients
 	 */
-	public HomeLessLoginAlgorithm(double swapMachineProb, long mSecondsBetweenLogins, DDGClient firstClient, List<DDGClient> clients) {
+	public HomeLessLoginAlgorithm(double swapMachineProb,
+			long mSecondsBetweenLogins, DDGClient firstClient,
+			List<DDGClient> clients) {
 
 		super(mSecondsBetweenLogins, firstClient);
 
@@ -51,17 +53,18 @@ public class HomeLessLoginAlgorithm extends LoginAlgorithm {
 		this.clients = clients;
 		this.swapMachineProb = swapMachineProb;
 		this.random = new Random();
-		this.lastSampledClient =  firstClient;
+		this.lastSampledClient = firstClient;
 
 	}
 
+	@Override
 	protected DDGClient pickAClient(long now) {
 		double sample = random.nextDouble();
-		if(sample <= swapMachineProb)
+		if (sample <= swapMachineProb)
 			lastSampledClient = clients.get(random.nextInt(clients.size()));
-		
+
 		Aggregator.getInstance().reportlogin(lastSampledClient, now);
-		
+
 		return lastSampledClient;
 	}
 

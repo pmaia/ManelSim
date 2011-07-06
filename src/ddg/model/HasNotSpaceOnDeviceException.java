@@ -19,7 +19,7 @@ import ddg.model.data.DataServer;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class HasNotSpaceOnDeviceException extends RuntimeException {
@@ -32,7 +32,9 @@ public class HasNotSpaceOnDeviceException extends RuntimeException {
 	 * @param dataserver
 	 */
 	public HasNotSpaceOnDeviceException(long sizeAddition, DataServer dataserver) {
-		super("DataServer: "+ dataserver + " available on disk: " + dataserver.getAvailableDiskSize() + " size addition: "+sizeAddition);
+		super("DataServer: " + dataserver + " available on disk: "
+				+ dataserver.getAvailableDiskSize() + " size addition: "
+				+ sizeAddition);
 		this.sizeAddition = sizeAddition;
 	}
 
@@ -42,5 +44,5 @@ public class HasNotSpaceOnDeviceException extends RuntimeException {
 	public long getSizeAddition() {
 		return sizeAddition;
 	}
-	
+
 }

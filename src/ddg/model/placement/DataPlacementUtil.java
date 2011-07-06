@@ -23,27 +23,30 @@ import ddg.util.RandomUtil;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public class DataPlacementUtil {
-	
-	 /**
+
+	/**
 	 * @param availableServers
 	 * @param numberOfWantedServers
 	 * @return
 	 */
-	public static List<DataServer> chooseRandomDataServers( List<DataServer> availableServers, int numberOfWantedServers ) {
+	public static List<DataServer> chooseRandomDataServers(
+			List<DataServer> availableServers, int numberOfWantedServers) {
 
-		int numberOfSelectedDataServers = (availableServers.size() > numberOfWantedServers ) ? numberOfWantedServers : availableServers.size();
+		int numberOfSelectedDataServers = (availableServers.size() > numberOfWantedServers) ? numberOfWantedServers
+				: availableServers.size();
 
 		List<DataServer> list = new ArrayList<DataServer>();
-		
-		List<Integer> randomList = RandomUtil.random( availableServers.size() );// random police
-		for ( int i = 0; i < numberOfSelectedDataServers; i++ ) {
-			list.add( availableServers.get( randomList.get( i ) ) );
+
+		List<Integer> randomList = RandomUtil.random(availableServers.size());// random
+																				// police
+		for (int i = 0; i < numberOfSelectedDataServers; i++) {
+			list.add(availableServers.get(randomList.get(i)));
 		}
-		
+
 		return list;
 	}
 

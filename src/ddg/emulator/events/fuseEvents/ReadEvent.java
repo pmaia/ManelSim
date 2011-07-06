@@ -25,13 +25,13 @@ import ddg.model.DDGClient;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class ReadEvent extends TransactionalDataEvent {
-	
+
 	public static final String EVENT_NAME = "read";
-	
+
 	private final long size;
 	private final long offset;
 	private final int fileDescriptor;
@@ -39,22 +39,27 @@ public class ReadEvent extends TransactionalDataEvent {
 	private final DDGClient client;
 
 	/**
-	 * @param size TODO
-	 * @param offset TODO
-	 * @param fileDescriptor TODO
+	 * @param size
+	 *            TODO
+	 * @param offset
+	 *            TODO
+	 * @param fileDescriptor
+	 *            TODO
 	 * @param handler
 	 * @param scheduledTime
-	 * @param client TODO
+	 * @param client
+	 *            TODO
 	 */
-	public ReadEvent(long size, long offset, int fileDescriptor, JEEventHandler handler, JETime scheduledTime, DDGClient client) {
-		
+	public ReadEvent(long size, long offset, int fileDescriptor,
+			JEEventHandler handler, JETime scheduledTime, DDGClient client) {
+
 		super(EVENT_NAME, handler, scheduledTime);
 		this.fileDescriptor = fileDescriptor;
 		this.size = size;
 		this.offset = offset;
 		this.client = client;
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -75,7 +80,7 @@ public class ReadEvent extends TransactionalDataEvent {
 	public long getOffset() {
 		return offset;
 	}
-	
+
 	/**
 	 * @return
 	 */

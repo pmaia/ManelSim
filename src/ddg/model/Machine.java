@@ -6,7 +6,6 @@ import java.util.List;
 import ddg.kernel.JEEventScheduler;
 import ddg.model.data.DataServer;
 
-
 /**
  * Models a machine. This machine can hold a number of clients and data servers.
  * 
@@ -14,12 +13,12 @@ import ddg.model.data.DataServer;
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
 public class Machine {
-	
+
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
-	
+
 	private final int id;
-	
+
 	/**
 	 * Default constructor using fields.
 	 * 
@@ -45,15 +44,17 @@ public class Machine {
 	public List<DataServer> getDeployedDataServers() {
 		return deployedDataServers;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public List<DDGClient> getDeployedClients() {
 		return clients;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -65,49 +66,51 @@ public class Machine {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals( Object obj ) {
+	public boolean equals(Object obj) {
 
-		if ( this == obj )
+		if (this == obj)
 			return true;
-		if ( obj == null )
+		if (obj == null)
 			return false;
-		if ( getClass() != obj.getClass() )
+		if (getClass() != obj.getClass())
 			return false;
 		Machine other = (Machine) obj;
-		if ( id != other.id )
+		if (id != other.id)
 			return false;
 		return true;
 	}
-	
+
 	/**
 	 * @param newClient
-	 * @return 
+	 * @return
 	 */
-	public int bindClient( DDGClient newClient ) {
-		clients.add( newClient );
-		return clients.indexOf( newClient );
+	public int bindClient(DDGClient newClient) {
+		clients.add(newClient);
+		return clients.indexOf(newClient);
 	}
-	
+
 	/**
 	 * @param newDataServer
-	 * @return 
+	 * @return
 	 */
-	public int deploy( DataServer newDataServer ) {
-		deployedDataServers.add( newDataServer );
-		return deployedDataServers.indexOf( newDataServer );
+	public int deploy(DataServer newDataServer) {
+		deployedDataServers.add(newDataServer);
+		return deployedDataServers.indexOf(newDataServer);
 	}
 
 	/**
 	 * @param newDataServer
 	 */
-	public boolean isDeployed( DataServer dataServer ) {
-		return deployedDataServers.contains( dataServer );
+	public boolean isDeployed(DataServer dataServer) {
+		return deployedDataServers.contains(dataServer);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

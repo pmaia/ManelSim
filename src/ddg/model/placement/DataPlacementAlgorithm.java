@@ -35,6 +35,8 @@ public interface DataPlacementAlgorithm {
 	 * @param client
 	 * @return
 	 */
-	Pair<DataServer, List<DataServer>> createFile(String fileName, int replicationLevel, List<DataServer> availableDataServers, DDGClient client);
+	Pair<DataServer, List<DataServer>> createFile(String fileName,
+			int replicationLevel, List<DataServer> availableDataServers,
+			DDGClient client);
 
 }

@@ -8,7 +8,6 @@ import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;
 import ddg.model.MetadataServer;
 
-
 /**
  * Create system entities, schedule first events and start emulation.
  * 
@@ -16,19 +15,19 @@ import ddg.model.MetadataServer;
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
 public class EmulatorControl {
-	
+
 	private final JEEventScheduler theUniqueEventScheduler;
 	private final ClientEventInjector eventInjector;
 
-	//ugly but works
+	// ugly but works
 	private static EmulatorControl singleInstace;
-	
-	private final MetadataServer metadataServer; 
+
+	private final MetadataServer metadataServer;
 	private final BootStrapperEventHandler bootStrapperEventHandler;
-	
+
 	public final boolean datamigration;
 	public final long replicationDelayMillis;
-	
+
 	/**
 	 * @param eventScheduler
 	 * @param eventInjector
@@ -37,32 +36,36 @@ public class EmulatorControl {
 	 * @param replicationDelayMillis
 	 * @return
 	 */
-	public static EmulatorControl build(JEEventScheduler eventScheduler, ClientEventInjector eventInjector, 
-											MetadataServer metadataServer, boolean data_migration, long replicationDelayMillis) {
-	
-		if (singleInstace != null) throw new IllegalStateException();
+	public static EmulatorControl build(JEEventScheduler eventScheduler,
+			ClientEventInjector eventInjector, MetadataServer metadataServer,
+			boolean data_migration, long replicationDelayMillis) {
 
-		singleInstace = new EmulatorControl(eventScheduler, eventInjector, metadataServer, data_migration, replicationDelayMillis);
+		if (singleInstace != null)
+			throw new IllegalStateException();
+
+		singleInstace = new EmulatorControl(eventScheduler, eventInjector,
+				metadataServer, data_migration, replicationDelayMillis);
 		return singleInstace;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public static EmulatorControl getInstance() {
-		
-		if (singleInstace == null) throw new IllegalStateException();
-		
+
+		if (singleInstace == null)
+			throw new IllegalStateException();
+
 		return singleInstace;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public MetadataServer getMetadataServer() {
 		return metadataServer;
 	}
-	
+
 	/**
 	 * @param eventScheduler
 	 * @param injector
@@ -70,38 +73,40 @@ public class EmulatorControl {
 	 * @param datamigration
 	 * @param replicationDelayMillis
 	 */
-	private EmulatorControl( JEEventScheduler eventScheduler, ClientEventInjector injector, MetadataServer metadataServer, 
-								boolean datamigration, long replicationDelayMillis) {
+	private EmulatorControl(JEEventScheduler eventScheduler,
+			ClientEventInjector injector, MetadataServer metadataServer,
+			boolean datamigration, long replicationDelayMillis) {
 
 		this.theUniqueEventScheduler = eventScheduler;
 		this.eventInjector = injector;
 		this.metadataServer = metadataServer;
 		this.datamigration = datamigration;
 		this.replicationDelayMillis = replicationDelayMillis;
-		bootStrapperEventHandler = new BootStrapperEventHandler(theUniqueEventScheduler);
+		bootStrapperEventHandler = new BootStrapperEventHandler(
+				theUniqueEventScheduler);
 	}
-	
+
 	public JEEventScheduler getTheUniqueEventScheduler() {
 		return theUniqueEventScheduler;
 	}
-	
+
 	/**
 	 * 
 	 */
 	public void scheduleNext() {
 		scheduleNext(this.eventInjector.getNextEvent());
 	}
-	
+
 	/**
-	 * @param nextEvent 
+	 * @param nextEvent
 	 */
 	public void scheduleNext(JEEvent nextEvent) {
 
 		if (nextEvent != null) {
 			bootStrapperEventHandler.event_handler(nextEvent);
 		}
-	}	
-	
+	}
+
 	private class BootStrapperEventHandler extends JEEventHandler {
 
 		/**
@@ -110,7 +115,7 @@ public class EmulatorControl {
 		public BootStrapperEventHandler(JEEventScheduler scheduler) {
 			super(scheduler);
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -118,6 +123,6 @@ public class EmulatorControl {
 		public void event_handler(JEEvent arg) {
 			send(arg);
 		}
-		
-	}	
+
+	}
 }

@@ -9,9 +9,8 @@ import ddg.model.File;
 import ddg.model.HasNotSpaceOnDeviceException;
 import ddg.model.Machine;
 
-
 /**
- * DataServer representation.  
+ * DataServer representation.
  * 
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
@@ -26,7 +25,7 @@ public class DataServer implements Comparable<DataServer> {
 	private double availableDiskSize;
 
 	private final Map<String, File> files;
-	
+
 	/**
 	 * Default constructor using fields.
 	 * 
@@ -34,58 +33,60 @@ public class DataServer implements Comparable<DataServer> {
 	 * @param machine
 	 * @param diskSize
 	 */
-	public DataServer( JEEventScheduler scheduler, Machine machine, double diskSize ) {
+	public DataServer(JEEventScheduler scheduler, Machine machine,
+			double diskSize) {
 		this.machine = machine;
-		this.id = "ds" + machine.deploy( this ) + machine;
+		this.id = "ds" + machine.deploy(this) + machine;
 		this.diskSize = diskSize;
-		this.availableDiskSize = this.diskSize; 
+		this.availableDiskSize = this.diskSize;
 		this.files = new HashMap<String, File>();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int compareTo(DataServer o) {
-		
+
 		// more_available < less_available
-		
+
 		double diff = getAvailableDiskSize() - o.getAvailableDiskSize();
-		//the direct subtraction can raise a flow error
+		// the direct subtraction can raise a flow error
 		if (diff > 0) {
 			return -1;
 		} else if (diff < 0) {
 			return 1;
 		}
-		
+
 		return 0;
 	}
-	
+
 	/**
 	 * @param fileName
 	 */
 	void removeFileReplica(String fileName) {
-		File removed = files.remove( fileName );
+		File removed = files.remove(fileName);
 		availableDiskSize += removed.getSize();
 	}
-	
+
 	/**
 	 * @param fileName
 	 * @param size
 	 */
-	void createFile( String fileName, long size) {
-		
+	void createFile(String fileName, long size) {
+
 		File file = new File(fileName, size);
 		long addition = file.getSize();
-		
-		if (  hasSpaceOnDevice( addition )) {
+
+		if (hasSpaceOnDevice(addition)) {
 			availableDiskSize -= addition;
-			
-			files.put( fileName, file );
-			
-		} else{
+
+			files.put(fileName, file);
+
+		} else {
 			throw new HasNotSpaceOnDeviceException(addition, this);
 		}
-		
+
 	}
 
 	/**
@@ -95,16 +96,16 @@ public class DataServer implements Comparable<DataServer> {
 	 * @param client
 	 */
 	void writeFile(String fileName, long offset, long length, DDGClient client) {
-		
+
 		File file = getFile(fileName);
-		
-		long newSize = Math.max( file.getSize(), offset + length);
+
+		long newSize = Math.max(file.getSize(), offset + length);
 		long addition = newSize - file.getSize();
-		
-		if ( hasSpaceOnDevice( addition )) {
+
+		if (hasSpaceOnDevice(addition)) {
 			availableDiskSize -= addition;
-			file.setSize( newSize );
-		} else{
+			file.setSize(newSize);
+		} else {
 			throw new HasNotSpaceOnDeviceException(addition, this);
 		}
 	}
@@ -117,8 +118,10 @@ public class DataServer implements Comparable<DataServer> {
 	public boolean hasSpaceOnDevice(long addition) {
 		return availableDiskSize >= addition;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ddg.DataServer#getId()
 	 */
 	public String getId() {
@@ -138,34 +141,34 @@ public class DataServer implements Comparable<DataServer> {
 	public double getDiskSize() {
 		return diskSize;
 	}
-	
+
 	public boolean isFull() {
 		return getAvailableDiskSize() == 0;
 	}
-	
+
 	/**
 	 * @return the availableDiskSize
 	 */
 	public double getAvailableDiskSize() {
 		return availableDiskSize;
 	}
-	
+
 	/**
 	 * @param fileName
 	 * @return
 	 */
-	public boolean containsFile( String fileName ) {
+	public boolean containsFile(String fileName) {
 		return files.containsKey(fileName);
 	}
-	
+
 	/**
 	 * @param fileName
 	 * @return
 	 */
-	private File getFile( String fileName) {
+	private File getFile(String fileName) {
 		return files.get(fileName);
 	}
-	
+
 	/**
 	 * @param fileName
 	 * @return
@@ -173,8 +176,10 @@ public class DataServer implements Comparable<DataServer> {
 	public long getFileSize(String fileName) {
 		return getFile(fileName).getSize();
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -185,7 +190,9 @@ public class DataServer implements Comparable<DataServer> {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override

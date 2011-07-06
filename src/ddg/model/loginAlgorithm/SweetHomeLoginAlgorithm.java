@@ -21,10 +21,9 @@ import java.util.Random;
 import ddg.model.Aggregator;
 import ddg.model.DDGClient;
 
-
 /**
  * TODO make doc
- *
+ * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public class SweetHomeLoginAlgorithm extends LoginAlgorithm {
@@ -32,36 +31,40 @@ public class SweetHomeLoginAlgorithm extends LoginAlgorithm {
 	private final Random random;
 	private final DDGClient sweetHomeClient;
 	private final List<DDGClient> othersClients;
-	
+
 	private final double migrationProb;
-	
+
 	/**
 	 * @param swapMachineProb
 	 * @param mSecondsBetweenLogins
 	 * @param sweetHomeClient
 	 * @param othersClients
 	 */
-	public SweetHomeLoginAlgorithm(double swapMachineProb, long mSecondsBetweenLogins, DDGClient sweetHomeClient, List<DDGClient> othersClients) {
-		
+	public SweetHomeLoginAlgorithm(double swapMachineProb,
+			long mSecondsBetweenLogins, DDGClient sweetHomeClient,
+			List<DDGClient> othersClients) {
+
 		super(mSecondsBetweenLogins, sweetHomeClient);
-		
+
 		if (swapMachineProb < 0 || swapMachineProb >= 1) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		if (othersClients.contains(sweetHomeClient)) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		this.migrationProb = swapMachineProb;
 		this.sweetHomeClient = sweetHomeClient;
 		this.othersClients = othersClients;
 		this.random = new Random();
 	}
 
+	@Override
 	protected DDGClient pickAClient(long now) {
 		double sample = random.nextDouble();
-		DDGClient client = (sample <= migrationProb) ? othersClients.get(random.nextInt(othersClients.size())) : sweetHomeClient;
+		DDGClient client = (sample <= migrationProb) ? othersClients.get(random
+				.nextInt(othersClients.size())) : sweetHomeClient;
 		Aggregator.getInstance().reportlogin(client, now);
 		return client;
 	}

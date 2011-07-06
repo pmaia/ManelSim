@@ -29,7 +29,8 @@ public class DDGClient extends JEEventHandler {
 	 * @param machine
 	 * @param herald
 	 */
-	public DDGClient(JEEventScheduler scheduler, int clientIndex, Machine machine, MetadataServer herald) {
+	public DDGClient(JEEventScheduler scheduler, int clientIndex,
+			Machine machine, MetadataServer herald) {
 
 		super(scheduler);
 
@@ -53,30 +54,36 @@ public class DDGClient extends JEEventHandler {
 
 			OpenEvent ev = (OpenEvent) anEvent;
 
-			ReplicationGroup replicationGroup = herald.openPath(ev.getFileName(), ev.getFileDescriptor(), this);
+			ReplicationGroup replicationGroup = herald.openPath(
+					ev.getFileName(), ev.getFileDescriptor(), this);
 
 			if (replicationGroup == null) {
-				throw new RuntimeException("The metadata server returned a null group for file: " + ev.getFileName());
+				throw new RuntimeException(
+						"The metadata server returned a null group for file: "
+								+ ev.getFileName());
 			}
 
 		} else if (anEventName.equals(ReadEvent.EVENT_NAME)) {
 
 			ReadEvent event = (ReadEvent) anEvent;
 			int fileDescriptor = event.getFileDescriptor();
-			ReplicationGroup group = herald.lookupReplicationGroup(fileDescriptor);
-			herald.read(this, group.getFileName(), event.getOffset(), event.getSize());
+			ReplicationGroup group = herald
+					.lookupReplicationGroup(fileDescriptor);
+			herald.read(this, group.getFileName(), event.getOffset(),
+					event.getSize());
 
 		} else if (anEventName.equals(WriteEvent.EVENT_NAME)) {
 
 			WriteEvent event = (WriteEvent) anEvent;
 			int fileDescriptor = event.getFileDescriptor();
-			ReplicationGroup group = herald.lookupReplicationGroup(fileDescriptor);
+			ReplicationGroup group = herald
+					.lookupReplicationGroup(fileDescriptor);
 			String fileName = group.getFileName();
 			herald.write(this, fileName, event.getOffset(), event.getSize());
 
 		} else {
-			
-			//throw new RuntimeException();
+
+			// throw new RuntimeException();
 		}
 
 		EmulatorControl.getInstance().scheduleNext();

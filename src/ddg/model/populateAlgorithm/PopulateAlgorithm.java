@@ -16,7 +16,8 @@ public interface PopulateAlgorithm {
 	 * @param fileDist
 	 * @param mapping
 	 */
-	public void populateNamespace(int numFullDSs, int rlevel, List<DataServer> dataServers,
-									FileSizeDistribution fileDist, Map<String, ReplicationGroup> mapping);
-	
+	public void populateNamespace(int numFullDSs, int rlevel,
+			List<DataServer> dataServers, FileSizeDistribution fileDist,
+			Map<String, ReplicationGroup> mapping);
+
 }

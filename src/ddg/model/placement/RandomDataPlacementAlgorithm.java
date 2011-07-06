@@ -25,7 +25,7 @@ import ddg.util.Pair;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
@@ -33,10 +33,15 @@ public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pair<DataServer, List<DataServer>> createFile(String fileName, int replicationLevel, List<DataServer> availableDataServers, DDGClient client) {
-		List<DataServer> dataServersToRequest = chooseRandomDataServers( availableDataServers, replicationLevel );
+	@Override
+	public Pair<DataServer, List<DataServer>> createFile(String fileName,
+			int replicationLevel, List<DataServer> availableDataServers,
+			DDGClient client) {
+		List<DataServer> dataServersToRequest = chooseRandomDataServers(
+				availableDataServers, replicationLevel);
 		DataServer primary = dataServersToRequest.remove(0);
-		return new Pair<DataServer, List<DataServer>>(primary, dataServersToRequest);
+		return new Pair<DataServer, List<DataServer>>(primary,
+				dataServersToRequest);
 	}
 
 }

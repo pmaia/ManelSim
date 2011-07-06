@@ -55,22 +55,22 @@ public class SeerTraceMain {
 		 * 1. Data placement police [random, co-random, co-balance] 
 		 * 2. number of machines 
 		 * 3. homeless login [true, false] 
-		 * 4. migration probability [0, 1)
-		 * 5. data_migration [true, false]
-		 * 6. replication delay secs 
+		 * 4. migration probability [0, 1) 
+		 * 5. data_migration [true, false] 
+		 * 6. replication delay secs
 		 */
 
 		System.out.println(Arrays.toString(args));
 
 		final JEEventScheduler scheduler = new JEEventScheduler();
-		
+
 		String traceFile = args[0];
 		String placement_police = args[1];
 		String num_machines = args[2];
 		String homeless = args[3];
 		String migration_prob = args[4];
 		String enableMigration = args[5];
-		long replicationDelayMillis = Long.parseLong(args[6]) * 1000;   
+		long replicationDelayMillis = Long.parseLong(args[6]) * 1000;
 
 		DataPlacementAlgorithm placement = createPlacementPolice(placement_police);
 
@@ -78,23 +78,32 @@ public class SeerTraceMain {
 
 		// 1 GiBytes
 		long diskSize = 1024 * 1024 * 1024 * 1L;
-		FileSizeDistribution fileSizeDistribution = new FileSizeDistribution(8.46, 2.38, diskSize);
+		FileSizeDistribution fileSizeDistribution = new FileSizeDistribution(
+				8.46, 2.38, diskSize);
 
-		//building network
+		// building network
 		List<Machine> machines = createMachines(scheduler, numberOfMachines);
-		List<DataServer> dataServers = createDataServers(scheduler, numberOfMachines, diskSize, machines);
-		
-		MetadataServer metadataServer = new MetadataServer(scheduler, dataServers, placement, fileSizeDistribution, new NOPAlgorithm());
-		List<DDGClient> clients = createClients(scheduler, numberOfMachines, machines, metadataServer);
-		
+		List<DataServer> dataServers = createDataServers(scheduler,
+				numberOfMachines, diskSize, machines);
+
+		MetadataServer metadataServer = new MetadataServer(scheduler,
+				dataServers, placement, fileSizeDistribution,
+				new NOPAlgorithm());
+		List<DDGClient> clients = createClients(scheduler, numberOfMachines,
+				machines, metadataServer);
+
 		// login algorithm
-		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(new Boolean(homeless),
-				new Double(migration_prob), MetadataServer.ONE_DAY, clients);
-		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(new File(traceFile), loginAlgorithm);
-		EmulatorControl control = EmulatorControl.build(scheduler, injector, metadataServer, new Boolean(enableMigration), replicationDelayMillis);
+		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(new Boolean(
+				homeless), new Double(migration_prob), MetadataServer.ONE_DAY,
+				clients);
+		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(
+				new File(traceFile), loginAlgorithm);
+		EmulatorControl control = EmulatorControl.build(scheduler, injector,
+				metadataServer, new Boolean(enableMigration),
+				replicationDelayMillis);
 
 		metadataServer.populateNamespace(0, 2, dataServers);
-		
+
 		control.scheduleNext();
 		scheduler.start();
 
@@ -108,26 +117,29 @@ public class SeerTraceMain {
 	 * @param clients
 	 * @return
 	 */
-	private static LoginAlgorithm createLoginAlgorithm(Boolean homeless, double migrationProb, int loginDuration,
-			List<DDGClient> clients) {
+	private static LoginAlgorithm createLoginAlgorithm(Boolean homeless,
+			double migrationProb, int loginDuration, List<DDGClient> clients) {
 
-		//always the first machines is full of data, otherwise in the case of machines are empty
-		
+		// always the first machines is full of data, otherwise in the case of
+		// machines are empty
+
 		DDGClient firstClient = clients.get(0);
-		
+
 		for (DDGClient ddgClient : clients) {
-			
+
 			if (ddgClient.getMachine().getDeployedDataServers().get(0).isFull()) {
 				firstClient = ddgClient;
 				break;
 			}
 		}
-		
+
 		if (homeless) {
-			return new HomeLessLoginAlgorithm(migrationProb, loginDuration, firstClient, clients);
+			return new HomeLessLoginAlgorithm(migrationProb, loginDuration,
+					firstClient, clients);
 		} else {
 			clients.remove(firstClient);
-			return new SweetHomeLoginAlgorithm(migrationProb, loginDuration, firstClient, clients);
+			return new SweetHomeLoginAlgorithm(migrationProb, loginDuration,
+					firstClient, clients);
 		}
 
 	}
@@ -155,7 +167,8 @@ public class SeerTraceMain {
 	 * @param machines2
 	 * @return
 	 */
-	private static List<DDGClient> createClients(JEEventScheduler scheduler, int numberOfClients, List<Machine> machines, MetadataServer herald) {
+	private static List<DDGClient> createClients(JEEventScheduler scheduler,
+			int numberOfClients, List<Machine> machines, MetadataServer herald) {
 
 		Iterator<Machine> iterator = machines.iterator();
 
@@ -175,7 +188,8 @@ public class SeerTraceMain {
 		return newClients;
 	}
 
-	private static List<Machine> createMachines(JEEventScheduler scheduler, int numberOfMachines) {
+	private static List<Machine> createMachines(JEEventScheduler scheduler,
+			int numberOfMachines) {
 
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
@@ -195,12 +209,15 @@ public class SeerTraceMain {
 	 * @param machines
 	 * @return
 	 */
-	private static List<DataServer> createDataServers(JEEventScheduler scheduler, int numberOfDataServers, double diskSize, List<Machine> machines) {
+	private static List<DataServer> createDataServers(
+			JEEventScheduler scheduler, int numberOfDataServers,
+			double diskSize, List<Machine> machines) {
 
 		List<DataServer> dataServers = new ArrayList<DataServer>();
 
 		for (Machine machine : machines) {
-			DataServer newDataServer = new DataServer(scheduler, machine, diskSize);
+			DataServer newDataServer = new DataServer(scheduler, machine,
+					diskSize);
 			dataServers.add(newDataServer);
 		}
 

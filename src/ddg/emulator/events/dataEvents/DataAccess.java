@@ -21,28 +21,32 @@ import ddg.kernel.JETime;
 
 /**
  * TODO make doc
- *
+ * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public class DataAccess extends TransactionalDataEvent {
 
 	public static final String EVENT_NAME = "data_access";
-	
-	public enum Type {READ_ACCESS, WRITE_ACCESS};
-	
+
+	public enum Type {
+		READ_ACCESS, WRITE_ACCESS
+	};
+
 	private final long size;
 	private final long offset;
 	private final Type type;
-	
+
 	/**
 	 * @param size
 	 * @param offset
-	 * @param accessType TODO
+	 * @param accessType
+	 *            TODO
 	 * @param name
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public DataAccess(long size, long offset, Type accessType, String name, JEEventHandler handler, JETime scheduledTime) {
+	public DataAccess(long size, long offset, Type accessType, String name,
+			JEEventHandler handler, JETime scheduledTime) {
 		super(name, handler, scheduledTime);
 		this.type = accessType;
 		this.size = size;
@@ -60,5 +64,5 @@ public class DataAccess extends TransactionalDataEvent {
 	public Type getType() {
 		return type;
 	}
-	
+
 }
