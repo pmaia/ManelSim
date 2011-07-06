@@ -3,8 +3,6 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;
 import ddg.model.data.DataServer;
 
@@ -15,7 +13,7 @@ import ddg.model.data.DataServer;
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
-public class Machine extends JEEventHandler {
+public class Machine {
 	
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
@@ -29,9 +27,6 @@ public class Machine extends JEEventHandler {
 	 * @param id
 	 */
 	public Machine(JEEventScheduler scheduler, int id) {
-		
-		super( scheduler );
-		
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
@@ -88,12 +83,6 @@ public class Machine extends JEEventHandler {
 		return true;
 	}
 	
-	/* (non-Javadoc)
-	 * @see kernel.JEEventHandler#event_handler(kernel.JEEvent)
-	 */
-	@Override
-	public void event_handler( JEEvent anEvent ) { }
-
 	/**
 	 * @param newClient
 	 * @return 

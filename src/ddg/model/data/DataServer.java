@@ -3,8 +3,6 @@ package ddg.model.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;
 import ddg.model.DDGClient;
 import ddg.model.File;
@@ -18,7 +16,7 @@ import ddg.model.Machine;
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
-public class DataServer extends JEEventHandler implements Comparable<DataServer> {
+public class DataServer implements Comparable<DataServer> {
 
 	public static final double DISK_RATE = 48 * (Math.pow(10, 7));// bits/s
 
@@ -37,22 +35,11 @@ public class DataServer extends JEEventHandler implements Comparable<DataServer>
 	 * @param diskSize
 	 */
 	public DataServer( JEEventScheduler scheduler, Machine machine, double diskSize ) {
-
-		super(scheduler);
-		
 		this.machine = machine;
 		this.id = "ds" + machine.deploy( this ) + machine;
 		this.diskSize = diskSize;
 		this.availableDiskSize = this.diskSize; 
 		this.files = new HashMap<String, File>();
-	}
-
-	/* (non-Javadoc)
-	 * @see kernel.JEEventHandler#event_handler(kernel.JEEvent)
-	 */
-	@Override
-	public void event_handler(JEEvent anEvent) {
-		throw new UnsupportedOperationException();// an event arrived
 	}
 
 	/**
