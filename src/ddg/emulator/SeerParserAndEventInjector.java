@@ -42,24 +42,15 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 	private long firstTimeStamp;
 	
 	private final BufferedReader bufferedReader;
-	private LoginAlgorithm loginAlgorithm;
+	private final LoginAlgorithm loginAlgorithm;
 	
 	/**
 	 * @param traceFile
 	 * @throws IOException
 	 */
-	public SeerParserAndEventInjector(File traceFile) throws IOException {
+	public SeerParserAndEventInjector(File traceFile, LoginAlgorithm loginAlgorithm) throws IOException {
 		this.lastTimeStamp = -1;
 		this.bufferedReader = new BufferedReader(new FileReader(traceFile));
-	}
-	
-	/**
-	 * @param loginAlgorithm
-	 */
-	public final void setLoginAlgorithm(LoginAlgorithm loginAlgorithm ) {
-		if (this.loginAlgorithm != null) {
-			throw new RuntimeException();
-		}
 		this.loginAlgorithm = loginAlgorithm;
 	}
 	

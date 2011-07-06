@@ -88,13 +88,12 @@ public class SeerTraceMain {
 		List<DDGClient> clients = createClients(scheduler, numberOfMachines, machines, metadataServer);
 		
 		// login algorithm
-		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(new File(traceFile));
+		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(new Boolean(homeless),
+				new Double(migration_prob), MetadataServer.ONE_DAY, clients);
+		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(new File(traceFile), loginAlgorithm);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector, metadataServer, new Boolean(enableMigration), replicationDelayMillis);
 
 		metadataServer.populateNamespace(0, 2, dataServers);
-		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(new Boolean(homeless),
-																new Double(migration_prob), MetadataServer.ONE_DAY, clients);
-		injector.setLoginAlgorithm(loginAlgorithm);
 		
 		control.scheduleNext();
 		scheduler.start();
