@@ -227,14 +227,4 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 
 	private enum Operation {OPEN, WRITE, READ, CLOSE};
 	
-	/**
-	 * @param args
-	 * @throws IOException
-	 */
-	public static void main(String[] args) throws IOException {
-		
-		SeerParserAndEventInjector parser = new SeerParserAndEventInjector(new File(args[0]));
-		
-	}
-	
 }
