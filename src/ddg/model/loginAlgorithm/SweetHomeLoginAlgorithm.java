@@ -43,7 +43,7 @@ public class SweetHomeLoginAlgorithm extends LoginAlgorithm {
 	 */
 	public SweetHomeLoginAlgorithm(double swapMachineProb, long mSecondsBetweenLogins, DDGClient sweetHomeClient, List<DDGClient> othersClients) {
 		
-		super(mSecondsBetweenLogins);
+		super(mSecondsBetweenLogins, sweetHomeClient);
 		
 		if (swapMachineProb < 0 || swapMachineProb >= 1) {
 			throw new IllegalArgumentException();

@@ -42,7 +42,7 @@ public class HomeLessLoginAlgorithm extends LoginAlgorithm {
 	 */
 	public HomeLessLoginAlgorithm(double swapMachineProb, long mSecondsBetweenLogins, DDGClient firstClient, List<DDGClient> clients) {
 
-		super(mSecondsBetweenLogins);
+		super(mSecondsBetweenLogins, firstClient);
 
 		if (swapMachineProb < 0 || swapMachineProb > 1) {
 			throw new IllegalArgumentException();

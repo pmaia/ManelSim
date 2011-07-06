@@ -30,8 +30,9 @@ public abstract class LoginAlgorithm {
 	private long lastStamp = -1;
 	private DDGClient lastSampledClient;
 	
-	public LoginAlgorithm(long mSecondsBetweenLogins) {
+	public LoginAlgorithm(long mSecondsBetweenLogins, DDGClient firstClient) {
 		this.mSecondsBetweenLogins = mSecondsBetweenLogins;
+		this.lastSampledClient = firstClient;
 	}
 
 	/**
