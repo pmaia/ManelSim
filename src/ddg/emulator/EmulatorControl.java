@@ -29,8 +29,6 @@ public class EmulatorControl {
 	public final boolean datamigration;
 	public final long replicationDelayMillis;
 	
-	public static final long BANDWIDTH_BITS_PER_SECOND = 100000000;
-	
 	/**
 	 * @param eventScheduler
 	 * @param eventInjector
