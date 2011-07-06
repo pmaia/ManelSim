@@ -23,11 +23,38 @@ import ddg.model.DDGClient;
  *
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public interface LoginAlgorithm {
+public abstract class LoginAlgorithm {
+	
+	private final long mSecondsBetweenLogins;
+	
+	private long lastStamp = -1;
+	private DDGClient lastSampledClient;
+	
+	public LoginAlgorithm(long mSecondsBetweenLogins) {
+		this.mSecondsBetweenLogins = mSecondsBetweenLogins;
+	}
 
 	/**
+	 * 
 	 * @param now
 	 * @return
 	 */
-	DDGClient sampleClient(long now);
+	public DDGClient sampleClient(long now) {
+		
+		if (lastStamp == -1) {
+			lastStamp = now;
+		}
+		
+		lastSampledClient = ( ( (now - lastStamp) < mSecondsBetweenLogins)) ? lastSampledClient : pickAClient(now);
+		lastStamp = now;
+		
+		return lastSampledClient;
+	}
+	
+	/**
+	 * 
+	 * @param now
+	 * @return
+	 */
+	protected abstract DDGClient pickAClient(long now);
 }

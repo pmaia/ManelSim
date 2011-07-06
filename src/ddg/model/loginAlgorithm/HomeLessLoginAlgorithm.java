@@ -26,17 +26,13 @@ import ddg.model.DDGClient;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public class HomeLessLoginAlgorithm implements LoginAlgorithm {
+public class HomeLessLoginAlgorithm extends LoginAlgorithm {
 
 	private final double swapMachineProb;
-	private final long mSecondsBetweenLogins;
-
 	private final Random random;
 	private final List<DDGClient> clients;
-
-	private DDGClient lastSampledClient;
 	
-	private long lastStamp;
+	private DDGClient lastSampledClient;
 
 	/**
 	 * @param swapMachineProb
@@ -46,39 +42,27 @@ public class HomeLessLoginAlgorithm implements LoginAlgorithm {
 	 */
 	public HomeLessLoginAlgorithm(double swapMachineProb, long mSecondsBetweenLogins, DDGClient firstClient, List<DDGClient> clients) {
 
+		super(mSecondsBetweenLogins);
+
 		if (swapMachineProb < 0 || swapMachineProb > 1) {
 			throw new IllegalArgumentException();
 		}
 
 		this.clients = clients;
-		this.lastSampledClient = firstClient;
 		this.swapMachineProb = swapMachineProb;
-		this.mSecondsBetweenLogins = mSecondsBetweenLogins;
 		this.random = new Random();
-		
-		this.lastStamp = -1;
+		this.lastSampledClient =  firstClient;
+
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public DDGClient sampleClient(long now) {
+	protected DDGClient pickAClient(long now) {
+		double sample = random.nextDouble();
+		if(sample <= swapMachineProb)
+			lastSampledClient = clients.get(random.nextInt(clients.size()));
 		
-		if (lastStamp == -1) {
-			lastStamp = now;
-		}
-		
-		lastSampledClient = ( ( (now - lastStamp) < mSecondsBetweenLogins)) ? lastSampledClient : pickAClient(now);
-		lastStamp = now;
+		Aggregator.getInstance().reportlogin(lastSampledClient, now);
 		
 		return lastSampledClient;
-	}
-
-	private DDGClient pickAClient(long now) {
-		double sample = random.nextDouble();
-		DDGClient client = (sample <= swapMachineProb) ? clients.get(random.nextInt(clients.size())) : lastSampledClient;
-		Aggregator.getInstance().reportlogin(client, now);
-		return client;
 	}
 
 }

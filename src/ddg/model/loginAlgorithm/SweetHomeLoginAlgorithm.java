@@ -27,18 +27,13 @@ import ddg.model.DDGClient;
  *
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public class SweetHomeLoginAlgorithm implements LoginAlgorithm {
+public class SweetHomeLoginAlgorithm extends LoginAlgorithm {
 
 	private final Random random;
 	private final DDGClient sweetHomeClient;
 	private final List<DDGClient> othersClients;
 	
 	private final double migrationProb;
-	private final long mSecondsBetweenLogins;
-	
-	private long lastStamp;
-	
-	private DDGClient lastSampledClient;
 	
 	/**
 	 * @param swapMachineProb
@@ -47,6 +42,8 @@ public class SweetHomeLoginAlgorithm implements LoginAlgorithm {
 	 * @param othersClients
 	 */
 	public SweetHomeLoginAlgorithm(double swapMachineProb, long mSecondsBetweenLogins, DDGClient sweetHomeClient, List<DDGClient> othersClients) {
+		
+		super(mSecondsBetweenLogins);
 		
 		if (swapMachineProb < 0 || swapMachineProb >= 1) {
 			throw new IllegalArgumentException();
@@ -57,31 +54,12 @@ public class SweetHomeLoginAlgorithm implements LoginAlgorithm {
 		}
 		
 		this.migrationProb = swapMachineProb;
-		this.mSecondsBetweenLogins = mSecondsBetweenLogins;
-		this.lastSampledClient = sweetHomeClient;
 		this.sweetHomeClient = sweetHomeClient;
 		this.othersClients = othersClients;
 		this.random = new Random();
-		
-		this.lastStamp = -1;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public DDGClient sampleClient(long now) {
-		
-		if (lastStamp == -1) {
-			lastStamp = now;
-		}
-		
-		lastSampledClient = ( ( (now - lastStamp) < mSecondsBetweenLogins)) ? lastSampledClient : pickAClient(now);
-		lastStamp = now;
-		
-		return lastSampledClient;
-	}
-
-	private DDGClient pickAClient(long now) {
+	protected DDGClient pickAClient(long now) {
 		double sample = random.nextDouble();
 		DDGClient client = (sample <= migrationProb) ? othersClients.get(random.nextInt(othersClients.size())) : sweetHomeClient;
 		Aggregator.getInstance().reportlogin(client, now);
