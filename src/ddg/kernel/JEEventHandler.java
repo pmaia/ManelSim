@@ -24,9 +24,9 @@ public abstract class JEEventHandler {
 	public JEEventHandler(JEEventScheduler scheduler) {
 
 		if (theUniqueHandlerId != null) {
-			theUniqueHandlerId = new Integer(theUniqueHandlerId.intValue() + 1);
+			theUniqueHandlerId = Integer.valueOf(theUniqueHandlerId.intValue() + 1);
 		} else {
-			theUniqueHandlerId = new Integer(1);
+			theUniqueHandlerId = Integer.valueOf(1);
 		}
 		HandlerId = theUniqueHandlerId;
 		parameterlist = new LinkedList();

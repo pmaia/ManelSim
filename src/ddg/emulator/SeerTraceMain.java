@@ -93,13 +93,13 @@ public class SeerTraceMain {
 				machines, metadataServer);
 
 		// login algorithm
-		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(new Boolean(
+		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(Boolean.valueOf(
 				homeless), new Double(migration_prob), MetadataServer.ONE_DAY,
 				clients);
 		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(
 				new File(traceFile), loginAlgorithm);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector,
-				metadataServer, new Boolean(enableMigration),
+				metadataServer, Boolean.valueOf(enableMigration),
 				replicationDelayMillis);
 
 		metadataServer.populateNamespace(0, 2, dataServers);

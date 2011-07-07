@@ -30,7 +30,7 @@ public class JEEvent {
 
 		myEventId = eventId++;
 
-		name = new String(aName);
+		name = aName;
 		theTargetHandlerId = aHandler.getHandlerId();
 		theScheduledTime = aScheduledTime;
 		theParameterList = new Vector();

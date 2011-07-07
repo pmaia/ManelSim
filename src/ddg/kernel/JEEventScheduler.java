@@ -35,7 +35,7 @@ public final class JEEventScheduler {
 		HandlerList = new Vector<JEEventHandler>();
 		HandlerList.setSize(100);
 		HandlerList.clear();
-		isActive = new Boolean(false);
+		isActive = Boolean.valueOf(false);
 		theEmulationEnd = emulationEnd;
 	}
 
@@ -140,7 +140,7 @@ public final class JEEventScheduler {
      */
 	private void schedule() {
 
-		isActive = new Boolean(true);
+		isActive = Boolean.valueOf(true);
 
 		while (!EventList.isEmpty() & isActive.booleanValue()
 				& isEarlierThanEmulationEnd(now())) {
