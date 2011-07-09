@@ -46,7 +46,7 @@ public class DDGClient extends JEEventHandler {
 	 * @see kernel.JEEventHandler#event_handler(kernel.JEEvent)
 	 */
 	@Override
-	public void event_handler(JEEvent anEvent) {
+	public void handleEvent(JEEvent anEvent) {
 
 		String anEventName = anEvent.getName();
 

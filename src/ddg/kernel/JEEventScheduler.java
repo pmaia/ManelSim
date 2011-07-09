@@ -188,7 +188,7 @@ public final class JEEventScheduler {
 					+ ". Something's wrong here, dude.");
 		}
 
-		HandlerList.elementAt(aTargetHandlerId.intValue() - 1).event_handler(
+		HandlerList.elementAt(aTargetHandlerId.intValue() - 1).handleEvent(
 				aNextEvent);
 	}
 

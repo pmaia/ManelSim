@@ -79,7 +79,7 @@ public class MetadataServer extends JEEventHandler {
 	 * @see kernel.JEEventHandler#event_handler(kernel.JEEvent)
 	 */
 	@Override
-	public void event_handler(JEEvent anEvent) {
+	public void handleEvent(JEEvent anEvent) {
 
 		if (anEvent.getName().equals(MigrateEvent.EVENT_NAME)) {
 			ReplicationGroup group = files.get(((MigrateEvent) anEvent)

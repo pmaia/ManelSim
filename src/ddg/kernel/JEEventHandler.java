@@ -44,7 +44,7 @@ public abstract class JEEventHandler {
 	/**
 	 * @param jeevent
 	 */
-	public abstract void event_handler(JEEvent jeevent);
+	public abstract void handleEvent(JEEvent jeevent);
 
 	/**
 	 * @param anEvent

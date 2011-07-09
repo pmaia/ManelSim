@@ -103,7 +103,7 @@ public class EmulatorControl {
 	public void scheduleNext(JEEvent nextEvent) {
 
 		if (nextEvent != null) {
-			bootStrapperEventHandler.event_handler(nextEvent);
+			bootStrapperEventHandler.handleEvent(nextEvent);
 		}
 	}
 
@@ -120,7 +120,7 @@ public class EmulatorControl {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void event_handler(JEEvent arg) {
+		public void handleEvent(JEEvent arg) {
 			send(arg);
 		}
 
