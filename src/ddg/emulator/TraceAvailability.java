@@ -11,11 +11,11 @@ import ddg.model.Availability;
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  *
  */
-public class FTATraceAvailability implements Availability {
+public class TraceAvailability implements Availability {
 	
 	public final FileReader fileReader;
 	
-	public FTATraceAvailability(File traceFile) throws FileNotFoundException {
+	public TraceAvailability(File traceFile) throws FileNotFoundException {
 		this.fileReader = new FileReader(traceFile);
 	}
 
