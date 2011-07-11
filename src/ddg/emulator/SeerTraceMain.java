@@ -194,7 +194,7 @@ public class SeerTraceMain {
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
 		for (int i = 0; i < numberOfMachines; i++) {
-			machines.add(new Machine(scheduler, i));
+			machines.add(new Machine(scheduler, new DSC_UFCGAvailability(), i));
 		}
 
 		return machines;

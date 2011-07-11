@@ -3,7 +3,9 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import ddg.emulator.EmulatorControl;
 import ddg.kernel.JEEventScheduler;
+import ddg.kernel.JETime;
 import ddg.model.data.DataServer;
 
 /**
@@ -16,6 +18,13 @@ public class Machine {
 
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
+	
+	private final Availability availability;
+	/**
+	 * 
+	 */
+	private boolean available;
+	private JETime end;
 
 	private final int id;
 
@@ -25,10 +34,41 @@ public class Machine {
 	 * @param scheduler
 	 * @param id
 	 */
-	public Machine(JEEventScheduler scheduler, int id) {
+	public Machine(JEEventScheduler scheduler, Availability availability, int id) {
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
+		this.availability = availability;
+		
+		JETime now = 
+			EmulatorControl.getInstance().getTheUniqueEventScheduler().now();
+		
+		if(System.currentTimeMillis() % 2 == 0) {
+			available = true;
+			end = now.plus(new JETime(availability.nextAvailabilityDuration()));
+		} else {
+			available = false;
+			end = now.plus(new JETime(availability.nextUnavailabilityDuration()));
+		}
+	}
+	
+	public boolean isBeingUsed() {
+		JETime now = 
+			EmulatorControl.getInstance().getTheUniqueEventScheduler().now();
+		
+		while(now.compareTo(end) > 0) {
+			JETime increment;
+			if(available) {
+				increment = new JETime(availability.nextUnavailabilityDuration());
+			} else {
+				increment = new JETime(availability.nextAvailabilityDuration());
+			}
+			
+			end = end.plus(increment);
+			available = !available;
+		}
+		
+		return available;
 	}
 
 	/**
