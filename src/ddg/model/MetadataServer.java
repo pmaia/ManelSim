@@ -5,10 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import ddg.emulator.events.metadataServerEvents.MigrateEvent;
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JEEventScheduler;
 import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 import ddg.model.placement.DataPlacementAlgorithm;
@@ -23,7 +19,7 @@ import ddg.util.Pair;
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
-public class MetadataServer extends JEEventHandler {
+public class MetadataServer {
 
 	private final DataPlacementAlgorithm dataPlacement;
 	private final List<DataServer> availableDataServers;
@@ -45,13 +41,10 @@ public class MetadataServer extends JEEventHandler {
 	 * @param popAlgorithm
 	 *            TODO
 	 */
-	public MetadataServer(JEEventScheduler scheduler,
-			List<DataServer> dataServers,
+	public MetadataServer(List<DataServer> dataServers,
 			DataPlacementAlgorithm dataPlacementAlgorithm,
 			FileSizeDistribution fileSizeDistribution,
 			PopulateAlgorithm popAlgorithm) {
-
-		super(scheduler);
 
 		if (dataServers == null)
 			throw new IllegalArgumentException();
@@ -71,25 +64,6 @@ public class MetadataServer extends JEEventHandler {
 		this.files = new HashMap<String, ReplicationGroup>();
 		this.fileSizeDistribution = fileSizeDistribution;
 		this.openFiles = new HashMap<Integer, ReplicationGroup>();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see kernel.JEEventHandler#event_handler(kernel.JEEvent)
-	 */
-	@Override
-	public void handleEvent(JEEvent anEvent) {
-
-		if (anEvent.getName().equals(MigrateEvent.EVENT_NAME)) {
-			ReplicationGroup group = files.get(((MigrateEvent) anEvent)
-					.getFileName());
-			if (group == null)
-				throw new RuntimeException();
-			group.migrate(((MigrateEvent) anEvent).getDataServer());
-		} else {
-			throw new RuntimeException();
-		}
 	}
 
 	/**
@@ -160,8 +134,7 @@ public class MetadataServer extends JEEventHandler {
 		long fileSize = (long) Math.min(fileSizeDistribution.nextSampleSize(),
 				primaryDataServer.getAvailableDiskSize());
 
-		return new ReplicationGroup(fileName, fileSize, replicationLevel,
-				primaryDataServer, group.second);
+		return new ReplicationGroup(fileName, fileSize, primaryDataServer, group.second);
 	}
 
 	/**
@@ -203,7 +176,7 @@ public class MetadataServer extends JEEventHandler {
 	public void write(DDGClient ddgClient, String fileName, long offset,
 			long length) {
 		ReplicationGroup replicationGroup = files.get(fileName);
-		replicationGroup.writeFile(fileName, offset, length, ddgClient);
+		replicationGroup.write(fileName, offset, length, ddgClient);
 	}
 
 	/**

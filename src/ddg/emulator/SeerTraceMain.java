@@ -86,9 +86,8 @@ public class SeerTraceMain {
 		List<DataServer> dataServers = createDataServers(scheduler,
 				numberOfMachines, diskSize, machines);
 
-		MetadataServer metadataServer = new MetadataServer(scheduler,
-				dataServers, placement, fileSizeDistribution,
-				new NOPAlgorithm());
+		MetadataServer metadataServer = new MetadataServer(dataServers, 
+				placement, fileSizeDistribution, new NOPAlgorithm());
 		List<DDGClient> clients = createClients(scheduler, numberOfMachines,
 				machines, metadataServer);
 
@@ -107,7 +106,7 @@ public class SeerTraceMain {
 		control.scheduleNext();
 		scheduler.start();
 
-		System.out.println(Aggregator.getInstance());
+		System.out.println(Aggregator.getInstance().summarizeIdleUtilization());
 	}
 
 	/**
@@ -194,7 +193,7 @@ public class SeerTraceMain {
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
 		for (int i = 0; i < numberOfMachines; i++) {
-			machines.add(new Machine(scheduler, new DSC_UFCGAvailability(), i));
+			machines.add(new Machine(scheduler, new DSC_UFCGAvailability(), Integer.toString(i)));
 		}
 
 		return machines;
