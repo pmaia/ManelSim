@@ -17,6 +17,7 @@ package ddg.model.placement;
 
 import static ddg.model.placement.DataPlacementUtil.chooseRandomDataServers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -39,22 +40,32 @@ public class CoLocatedWithSecondaryRandomPlacement implements
 	public Pair<DataServer, List<DataServer>> createFile(String fileName,
 			int replicationLevel, List<DataServer> availableDataServers,
 			DDGClient client) {
+		
+		DataServer primary;
+		List<DataServer> secondaries;
+		
+		List<DataServer> colocatedDataServers = 
+			client.getMachine().getDeployedDataServers();
+		
+		if(!colocatedDataServers.isEmpty()) {
+			List<DataServer> copyOfAvailableDataServers = 
+				new ArrayList<DataServer>(availableDataServers);
+			
+			copyOfAvailableDataServers.removeAll(colocatedDataServers);
 
-		List<DataServer> dataServersToRequest = chooseRandomDataServers(
-				availableDataServers, replicationLevel);
-
-		// choose one of the co-located data servers
-		List<DataServer> dss = client.getMachine().getDeployedDataServers();
-		DataServer coAllocated = dss.get(new Random().nextInt(dss.size()));
-
-		if (dataServersToRequest.contains(coAllocated)) {
-			dataServersToRequest.remove(coAllocated);
+			secondaries = 
+				chooseRandomDataServers(copyOfAvailableDataServers, replicationLevel - 1);
+			// choose one of the co-located data servers
+			primary = colocatedDataServers.get(new Random().nextInt(colocatedDataServers.size()));
 		} else {
-			dataServersToRequest.remove(0);
+			secondaries = chooseRandomDataServers(availableDataServers, replicationLevel);
+			
+			primary = secondaries.remove(0);
 		}
+		
+		
 
-		return new Pair<DataServer, List<DataServer>>(coAllocated,
-				dataServersToRequest);
+		return new Pair<DataServer, List<DataServer>>(primary, secondaries);
 	}
 
 }

@@ -21,8 +21,6 @@ import ddg.util.Pair;
  */
 public class MetadataServer {
 	
-	private static final int REPLICATION_LEVEL = 3;
-
 	private final DataPlacementAlgorithm dataPlacement;
 	private final List<DataServer> availableDataServers;
 	private final FileSizeDistribution fileSizeDistribution;
@@ -30,22 +28,21 @@ public class MetadataServer {
 	private final Map<String, ReplicationGroup> files;
 	private final Map<Integer, ReplicationGroup> openFiles;
 	private final PopulateAlgorithm populateAlgorithm;
+	
+	private final int replicationLevel;
 
 	public final static int ONE_DAY = 1000 * 60 * 60 * 24;
 
 	/**
-	 * Default constructor using fields.
 	 * 
-	 * @param scheduler
 	 * @param dataServers
 	 * @param dataPlacementAlgorithm
+	 * @param replicationLevel
 	 * @param fileSizeDistribution
 	 * @param popAlgorithm
-	 *            TODO
 	 */
-	public MetadataServer(List<DataServer> dataServers,
-			DataPlacementAlgorithm dataPlacementAlgorithm,
-			FileSizeDistribution fileSizeDistribution,
+	public MetadataServer(List<DataServer> dataServers, DataPlacementAlgorithm dataPlacementAlgorithm, 
+			int replicationLevel,FileSizeDistribution fileSizeDistribution,
 			PopulateAlgorithm popAlgorithm) {
 
 		if (dataServers == null)
@@ -58,6 +55,8 @@ public class MetadataServer {
 			throw new IllegalArgumentException();
 		if (popAlgorithm == null)
 			throw new IllegalArgumentException();
+		if(replicationLevel < 1)
+			throw new IllegalArgumentException();
 
 		this.dataPlacement = dataPlacementAlgorithm;
 		this.populateAlgorithm = popAlgorithm;
@@ -66,6 +65,8 @@ public class MetadataServer {
 		this.files = new HashMap<String, ReplicationGroup>();
 		this.fileSizeDistribution = fileSizeDistribution;
 		this.openFiles = new HashMap<Integer, ReplicationGroup>();
+		
+		this.replicationLevel = replicationLevel;
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class MetadataServer {
 			DDGClient client) {
 
 		if (!files.containsKey(fileName)) {
-			createFile(fileName, REPLICATION_LEVEL, client);// FIXME externalize
+			createFile(fileName, replicationLevel, client);// FIXME externalize
 		}
 
 		ReplicationGroup replicationGroup = files.get(fileName);

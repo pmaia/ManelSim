@@ -56,6 +56,7 @@ public class SeerTraceMain {
 		 * 0. trace file 
 		 * 1. Data placement police [random, co-random, co-balance] 
 		 * 2. number of machines 
+		 * 3. replication level
 		 */
 
 		System.out.println(Arrays.toString(args));
@@ -63,12 +64,13 @@ public class SeerTraceMain {
 		final JEEventScheduler scheduler = new JEEventScheduler();
 
 		String traceFile = args[0];
-		String placement_police = args[1];
-		String num_machines = args[2];
+		String placementPoliceName = args[1];
+		Integer numberOfMachines = Integer.valueOf(args[2]);
+		Integer replicationLevel = Integer.valueOf(args[3]);
 
-		DataPlacementAlgorithm placement = createPlacementPolice(placement_police);
+		DataPlacementAlgorithm placement = createPlacementPolice(placementPoliceName);
 
-		Integer numberOfMachines = new Integer(num_machines);
+		
 
 		// 1 GiBytes
 		long diskSize = 1024 * 1024 * 1024 * 1L;
@@ -81,7 +83,7 @@ public class SeerTraceMain {
 				numberOfMachines, diskSize, machines);
 
 		MetadataServer metadataServer = new MetadataServer(dataServers, 
-				placement, fileSizeDistribution, new NOPAlgorithm());
+				placement, replicationLevel, fileSizeDistribution, new NOPAlgorithm());
 		List<DDGClient> clients = createClients(scheduler, NUMBER_OF_CLIENTS,
 				machines, metadataServer);
 
