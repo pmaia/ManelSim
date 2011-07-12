@@ -45,6 +45,8 @@ import ddg.util.FileSizeDistribution;
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public class SeerTraceMain {
+	
+	private static final int NUMBER_OF_CLIENTS = 1;
 
 	public static void main(String[] args) throws IOException {
 
@@ -54,10 +56,6 @@ public class SeerTraceMain {
 		 * 0. trace file 
 		 * 1. Data placement police [random, co-random, co-balance] 
 		 * 2. number of machines 
-		 * 3. homeless login [true, false] 
-		 * 4. migration probability [0, 1) 
-		 * 5. data_migration [true, false] 
-		 * 6. replication delay secs
 		 */
 
 		System.out.println(Arrays.toString(args));
@@ -67,10 +65,6 @@ public class SeerTraceMain {
 		String traceFile = args[0];
 		String placement_police = args[1];
 		String num_machines = args[2];
-		String homeless = args[3];
-		String migration_prob = args[4];
-		String enableMigration = args[5];
-		long replicationDelayMillis = Long.parseLong(args[6]) * 1000;
 
 		DataPlacementAlgorithm placement = createPlacementPolice(placement_police);
 
@@ -88,18 +82,16 @@ public class SeerTraceMain {
 
 		MetadataServer metadataServer = new MetadataServer(dataServers, 
 				placement, fileSizeDistribution, new NOPAlgorithm());
-		List<DDGClient> clients = createClients(scheduler, numberOfMachines,
+		List<DDGClient> clients = createClients(scheduler, NUMBER_OF_CLIENTS,
 				machines, metadataServer);
 
 		// login algorithm
-		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(Boolean.valueOf(
-				homeless), new Double(migration_prob), MetadataServer.ONE_DAY,
+		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(false, 0.0, MetadataServer.ONE_DAY,
 				clients);
 		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(
 				new File(traceFile), loginAlgorithm);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector,
-				metadataServer, Boolean.valueOf(enableMigration),
-				replicationDelayMillis);
+				metadataServer);
 
 		metadataServer.populateNamespace(0, 2, dataServers);
 
@@ -187,8 +179,7 @@ public class SeerTraceMain {
 		return newClients;
 	}
 
-	private static List<Machine> createMachines(JEEventScheduler scheduler,
-			int numberOfMachines) {
+	private static List<Machine> createMachines(JEEventScheduler scheduler,	int numberOfMachines) {
 
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 

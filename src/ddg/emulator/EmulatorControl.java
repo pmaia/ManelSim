@@ -25,26 +25,14 @@ public class EmulatorControl {
 	private final MetadataServer metadataServer;
 	private final BootStrapperEventHandler bootStrapperEventHandler;
 
-	public final boolean datamigration;
-	public final long replicationDelayMillis;
-
-	/**
-	 * @param eventScheduler
-	 * @param eventInjector
-	 * @param metadataServer
-	 * @param data_migration
-	 * @param replicationDelayMillis
-	 * @return
-	 */
 	public static EmulatorControl build(JEEventScheduler eventScheduler,
-			ClientEventInjector eventInjector, MetadataServer metadataServer,
-			boolean data_migration, long replicationDelayMillis) {
+			ClientEventInjector eventInjector, MetadataServer metadataServer) {
 
 		if (singleInstace != null)
 			throw new IllegalStateException();
 
 		singleInstace = new EmulatorControl(eventScheduler, eventInjector,
-				metadataServer, data_migration, replicationDelayMillis);
+				metadataServer);
 		return singleInstace;
 	}
 
@@ -66,22 +54,12 @@ public class EmulatorControl {
 		return metadataServer;
 	}
 
-	/**
-	 * @param eventScheduler
-	 * @param injector
-	 * @param metadataServer
-	 * @param datamigration
-	 * @param replicationDelayMillis
-	 */
 	private EmulatorControl(JEEventScheduler eventScheduler,
-			ClientEventInjector injector, MetadataServer metadataServer,
-			boolean datamigration, long replicationDelayMillis) {
+			ClientEventInjector injector, MetadataServer metadataServer) {
 
 		this.theUniqueEventScheduler = eventScheduler;
 		this.eventInjector = injector;
 		this.metadataServer = metadataServer;
-		this.datamigration = datamigration;
-		this.replicationDelayMillis = replicationDelayMillis;
 		bootStrapperEventHandler = new BootStrapperEventHandler(
 				theUniqueEventScheduler);
 	}
