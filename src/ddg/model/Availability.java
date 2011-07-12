@@ -1,10 +1,8 @@
 package ddg.model;
 
-import ddg.kernel.JETime;
-
 /**
  * 
- * Represents the (un)availability distribution for one machine
+ * Represents an (un)availability distribution for one machine
  * 
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  *
@@ -12,20 +10,13 @@ import ddg.kernel.JETime;
 public interface Availability {
 	
 	/**
-	 * Sets the simulation time to the given {@link JETime}. 
-	 * Subsequent calls to this method must use crescent values for now. 
-	 * 
-	 * @param now the current simulation time
-	 * @throws IllegalArgumentException if the given {@link JETime} is before the one of the last call
+	 * @return the next availability duration for one machine in milliseconds
 	 */
-	public void updateSimulationTime(JETime now);
-	
-	public JETime getSimulationTime();
+	public long nextAvailabilityDuration();
 	
 	/**
-	 * 
-	 * @return
+	 * @return the next unavailability duration for one machine in milliseconds
 	 */
-	public boolean isAvailable();
+	public long nextUnavailabilityDuration();
 	
 }

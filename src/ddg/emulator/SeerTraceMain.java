@@ -107,7 +107,7 @@ public class SeerTraceMain {
 		control.scheduleNext();
 		scheduler.start();
 
-		System.out.println(Aggregator.getInstance().summarizeIdleUtilization());
+		System.out.println(Aggregator.getInstance());
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class SeerTraceMain {
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
 		for (int i = 0; i < numberOfMachines; i++) {
-			machines.add(new Machine(scheduler, new DSC_UFCGAvailability(), Integer.toString(i)));
+			machines.add(new Machine(scheduler, new DSC_UFCGAvailability(), i));
 		}
 
 		return machines;

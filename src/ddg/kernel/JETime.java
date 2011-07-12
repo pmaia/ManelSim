@@ -9,8 +9,6 @@ package ddg.kernel;
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public final class JETime implements Comparable<JETime> {
-	
-	public static final long MINUTE = 60 * 1000;
 
 	// FIXME: CREATE A STATIC SUBCLASS TO MODEL AN INFINITY JETIME
 

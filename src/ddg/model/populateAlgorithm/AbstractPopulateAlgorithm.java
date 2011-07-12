@@ -36,6 +36,7 @@ public abstract class AbstractPopulateAlgorithm implements PopulateAlgorithm {
 		long fileSize = (long) Math.min(fileSizeDistribution.nextSampleSize(),
 				primaryDataServer.getAvailableDiskSize());
 
-		return new ReplicationGroup(fileName, fileSize, primaryDataServer, group.second);
+		return new ReplicationGroup(fileName, fileSize, replicationLevel,
+				primaryDataServer, group.second);
 	}
 }

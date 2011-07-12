@@ -7,23 +7,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ddg.emulator.EmulatorControl;
+import ddg.emulator.events.metadataServerEvents.MigrateEvent;
+import ddg.kernel.JEEventScheduler;
+import ddg.kernel.JETime;
 import ddg.model.Aggregator;
+import ddg.model.Aggregator.DataOperation;
 import ddg.model.DDGClient;
+import ddg.model.Machine;
 
 /**
  * @author Thiago Emmanuel Pereira da Cunha Silva, thiago.manel@gmail.com
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
-public class ReplicationGroup {
-	
-	double BYTES_RW_PER_MILLISECOND = 20971.52; //20 MB/s == 20971.52 bytes/ms
+public class ReplicationGroup implements Comparable<ReplicationGroup> {
+
+	private JETime timeStamp;
+	private JETime creationTime;
 
 	private final String fileName;
+
+	private int replicationLevel;
+	private final JEEventScheduler theUniqueEventScheduler;
+	private final EmulatorControl emulatorControl;
 
 	private DataServer primary;
 	private Map<String, DataServer> secondaries;
 
-	private Map<Long, Long> nonReplicatedChanges = new HashMap<Long, Long>(); //<offset, length>
+	private boolean processingMigration = false;
+	private final JETime replicationDelay;
 
 	/**
 	 * Default constructor using fields.
@@ -36,7 +48,7 @@ public class ReplicationGroup {
 	 * @param secondariesReplicas
 	 */
 	public ReplicationGroup(String fileName, long initialFileSize,
-			final DataServer primaryDataServer,
+			int replicationLevel, final DataServer primaryDataServer,
 			final List<DataServer> secondariesReplicas) {
 
 		// FIXME secs should be a set, no duplicates
@@ -49,6 +61,13 @@ public class ReplicationGroup {
 			throw new IllegalArgumentException();
 
 		this.fileName = fileName;
+		this.replicationLevel = replicationLevel;
+
+		this.emulatorControl = EmulatorControl.getInstance();
+		this.theUniqueEventScheduler = emulatorControl
+				.getTheUniqueEventScheduler();
+		this.replicationDelay = new JETime(
+				emulatorControl.replicationDelayMillis);
 
 		this.primary = primaryDataServer;
 		this.secondaries = new HashMap<String, DataServer>();
@@ -61,10 +80,71 @@ public class ReplicationGroup {
 			secondary.createFile(fileName, initialFileSize);
 		}
 
+		this.creationTime = theUniqueEventScheduler.now();
 	}
-	
-	public boolean isDirty() {
-		return !nonReplicatedChanges.isEmpty();
+
+	/**
+	 * @param newDataServer
+	 */
+	public void migrate(DataServer newDataServer) {
+
+		if (hasReplica(newDataServer))
+			throw new RuntimeException();
+
+		String id = secondaries.keySet().iterator().next();
+		DataServer dataServer = secondaries.remove(id);
+
+		dataServer.removeFileReplica(getFileName());
+
+		long fileSize = primary.getFileSize(getFileName());
+		newDataServer.createFile(fileName, fileSize);
+		secondaries.put(newDataServer.getId(), newDataServer);
+
+		processingMigration = false;
+	}
+
+	private void promoteSecondary(DataServer secondary) {
+
+		Aggregator.getInstance().report(
+				"promoting " + getTime() + " "
+						+ emulatorControl.getTheUniqueEventScheduler().now()
+						+ " " + fileName);
+
+		if (secondaries.remove(secondary.getId()) == null) {// double checking
+			throw new RuntimeException();
+		}
+		// promoting to primary
+		secondaries.put(primary.getId(), primary);
+		primary = secondary;
+	}
+
+	// 1Mbit/second
+	private final long sustainedThroughtput_bits_per_sec = 1000000;
+
+	private void scheduleMigration(DataServer dstDataServer) {
+
+		long delta = (long) (2 + Math
+				.ceil((primary.getFileSize(getFileName()) * 8)
+						/ sustainedThroughtput_bits_per_sec)); // 2 millisecond
+																// by control
+																// messages
+		JETime time = emulatorControl.getTheUniqueEventScheduler().now()
+				.plus(new JETime(delta * 1000));
+		MigrateEvent migrateEvent = new MigrateEvent(getFileName(),
+				dstDataServer, emulatorControl.getMetadataServer(), time);
+		emulatorControl.scheduleNext(migrateEvent);
+	}
+
+	private boolean hasReplica(DataServer dataServer) {
+		return isSecondary(dataServer) || isPrimary(dataServer);
+	}
+
+	private boolean isSecondary(DataServer dataServer) {
+		return secondaries.containsKey(dataServer.getId());
+	}
+
+	private boolean isPrimary(DataServer dataServer) {
+		return dataServer.equals(primary);
 	}
 
 	/**
@@ -74,29 +154,54 @@ public class ReplicationGroup {
 	 * @param length
 	 * @param client
 	 */
-	public void write(String fileName, long offset, long length, DDGClient client) {
-		
-		if(!client.getMachine().equals(primary.getMachine()) && !primary.getMachine().isBeingUsed())
-			Aggregator.getInstance().reportIdleUtilization(primary.getMachine().getId(), 
-					(long)(length / BYTES_RW_PER_MILLISECOND));
-		
-		nonReplicatedChanges.put(offset, length);
-	}
-	
-	public void updateReplicas() {
-		for(DataServer replicaServer : secondaries.values()) {
-			if(!primary.getMachine().isBeingUsed()) //FIXME this should happen just once or once per replica server
-				for(Long offset : nonReplicatedChanges.keySet())
-					Aggregator.getInstance().reportIdleUtilization(primary.getMachine().getId(), 
-							(long)(nonReplicatedChanges.get(offset) / BYTES_RW_PER_MILLISECOND));
-			
-			if(!replicaServer.getMachine().isBeingUsed())
-				for(Long offset : nonReplicatedChanges.keySet())
-					Aggregator.getInstance().reportIdleUtilization(replicaServer.getMachine().getId(), 
-							(long)(nonReplicatedChanges.get(offset) / BYTES_RW_PER_MILLISECOND));
+	public void writeFile(String fileName, long offset, long length,
+			DDGClient client) {
+
+		setTouchTimeStamp(EmulatorControl.getInstance()
+				.getTheUniqueEventScheduler().now());
+
+		checkDataMigrationAndPromotion(client);
+		reportDataOperation(client.getMachine(), primary, DataOperation.WRITE,
+				length);
+
+		writeFile(primary, fileName, offset, length, client);
+		for (DataServer dataserver : secondaries.values()) {
+			writeFile(dataserver, fileName, offset, length, client);
 		}
-		
-		nonReplicatedChanges.clear();
+	}
+
+	private void writeFile(DataServer dataServer, String fileName, long offset,
+			long length, DDGClient client) {
+
+		if (!dataServer.containsFile(fileName)) {
+			throw new RuntimeException("File " + fileName
+					+ " does not exist on data server: " + dataServer.getId());
+		}
+
+		dataServer.writeFile(fileName, offset, length, client);
+	}
+
+	private void checkDataMigrationAndPromotion(DDGClient client) {
+
+		DataServer clientDS = client.getMachine().getDeployedDataServers()
+				.iterator().next();
+
+		if (!hasReplica(clientDS) && emulatorControl.datamigration) {
+			if (!processingMigration) {
+				processingMigration = true;
+				scheduleMigration(client.getMachine().getDeployedDataServers()
+						.iterator().next());
+			}
+		} else { // has a replica but is a secondary, promote
+			if (isSecondary(clientDS) && isUptoDate()) {
+				promoteSecondary(clientDS);
+			}
+		}
+	}
+
+	private boolean isUptoDate() {
+		return getTime().plus(replicationDelay).isEarlierThan(
+				emulatorControl.getTheUniqueEventScheduler().now());
 	}
 
 	/**
@@ -106,9 +211,36 @@ public class ReplicationGroup {
 	 * @param client
 	 */
 	public void read(String fileName, long offset, long length, DDGClient client) {
-		if(!client.getMachine().equals(primary.getMachine()) && !primary.getMachine().isBeingUsed())
-			Aggregator.getInstance().
-				reportIdleUtilization(primary.getMachine().getId(), (long)(length/BYTES_RW_PER_MILLISECOND));
+		checkDataMigrationAndPromotion(client);
+		reportDataOperation(client.getMachine(), primary, DataOperation.READ,
+				length);
+	}
+
+	private void reportDataOperation(Machine machine, DataServer dataServer,
+			DataOperation dataOperation, long length) {
+		Aggregator.getInstance().reportDataOperation(fileName, dataOperation,
+				length, machine.isDeployed(dataServer), machine.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int compareTo(ReplicationGroup group) {
+		return getTime().compareTo(group.getTime());
+	}
+
+	private JETime getTime() {
+		return (getTouchTimeStamp() != null) ? getTouchTimeStamp()
+				: creationTime;
+	}
+
+	private void setTouchTimeStamp(JETime touchTimeStamp) {
+		this.timeStamp = touchTimeStamp;
+	}
+
+	private JETime getTouchTimeStamp() {
+		return timeStamp;
 	}
 
 	private String getDsString(DataServer dataServer, String fileName) {

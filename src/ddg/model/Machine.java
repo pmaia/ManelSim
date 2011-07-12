@@ -20,8 +20,13 @@ public class Machine {
 	private final List<DDGClient> clients;
 	
 	private final Availability availability;
+	/**
+	 * 
+	 */
+	private boolean available;
+	private JETime end;
 
-	private final String id;
+	private final int id;
 
 	/**
 	 * Default constructor using fields.
@@ -29,26 +34,47 @@ public class Machine {
 	 * @param scheduler
 	 * @param id
 	 */
-	public Machine(JEEventScheduler scheduler, Availability availability, String id) {
+	public Machine(JEEventScheduler scheduler, Availability availability, int id) {
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
 		this.availability = availability;
+		
+		JETime now = 
+			EmulatorControl.getInstance().getTheUniqueEventScheduler().now();
+		
+		if(System.currentTimeMillis() % 2 == 0) {
+			available = true;
+			end = now.plus(new JETime(availability.nextAvailabilityDuration()));
+		} else {
+			available = false;
+			end = now.plus(new JETime(availability.nextUnavailabilityDuration()));
+		}
 	}
 	
 	public boolean isBeingUsed() {
 		JETime now = 
 			EmulatorControl.getInstance().getTheUniqueEventScheduler().now();
 		
-		availability.updateSimulationTime(now);
+		while(now.compareTo(end) > 0) {
+			JETime increment;
+			if(available) {
+				increment = new JETime(availability.nextUnavailabilityDuration());
+			} else {
+				increment = new JETime(availability.nextAvailabilityDuration());
+			}
+			
+			end = end.plus(increment);
+			available = !available;
+		}
 		
-		return !availability.isAvailable();
+		return available;
 	}
 
 	/**
 	 * @return the id
 	 */
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
@@ -76,7 +102,7 @@ public class Machine {
 
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + id.hashCode();
+		result = prime * result + id;
 		return result;
 	}
 
