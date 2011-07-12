@@ -20,6 +20,8 @@ import ddg.util.Pair;
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
 public class MetadataServer {
+	
+	private static final int REPLICATION_LEVEL = 3;
 
 	private final DataPlacementAlgorithm dataPlacement;
 	private final List<DataServer> availableDataServers;
@@ -76,7 +78,7 @@ public class MetadataServer {
 			DDGClient client) {
 
 		if (!files.containsKey(fileName)) {
-			createFile(fileName, 2, client);// FIXME externalize
+			createFile(fileName, REPLICATION_LEVEL, client);// FIXME externalize
 		}
 
 		ReplicationGroup replicationGroup = files.get(fileName);
