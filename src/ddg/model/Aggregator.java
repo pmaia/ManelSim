@@ -24,6 +24,9 @@ public class Aggregator {
 	private final Map<DataOperation, long[]> opstraces;
 	private final Map<String, Map<DataOperation, long[]>> file2Data;
 	private final List<String> generalLogs = new LinkedList<String>();
+	
+	private long totalIdleUtilization = 0;
+	private final Map<String, Long> idleUtilizationPerMachine = new HashMap<String, Long>();
 
 	private static Aggregator instance = new Aggregator();
 
@@ -42,6 +45,27 @@ public class Aggregator {
 
 		this.file2Data = new HashMap<String, Map<DataOperation, long[]>>();
 		this.loginlogs = new LinkedList<String>();
+	}
+	
+	public void reportIdleUtilization(String machine, long duration) {
+		totalIdleUtilization += duration;
+		
+		Long machineIdleUtilization = idleUtilizationPerMachine.get(machine);
+		if(machineIdleUtilization == null)
+			idleUtilizationPerMachine.put(machine, duration);
+		else
+			idleUtilizationPerMachine.put(machine, machineIdleUtilization + duration);
+	}
+	
+	public String summarizeIdleUtilization() {
+		StringBuilder summary = new StringBuilder();
+		
+		summary.append("Total idle utilization:\t " + totalIdleUtilization);
+		
+		for(String machine : idleUtilizationPerMachine.keySet())
+			summary.append(String.format("\n%s:\t%d", machine, idleUtilizationPerMachine.get(machine)));
+		
+		return summary.toString();
 	}
 
 	/**

@@ -40,11 +40,6 @@ public class DDGClient extends JEEventHandler {
 		this.id = "client" + clientIndex + machine;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see kernel.JEEventHandler#event_handler(kernel.JEEvent)
-	 */
 	@Override
 	public void handleEvent(JEEvent anEvent) {
 

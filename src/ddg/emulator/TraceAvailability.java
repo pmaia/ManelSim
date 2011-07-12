@@ -1,9 +1,6 @@
 package ddg.emulator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-
+import ddg.kernel.JETime;
 import ddg.model.Availability;
 
 /**
@@ -12,23 +9,24 @@ import ddg.model.Availability;
  *
  */
 public class TraceAvailability implements Availability {
-	
-	public final FileReader fileReader;
-	
-	public TraceAvailability(File traceFile) throws FileNotFoundException {
-		this.fileReader = new FileReader(traceFile);
+
+	@Override
+	public void updateSimulationTime(JETime now) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
-	public long nextAvailabilityDuration() {
+	public JETime getSimulationTime() {
 		// TODO Auto-generated method stub
-		return 0;
+		return null;
 	}
 
 	@Override
-	public long nextUnavailabilityDuration() {
+	public boolean isAvailable() {
 		// TODO Auto-generated method stub
-		return 0;
+		return false;
 	}
+
 
 }
