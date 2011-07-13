@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
+# -*- coding: iso-8859-1 -*-
 import sys
 import io
-
-trace_path = sys.argv[1]
-trace = open(trace_path, 'r')
-
-simple_trace = open(trace_path + '.simple' , 'w')
 
 init_header = ''
 
@@ -18,32 +13,31 @@ init_header = ''
 # 1997364 UID 12196 PID 1676 /usr/bin/netscape A 960353061.514438 dup2(3, 1) = 1
 
 
-for line in trace:
+for line in sys.stdin:
 	splited = line.split()
 	if splited[1] == 'UID':
-		pid = splited[4]
 		op = splited[8]
 		time = splited[7]
 		if op.startswith('open('):
 			f_name = op.split('"')[1]
 			fd = line.split('=')[1].split()[0]
 			if not fd == '-1':
-				open_str = "\t".join(['open', f_name, time, fd, pid])
-				simple_trace.writelines('\n' + open_str)
+				open_str = "\t".join(['open', f_name, time, fd])
+				print open_str
 		elif op.startswith('read('):
 			fd = op.split('(')[1].split(',')[0]
 			read_bytes = line.split('=')[1].split()[0]
-			read_str = "\t".join(['read', time, fd, read_bytes, pid])
-			simple_trace.writelines('\n' + read_str)
+			read_str = "\t".join(['read', time, fd, read_bytes])
+			print read_str			
 		elif op.startswith('write('):
 			fd = op.split('(')[1].split(',')[0]
 			write_bytes = line.split('=')[1].split()[0]
-			write_str = '\t'.join(['write', time, fd, write_bytes, pid])
-			simple_trace.writelines('\n' + write_str)
+			write_str = '\t'.join(['write', time, fd, write_bytes])
+			print write_str
 		elif op.startswith('close('):
 			fd = op.split('(')[1].split(',')[0]
-			close_str = "\t".join(['close', time, fd, pid])
-			simple_trace.writelines('\n' + close_str)
+			close_str = "\t".join(['close', time, fd])
+			print close_str
 #		elif op.startswith('dup('):#dup(2) = 3
 #			fd0 = op.split('(')[1][0]
 #			fd1 = line.split('=')[1].split()[0]
@@ -54,7 +48,3 @@ for line in trace:
 #			fd1 = line.split('=')[1].split()[0]
 #			dup2_str = "\t".join(['dup2', time, fd0, fd1, pid])
 #			simple_trace.writelines('\n' + dup2_str)
-simple_trace.flush()
-simple_trace.close()
-
-trace.close()
