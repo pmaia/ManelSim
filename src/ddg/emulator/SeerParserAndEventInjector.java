@@ -110,7 +110,7 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 		StringTokenizer tokenizer = new StringTokenizer(nextLine);
 
 		tokenizer.nextToken();// close
-		long time = parseTime(tokenizer.nextToken());// time stamp
+		long time = Long.valueOf(tokenizer.nextToken());// time stamp
 		tokenizer.nextToken();// fd
 
 		advanceTime(time);
@@ -143,7 +143,7 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 		StringTokenizer tokenizer = new StringTokenizer(traceLine);
 
 		tokenizer.nextToken();// read
-		long time = parseTime(tokenizer.nextToken());// time stamp
+		long time = Long.valueOf(tokenizer.nextToken());// time stamp
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 		long dataLength = Long.parseLong(tokenizer.nextToken());// length
 
@@ -161,7 +161,7 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 		StringTokenizer tokenizer = new StringTokenizer(traceLine);
 
 		tokenizer.nextToken();// write
-		long time = parseTime(tokenizer.nextToken());// time
+		long time = Long.valueOf(tokenizer.nextToken());// time
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 		long dataLength = Long.parseLong(tokenizer.nextToken());// length
 
@@ -172,22 +172,6 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 				client);
 	}
 
-	private long parseTime(String time) {
-
-		StringTokenizer timeTokenizer = new StringTokenizer(time, ".");
-
-		String seconds = timeTokenizer.nextToken();
-		long milliAsLongFirstPart = Long.parseLong(seconds) * 1000;
-
-		String microseconds = timeTokenizer.nextToken();
-		if (microseconds.length() != 6)
-			throw new UnsupportedOperationException("time: " + time);
-		long milliAsLongSecondPart = Long.parseLong(microseconds
-				.substring(0, 2));
-
-		return milliAsLongFirstPart + milliAsLongSecondPart;
-	}
-
 	private JEEvent readOpenEvent(String line) {
 
 		// open /usr/X11R6/lib/X11/fonts/misc/fonts.dir 960254165.543422 5
@@ -196,7 +180,7 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 		tokenizer.nextToken();// open
 		String fileName = tokenizer.nextToken(); // filename
 
-		long time = parseTime(tokenizer.nextToken());// time stamp
+		long time = Long.valueOf(tokenizer.nextToken());// time stamp
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 
 		advanceTime(time);
