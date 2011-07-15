@@ -100,7 +100,7 @@ public class SeerTraceMain {
 		control.scheduleNext();
 		scheduler.start();
 
-		System.out.println(Aggregator.getInstance().summarizeIdleUtilization());
+		System.out.println(Aggregator.getInstance().summarizePerturbation());
 	}
 
 	/**
