@@ -174,7 +174,7 @@ public class SeerParserAndEventInjector implements ClientEventInjector {
 
 	private JEEvent readOpenEvent(String line) {
 
-		// open /usr/X11R6/lib/X11/fonts/misc/fonts.dir 960254165.543422 5
+		// open /usr/X11R6/lib/X11/fonts/misc/fonts.dir 960254165 5
 		StringTokenizer tokenizer = new StringTokenizer(line);
 
 		tokenizer.nextToken();// open
