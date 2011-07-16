@@ -75,7 +75,7 @@ public class Aggregator {
 		}
 
 		summary.append(String.format("\n\nTotal perturbation duration:\t%d ms", totalPerturbationDuration));
-		summary.append(String.format("\nTotal perturbation count:\t", totalPerturbationCount));
+		summary.append(String.format("\nTotal perturbation count:\t %d", totalPerturbationCount));
 
 		//summarize availability
 		summary.append("\n\n============================================ \nAvailability summary: \n");
@@ -114,7 +114,7 @@ public class Aggregator {
 		
 		double perturbationConsumptionkWh = 
 			totalPerturbationCount * toHours(TRANSITION_DURATION_IN_MILLISECONDS) * TRANSITION_POWER_IN_WATTS;
-		perturbationConsumptionkWh += toHours(totalPerturbationDuration) * ACTIVE_POWER_IN_WATTS;
+		perturbationConsumptionkWh += (toHours(totalPerturbationDuration) * ACTIVE_POWER_IN_WATTS);
 		
 		double energyConsumptionDOFSkWh = perturbationConsumptionkWh + energyConsumptionkWh;
 		
