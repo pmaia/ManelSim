@@ -28,6 +28,14 @@ public final class JETime implements Comparable<JETime> {
 	public JETime plus(JETime otherETime) {
 		return new JETime(timeMilliSeconds + otherETime.timeMilliSeconds);
 	}
+	
+	public JETime minus(JETime otherETime) {
+		return new JETime(timeMilliSeconds - otherETime.timeMilliSeconds);
+	}
+	
+	public long asMilliseconds() {
+		return timeMilliSeconds;
+	}
 
 	/**
 	 * @param otherTime
@@ -57,6 +65,6 @@ public final class JETime implements Comparable<JETime> {
 	 */
 	@Override
 	public String toString() {
-		return timeMilliSeconds + "";// FIXME optimize
+		return String.valueOf(timeMilliSeconds);
 	}
 }

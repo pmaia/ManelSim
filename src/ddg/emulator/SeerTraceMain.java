@@ -70,8 +70,6 @@ public class SeerTraceMain {
 
 		DataPlacementAlgorithm placement = createPlacementPolice(placementPoliceName);
 
-		
-
 		// 1 GiBytes
 		long diskSize = 1024 * 1024 * 1024 * 1L;
 		FileSizeDistribution fileSizeDistribution = new FileSizeDistribution(
@@ -79,6 +77,8 @@ public class SeerTraceMain {
 
 		// building network
 		List<Machine> machines = createMachines(scheduler, numberOfMachines);
+		CancelPendingMachineStateTransitionsEventHandler.build(scheduler, machines);
+		
 		List<DataServer> dataServers = createDataServers(scheduler,
 				numberOfMachines, diskSize, machines);
 
@@ -100,7 +100,7 @@ public class SeerTraceMain {
 		control.scheduleNext();
 		scheduler.start();
 
-		System.out.println(Aggregator.getInstance().summarizePerturbation());
+		System.out.println(Aggregator.getInstance().summarize());
 	}
 
 	/**

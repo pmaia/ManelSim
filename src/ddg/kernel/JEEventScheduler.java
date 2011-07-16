@@ -13,8 +13,8 @@ import java.util.Vector;
 public final class JEEventScheduler {
 
 	private JETime now = new JETime(0L);
-	private Vector<JEEvent> EventList = new Vector<JEEvent>();
-	private Vector<JEEventHandler> HandlerList;
+	private Vector<JEEvent> eventList = new Vector<JEEvent>();
+	private Vector<JEEventHandler> handlerList;
 	private Boolean isActive;
 	private JETime theEmulationEnd;
 
@@ -30,11 +30,11 @@ public final class JEEventScheduler {
 	 */
 	public JEEventScheduler(JETime emulationEnd) {
 
-		EventList.setSize(10000);
-		EventList.clear();
-		HandlerList = new Vector<JEEventHandler>();
-		HandlerList.setSize(100);
-		HandlerList.clear();
+		eventList.setSize(10000);
+		eventList.clear();
+		handlerList = new Vector<JEEventHandler>();
+		handlerList.setSize(100);
+		handlerList.clear();
 		isActive = Boolean.valueOf(false);
 		theEmulationEnd = emulationEnd;
 	}
@@ -42,7 +42,7 @@ public final class JEEventScheduler {
 	/**
 	 * @param aNewEvent
 	 */
-	public void queue_event(JEEvent aNewEvent) {
+	public void schedule(JEEvent aNewEvent) {
 
 		JETime anEventTime = aNewEvent.getTheScheduledTime();
 
@@ -52,61 +52,61 @@ public final class JEEventScheduler {
 					+ "). Event is outdated and will not be processed.");
 		}
 
-		int queue_size = EventList.size();
+		int queueSize = eventList.size();
 
-		if (queue_size == 0) {
-			EventList.addElement(aNewEvent);
-		} else if (EventList.lastElement().getTheScheduledTime()
+		if (queueSize == 0) {
+			eventList.addElement(aNewEvent);
+		} else if (eventList.lastElement().getTheScheduledTime()
 				.isEarlierThan(anEventTime)) {
-			EventList.addElement(aNewEvent);
+			eventList.addElement(aNewEvent);
 		} else {
 
-			int queue_pos;
+			int queuePos;
 
-			for (queue_pos = queue_size - 1; ((queue_pos > 0) & anEventTime
-					.isEarlierThan(EventList.elementAt(queue_pos)
-							.getTheScheduledTime())); queue_pos--) {
+			for (queuePos = queueSize - 1; ((queuePos > 0) & anEventTime
+					.isEarlierThan(eventList.elementAt(queuePos)
+							.getTheScheduledTime())); queuePos--) {
 				/* empty */
 			}
 
-			if (++queue_pos == 1
-					& anEventTime.isEarlierThan(EventList.elementAt(0)
+			if (++queuePos == 1
+					& anEventTime.isEarlierThan(eventList.elementAt(0)
 							.getTheScheduledTime())) {
-				queue_pos--;
+				queuePos--;
 			}
 
-			EventList.insertElementAt(aNewEvent, queue_pos);
+			eventList.insertElementAt(aNewEvent, queuePos);
 		}
 	}
 
 	/**
 	 * @param anObsoleteEvent
 	 */
-	public void cancel_event(JEEvent anObsoleteEvent) {
+	public void cancelEvent(JEEvent anObsoleteEvent) {
 
 		if (anObsoleteEvent == null) {
 			throw new NullPointerException();
 		}
-		EventList.remove(anObsoleteEvent);
+		eventList.remove(anObsoleteEvent);
 	}
 
 	/**
 	 * @param aNewEventHandler
 	 * @return
 	 */
-	public JEEventScheduler register_handler(JEEventHandler aNewEventHandler) {
+	public JEEventScheduler registerHandler(JEEventHandler aNewEventHandler) {
 
 		Integer aHandlerId = aNewEventHandler.getHandlerId();
 
-		if (HandlerList.size() < aHandlerId.intValue() - 1) {
-			HandlerList.setSize(aHandlerId.intValue() - 1);
+		if(handlerList.size() < aHandlerId.intValue() - 1) {
+			handlerList.setSize(aHandlerId.intValue() - 1);
 		}
 
-		if (HandlerList.size() > aHandlerId.intValue() - 1) {
-			HandlerList.removeElementAt(aHandlerId.intValue() - 1);
+		if(handlerList.size() > aHandlerId.intValue() - 1) {
+			handlerList.removeElementAt(aHandlerId.intValue() - 1);
 		}
 
-		HandlerList
+		handlerList
 				.insertElementAt(aNewEventHandler, aHandlerId.intValue() - 1);
 		return this;
 	}
@@ -116,7 +116,7 @@ public final class JEEventScheduler {
      */
 	public void start() {
 
-		if (!EventList.isEmpty()) {
+		if (!eventList.isEmpty()) {
 			schedule();
 		}
 	}
@@ -126,9 +126,9 @@ public final class JEEventScheduler {
 	 */
 	private JEEvent peek() {
 
-		if (!EventList.isEmpty()) {
-			JEEvent aNextEvent = EventList.elementAt(0);
-			EventList.removeElementAt(0);
+		if (!eventList.isEmpty()) {
+			JEEvent aNextEvent = eventList.elementAt(0);
+			eventList.removeElementAt(0);
 			return aNextEvent;
 		}
 
@@ -142,7 +142,7 @@ public final class JEEventScheduler {
 
 		isActive = Boolean.valueOf(true);
 
-		while (!EventList.isEmpty() & isActive.booleanValue()
+		while (!eventList.isEmpty() & isActive.booleanValue()
 				& isEarlierThanEmulationEnd(now())) {
 
 			JEEvent aNextEvent = peek();
@@ -182,13 +182,13 @@ public final class JEEventScheduler {
 
 		Integer aTargetHandlerId = aNextEvent.getTheTargetHandlerId();
 
-		if (HandlerList.elementAt(aTargetHandlerId.intValue() - 1) == null) {
+		if (handlerList.elementAt(aTargetHandlerId.intValue() - 1) == null) {
 			throw new RuntimeException("ERROR: no Handler at vector position "
 					+ (aTargetHandlerId.intValue() - 1)
 					+ ". Something's wrong here, dude.");
 		}
 
-		HandlerList.elementAt(aTargetHandlerId.intValue() - 1).handleEvent(
+		handlerList.elementAt(aTargetHandlerId.intValue() - 1).handleEvent(
 				aNextEvent);
 	}
 

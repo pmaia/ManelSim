@@ -1,5 +1,10 @@
 package ddg.model;
 
+import static ddg.model.Machine.ACTIVE_POWER_IN_WATTS;
+import static ddg.model.Machine.STAND_BY_POWER_IN_WATTS;
+import static ddg.model.Machine.TRANSITION_DURATION_IN_MILLISECONDS;
+import static ddg.model.Machine.TRANSITION_POWER_IN_WATTS;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,11 +38,11 @@ public class Aggregator {
 		machinePerturbation.addNewPerturbation(duration);
 	}
 	
-	public void reportTransitionToActive(String machine, long activeDuration) {
+	public void aggregateActiveDuration(String machine, long activeDuration) {
 		getMachineAvailability(machine).addActiveDuration(activeDuration);
 	}
 	
-	public void reportTransitionToInactive(String machine, long inactiveDuration) {
+	public void aggregateInactiveDuration(String machine, long inactiveDuration) {
 		getMachineAvailability(machine).addInactiveDuration(inactiveDuration);
 	}
 	
@@ -51,9 +56,10 @@ public class Aggregator {
 		return machineAvailability;
 	}
 	
-	public String summarizePerturbation() {
+	public String summarize() {
 		StringBuilder summary = new StringBuilder();
 		
+		//summarize perturbation
 		summary.append("\n\n============================================ \nPerturbation summary: \n");
 		
 		long totalPerturbationDuration = 0;
@@ -62,45 +68,65 @@ public class Aggregator {
 		for(String machine : perturbationTotalsPerMachine.keySet()) {
 			MachinePerturbation mPerturbation = perturbationTotalsPerMachine.get(machine);
 			
-			summary.append(String.format("\nMachine=%s\tDuration=%d\tCount=%d", 
+			summary.append(String.format("\nMachine=%s\tDuration=%d ms\tCount=%d", 
 					machine, mPerturbation.getDurationTotal(), mPerturbation.getCount()));
 			totalPerturbationDuration += mPerturbation.getDurationTotal();
 			totalPerturbationCount += mPerturbation.getCount();
 		}
 
-		summary.append("\n\nTotal perturbation duration:\t " + totalPerturbationDuration);
-		summary.append("\nTotal perturbation count:\t" + totalPerturbationCount);
-		
-		return summary.toString();
-	}
-	
-	public String summarizeAvailability() {
-		StringBuilder summary = new StringBuilder();
-		
+		summary.append(String.format("\n\nTotal perturbation duration:\t%d ms", totalPerturbationDuration));
+		summary.append(String.format("\nTotal perturbation count:\t", totalPerturbationCount));
+
+		//summarize availability
 		summary.append("\n\n============================================ \nAvailability summary: \n");
 		
-		long totalActiveDuration = 0;
-		long totalInactiveDuration = 0;
+		long totalActiveDurationMillis = 0;
+		long totalInactiveDurationMillis = 0;
 		long totalTransitions = 0;
 		
 		for(String machine : availabilityTotalsPerMachine.keySet()) {
 			MachineAvailability mAvailability = availabilityTotalsPerMachine.get(machine);
 			
-			summary.append(String.format("\nMachine=%s\tActive (ms)=%d\tInactive (ms)=%d\tTransitions=%d", 
-					mAvailability));
+			summary.append(String.format("\nMachine=%s\tActive=%d ms\tInactive=%d ms\tTransitions=%d", 
+					machine, mAvailability.getActiveDurationTotal(), mAvailability.getInactiveDurationTotal(), 
+					mAvailability.getTransitionsCount()));
 			
-			totalActiveDuration += mAvailability.getActiveDurationTotal();
-			totalInactiveDuration += mAvailability.getInactiveDurationTotal();
+			totalActiveDurationMillis += mAvailability.getActiveDurationTotal();
+			totalInactiveDurationMillis += mAvailability.getInactiveDurationTotal();
 			totalTransitions += mAvailability.getTransitionsCount();
 		}
 		
-		summary.append("\n\nTotal active duration:\t " + totalActiveDuration);
-		summary.append("\nTotal inactive duration:\t" + totalInactiveDuration);
-		summary.append("\nTotal transitions:\t" + totalTransitions);
+		summary.append(String.format("\n\nTotal active duration:\t%d ms", totalActiveDurationMillis));
+		summary.append(String.format("\nTotal inactive duration:\t%d ms", totalInactiveDurationMillis));
+		summary.append(String.format("\nTotal transitions:\t%d", totalTransitions));
 		
+		//summarize energy consumption
+		summary.append("\n\n============================================ \nEnergy consumption summary: \n");
+		double activeConsumptionWh = toHours(totalActiveDurationMillis) * ACTIVE_POWER_IN_WATTS;
+		double inactiveConsumptionWh = toHours(totalInactiveDurationMillis) * STAND_BY_POWER_IN_WATTS;
+		double transitionConsumptionWh = 
+			totalTransitions * toHours(TRANSITION_DURATION_IN_MILLISECONDS) * TRANSITION_POWER_IN_WATTS;
+		
+		double energyConsumptionkWh = (activeConsumptionWh + inactiveConsumptionWh + transitionConsumptionWh) / 1000; 
+		
+		summary.append(String.format("\nEnergy consumption without opportunistic distributed file system:\t%f kWh",
+				energyConsumptionkWh));
+		
+		double perturbationConsumptionkWh = 
+			totalPerturbationCount * toHours(TRANSITION_DURATION_IN_MILLISECONDS) * TRANSITION_POWER_IN_WATTS;
+		perturbationConsumptionkWh += toHours(totalPerturbationDuration) * ACTIVE_POWER_IN_WATTS;
+		
+		double energyConsumptionDOFSkWh = perturbationConsumptionkWh + energyConsumptionkWh;
+		
+		summary.append(String.format("\nEnergy consumption with opportunistic distributed file system:\t%f kWh",
+				energyConsumptionDOFSkWh));
+
 		return summary.toString();
 	}
-
+	
+	private double toHours(long timeInMillis) {
+		return ((timeInMillis / 1000) / 60) / 60;
+	}
 
 	public void reportlogin(DDGClient client, long now) {
 		DataServer dataServer = client.getMachine().getDeployedDataServers()

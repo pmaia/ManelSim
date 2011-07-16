@@ -1,7 +1,7 @@
 package ddg.emulator;
 
-import ddg.kernel.JETime;
 import ddg.model.Availability;
+import ddg.model.State;
 
 /**
  * 
@@ -11,21 +11,15 @@ import ddg.model.Availability;
 public class TraceAvailability implements Availability {
 
 	@Override
-	public void updateSimulationTime(JETime now) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public JETime getSimulationTime() {
+	public State currentState() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean isAvailable() {
+	public void advanceState() {
 		// TODO Auto-generated method stub
-		return false;
+		
 	}
 
 

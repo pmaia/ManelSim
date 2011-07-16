@@ -31,7 +31,7 @@ public abstract class JEEventHandler {
 		HandlerId = theUniqueHandlerId;
 		parameterlist = new LinkedList();
 		theUniqueEventScheduler = scheduler;
-		theUniqueEventScheduler.register_handler(this);
+		theUniqueEventScheduler.registerHandler(this);
 	}
 
 	/**
@@ -50,7 +50,7 @@ public abstract class JEEventHandler {
 	 * @param anEvent
 	 */
 	public void send(JEEvent anEvent) {
-		theUniqueEventScheduler.queue_event(anEvent);
+		theUniqueEventScheduler.schedule(anEvent);
 	}
 
 	/**

@@ -3,7 +3,9 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import ddg.emulator.EmulatorControl;
+import ddg.emulator.events.MachineStateTransitionEvent;
+import ddg.kernel.JEEvent;
+import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;
 import ddg.kernel.JETime;
 import ddg.model.data.DataServer;
@@ -14,35 +16,47 @@ import ddg.model.data.DataServer;
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
-public class Machine {
+public class Machine extends JEEventHandler {
 
+	/*
+	 * The source of the values below is Lesandro's work: 
+	 * "On the Impact of Energy-saving Strategies in Opportunistic Grids"
+	 */
+	public static final double TRANSITION_POWER_IN_WATTS = 140;
+	public static final double ACTIVE_POWER_IN_WATTS = 140;
+	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
+	public static final long TRANSITION_DURATION_IN_MILLISECONDS = 2500;
+	
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
 	
 	private final Availability availability;
+	
+	private MachineStateTransitionEvent pendingTransition;
+	private JETime lastTransitionTime;
 
 	private final String id;
 
-	/**
-	 * Default constructor using fields.
-	 * 
-	 * @param scheduler
-	 * @param id
-	 */
 	public Machine(JEEventScheduler scheduler, Availability availability, String id) {
+		super(scheduler);
+		
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
 		this.availability = availability;
+				
+		lastTransitionTime = scheduler.now();
+		JETime nextTransitionTime = 
+			lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
+		
+		pendingTransition = 
+			new MachineStateTransitionEvent(this, lastTransitionTime.plus(nextTransitionTime));
+		
+		this.send(pendingTransition);
 	}
 	
 	public boolean isBeingUsed() {
-		JETime now = 
-			EmulatorControl.getInstance().getTheUniqueEventScheduler().now();
-		
-		availability.updateSimulationTime(now);
-		
-		return !availability.isAvailable();
+		return availability.currentState().isActive();
 	}
 
 	/**
@@ -131,5 +145,38 @@ public class Machine {
 	@Override
 	public String toString() {
 		return "machine" + id;
+	}
+	
+	public void cancelPendingMachineStateTransition() {
+		JETime actualDuration = getScheduler().now().minus(lastTransitionTime);
+		if(availability.currentState().isActive()) {
+			Aggregator.getInstance().aggregateActiveDuration(getId(), actualDuration.asMilliseconds());
+		} else {
+			Aggregator.getInstance().aggregateInactiveDuration(getId(), actualDuration.asMilliseconds());
+		}
+		getScheduler().cancelEvent(pendingTransition);
+	}
+
+	@Override
+	public void handleEvent(JEEvent jeevent) {
+		if(jeevent instanceof MachineStateTransitionEvent) {
+			State justEndedState = availability.currentState(); 
+			if(justEndedState.isActive()) {
+				Aggregator.getInstance().aggregateActiveDuration(getId(), justEndedState.getDuration());
+			} else {
+				Aggregator.getInstance().aggregateInactiveDuration(getId(), justEndedState.getDuration());
+			}
+			
+			availability.advanceState();
+			lastTransitionTime = super.getScheduler().now();
+			JETime nextTransition = 
+				lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
+			
+			pendingTransition = new MachineStateTransitionEvent(this, nextTransition); 
+			
+			this.send(pendingTransition);
+		} else {
+			throw new IllegalArgumentException();
+		}
 	}
 }
