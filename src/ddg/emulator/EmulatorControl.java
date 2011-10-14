@@ -19,7 +19,7 @@ import ddg.model.MetadataServer;
 public class EmulatorControl {
 
 	private final JEEventScheduler theUniqueEventScheduler;
-	private final ClientEventInjector eventInjector;
+	private final EventParser eventInjector;
 
 	// ugly but works
 	private static EmulatorControl singleInstace;
@@ -28,7 +28,7 @@ public class EmulatorControl {
 	private final BootStrapperEventHandler bootStrapperEventHandler;
 
 	public static EmulatorControl build(JEEventScheduler eventScheduler,
-			ClientEventInjector eventInjector, MetadataServer metadataServer) {
+			EventParser eventInjector, MetadataServer metadataServer) {
 
 		if (singleInstace != null)
 			throw new IllegalStateException();
@@ -57,7 +57,7 @@ public class EmulatorControl {
 	}
 
 	private EmulatorControl(JEEventScheduler eventScheduler,
-			ClientEventInjector injector, MetadataServer metadataServer) {
+			EventParser injector, MetadataServer metadataServer) {
 
 		this.theUniqueEventScheduler = eventScheduler;
 		this.eventInjector = injector;

@@ -22,7 +22,7 @@ import ddg.kernel.JEEvent;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public interface ClientEventInjector {
+public interface EventParser {
 
 	/**
 	 * @return

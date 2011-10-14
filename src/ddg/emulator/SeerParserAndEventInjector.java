@@ -35,7 +35,7 @@ import ddg.model.loginAlgorithm.LoginAlgorithm;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public class SeerParserAndEventInjector implements ClientEventInjector {
+public class SeerParserAndEventInjector implements EventParser { //TODO renomear. não existe mais SEER por aqui
 
 	private long lastTimeStamp;
 
