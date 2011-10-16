@@ -15,7 +15,7 @@
  */
 package ddg.emulator;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,7 +91,7 @@ public class SeerTraceMain {
 		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(false, 0.0, MetadataServer.ONE_DAY,
 				clients);
 		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(
-				new File(traceFile), loginAlgorithm);
+				new FileInputStream(traceFile), loginAlgorithm);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector,
 				metadataServer);
 

@@ -27,36 +27,41 @@ import java.util.Random;
 import org.junit.Test;
 
 import ddg.emulator.EventParser;
+import ddg.emulator.MultipleSourceEventParser;
 import ddg.emulator.SeerParserAndEventInjector;
 import ddg.kernel.JEEvent;
 
 /**
- * A suite of tests to the MultipleSourceEventParserTest class
+ * A suite of tests to the MultipleSourceEventParser class
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class MultipleSourceEventParserTest {
 	
 	@Test
-	public void eventOrderingTest() {
-//		EventParser [] injectors = new EventParser[3];
-//		
-//		InputStream trace1 = new RandomEventStream(15);
-//		InputStream trace2 = new RandomEventStream(30);
-//		InputStream trace3 = new RandomEventStream(60);
-//		
-//		injectors[0] = new SeerParserAndEventInjector(trace1, null);
-//		injectors[1] = new SeerParserAndEventInjector(trace2, null);
-//		injectors[2] = new SeerParserAndEventInjector(trace3, null);
-//		
-//		EventParser multipleSourceParser = new MultipleSourceEventParser(injectors);
-//		
-//		JEEvent currentEvent = multipleSourceParser.getNextEvent();
-//		JEEvent nextEvent = null;
-//		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
-//			assertTrue(currentEvent.getTheScheduledTime().compareTo(nextEvent.getTheScheduledTime()) >= 0);
-//			currentEvent = nextEvent;
-//		}
+	public void eventOrderingTest() throws IOException {
+		EventParser [] injectors = new EventParser[3];
+		
+		InputStream trace1 = new FakeTraceStream(15);
+		InputStream trace2 = new FakeTraceStream(30);
+		InputStream trace3 = new FakeTraceStream(60);
+		
+		/*
+		 * TODO I must decide what to do with client migration now... 
+		 * it is difficult to construct SeerParserAndEventInjectors because of LoginAlgorithm, etc. 
+		 */
+		injectors[0] = new SeerParserAndEventInjector(trace1, null);
+		injectors[1] = new SeerParserAndEventInjector(trace2, null);
+		injectors[2] = new SeerParserAndEventInjector(trace3, null);
+		
+		EventParser multipleSourceParser = new MultipleSourceEventParser(injectors);
+		
+		JEEvent currentEvent = multipleSourceParser.getNextEvent();
+		JEEvent nextEvent = null;
+		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
+			assertTrue(currentEvent.getTheScheduledTime().compareTo(nextEvent.getTheScheduledTime()) >= 0);
+			currentEvent = nextEvent;
+		}
 	}
 	
 	/**

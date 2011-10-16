@@ -16,9 +16,9 @@
 package ddg.emulator;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 import ddg.emulator.events.fuseEvents.OpenEvent;
@@ -45,13 +45,13 @@ public class SeerParserAndEventInjector implements EventParser { //TODO renomear
 	private final LoginAlgorithm loginAlgorithm;
 
 	/**
-	 * @param traceFile
+	 * @param traceStream
 	 * @throws IOException
 	 */
-	public SeerParserAndEventInjector(File traceFile,
+	public SeerParserAndEventInjector(InputStream traceStream,
 			LoginAlgorithm loginAlgorithm) throws IOException {
 		this.lastTimeStamp = -1;
-		this.bufferedReader = new BufferedReader(new FileReader(traceFile));
+		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.loginAlgorithm = loginAlgorithm;
 	}
 
