@@ -18,7 +18,7 @@ package ddg.emulator;
 import ddg.kernel.JEEvent;
 
 /**
- * TODO make doc
+ * An {@link EventParser} that aggregates a bunch of {@link EventParser}s and delivery their events in order.  
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */

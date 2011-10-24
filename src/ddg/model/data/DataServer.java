@@ -17,8 +17,6 @@ import ddg.model.Machine;
  */
 public class DataServer implements Comparable<DataServer> {
 
-	public static final double DISK_RATE = 48 * (Math.pow(10, 7));// bits/s
-
 	private final String id;
 	private final Machine machine;
 	private final double diskSize;

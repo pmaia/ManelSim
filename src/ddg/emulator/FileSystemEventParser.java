@@ -31,11 +31,11 @@ import ddg.model.DDGClient;
 import ddg.model.loginAlgorithm.LoginAlgorithm;
 
 /**
- * TODO make doc
+ * A parser for the trace of calls to the file system.
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public class SeerParserAndEventInjector implements EventParser { //TODO renomear. não existe mais SEER por aqui
+public class FileSystemEventParser implements EventParser {
 
 	private long lastTimeStamp;
 
@@ -48,7 +48,7 @@ public class SeerParserAndEventInjector implements EventParser { //TODO renomear
 	 * @param traceStream
 	 * @throws IOException
 	 */
-	public SeerParserAndEventInjector(InputStream traceStream,
+	public FileSystemEventParser(InputStream traceStream,
 			LoginAlgorithm loginAlgorithm) throws IOException {
 		this.lastTimeStamp = -1;
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));

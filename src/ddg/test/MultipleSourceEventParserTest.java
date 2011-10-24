@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import ddg.emulator.EventParser;
 import ddg.emulator.MultipleSourceEventParser;
-import ddg.emulator.SeerParserAndEventInjector;
+import ddg.emulator.FileSystemEventParser;
 import ddg.kernel.JEEvent;
 
 /**
@@ -50,9 +50,9 @@ public class MultipleSourceEventParserTest {
 		 * TODO I must decide what to do with client migration now... 
 		 * it is difficult to construct SeerParserAndEventInjectors because of LoginAlgorithm, etc. 
 		 */
-		injectors[0] = new SeerParserAndEventInjector(trace1, null);
-		injectors[1] = new SeerParserAndEventInjector(trace2, null);
-		injectors[2] = new SeerParserAndEventInjector(trace3, null);
+		injectors[0] = new FileSystemEventParser(trace1, null);
+		injectors[1] = new FileSystemEventParser(trace2, null);
+		injectors[2] = new FileSystemEventParser(trace3, null);
 		
 		EventParser multipleSourceParser = new MultipleSourceEventParser(injectors);
 		
@@ -67,7 +67,7 @@ public class MultipleSourceEventParserTest {
 	/**
 	 * 
 	 * An InputStream that simulates an InputStream over a trace file whose events are in the format expected by 
-	 * {@link SeerParserAndEventInjector}. <code>numberOfEvents</code> events will be generated.  
+	 * {@link FileSystemEventParser}. <code>numberOfEvents</code> events will be generated.  
 	 *
 	 * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
 	 */

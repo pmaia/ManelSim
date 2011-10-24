@@ -90,7 +90,7 @@ public class SeerTraceMain {
 		// login algorithm
 		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(false, 0.0, MetadataServer.ONE_DAY,
 				clients);
-		SeerParserAndEventInjector injector = new SeerParserAndEventInjector(
+		FileSystemEventParser injector = new FileSystemEventParser(
 				new FileInputStream(traceFile), loginAlgorithm);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector,
 				metadataServer);
