@@ -29,9 +29,6 @@ import ddg.model.DDGClient;
 import ddg.model.Machine;
 import ddg.model.MetadataServer;
 import ddg.model.data.DataServer;
-import ddg.model.loginAlgorithm.HomeLessLoginAlgorithm;
-import ddg.model.loginAlgorithm.LoginAlgorithm;
-import ddg.model.loginAlgorithm.SweetHomeLoginAlgorithm;
 import ddg.model.placement.CoLocatedWithSecondariesLoadBalance;
 import ddg.model.placement.CoLocatedWithSecondaryRandomPlacement;
 import ddg.model.placement.DataPlacementAlgorithm;
@@ -43,8 +40,9 @@ import ddg.util.FileSizeDistribution;
  * TODO make doc
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
+ * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class SeerTraceMain {
+public class ManelSim {
 	
 	private static final int NUMBER_OF_CLIENTS = 1;
 
@@ -84,12 +82,10 @@ public class SeerTraceMain {
 
 		MetadataServer metadataServer = new MetadataServer(dataServers, 
 				placement, replicationLevel, fileSizeDistribution, new NOPAlgorithm());
+		
 		List<DDGClient> clients = createClients(scheduler, NUMBER_OF_CLIENTS,
 				machines, metadataServer);
 
-		// login algorithm
-		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(false, 0.0, MetadataServer.ONE_DAY,
-				clients);
 		FileSystemEventParser injector = new FileSystemEventParser(
 				new FileInputStream(traceFile), null);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector,
@@ -101,40 +97,6 @@ public class SeerTraceMain {
 		scheduler.start();
 
 		System.out.println(Aggregator.getInstance().summarize());
-	}
-
-	/**
-	 * @param homeless
-	 * @param migrationProb
-	 * @param loginDuration
-	 * @param clients
-	 * @return
-	 */
-	private static LoginAlgorithm createLoginAlgorithm(Boolean homeless,
-			double migrationProb, int loginDuration, List<DDGClient> clients) {
-
-		// always the first machines is full of data, otherwise in the case of
-		// machines are empty
-
-		DDGClient firstClient = clients.get(0);
-
-		for (DDGClient ddgClient : clients) {
-
-			if (ddgClient.getMachine().getDeployedDataServers().get(0).isFull()) {
-				firstClient = ddgClient;
-				break;
-			}
-		}
-
-		if (homeless) {
-			return new HomeLessLoginAlgorithm(migrationProb, loginDuration,
-					firstClient, clients);
-		} else {
-			clients.remove(firstClient);
-			return new SweetHomeLoginAlgorithm(migrationProb, loginDuration,
-					firstClient, clients);
-		}
-
 	}
 
 	private static DataPlacementAlgorithm createPlacementPolice(String police) {
