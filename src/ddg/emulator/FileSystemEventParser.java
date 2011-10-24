@@ -28,12 +28,12 @@ import ddg.emulator.events.fuseEvents.WriteEvent;
 import ddg.kernel.JEEvent;
 import ddg.kernel.JETime;
 import ddg.model.DDGClient;
-import ddg.model.loginAlgorithm.LoginAlgorithm;
 
 /**
  * A parser for the trace of calls to the file system.
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
+ * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class FileSystemEventParser implements EventParser {
 
@@ -42,17 +42,18 @@ public class FileSystemEventParser implements EventParser {
 	private long firstTimeStamp;
 
 	private final BufferedReader bufferedReader;
-	private final LoginAlgorithm loginAlgorithm;
+	
+	private final DDGClient client;
 
 	/**
 	 * @param traceStream
 	 * @throws IOException
 	 */
 	public FileSystemEventParser(InputStream traceStream,
-			LoginAlgorithm loginAlgorithm) throws IOException {
+			DDGClient client) throws IOException {
 		this.lastTimeStamp = -1;
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
-		this.loginAlgorithm = loginAlgorithm;
+		this.client = client;
 	}
 
 	/**
@@ -114,7 +115,6 @@ public class FileSystemEventParser implements EventParser {
 		tokenizer.nextToken();// fd
 
 		advanceTime(time);
-		DDGClient client = chooseClient(lastTimeStamp);
 
 		return new ReleaseEvent(null, client, now());
 	}
@@ -132,10 +132,6 @@ public class FileSystemEventParser implements EventParser {
 		lastTimeStamp = time;
 	}
 
-	private DDGClient chooseClient(long now) {
-		return loginAlgorithm.sampleClient(now);
-	}
-
 	private JEEvent readReadEvent(String traceLine) {
 
 		// read 960254162.929275 3 4096
@@ -148,7 +144,6 @@ public class FileSystemEventParser implements EventParser {
 		long dataLength = Long.parseLong(tokenizer.nextToken());// length
 
 		advanceTime(time);
-		DDGClient client = chooseClient(lastTimeStamp);
 
 		return new ReadEvent(dataLength, 0, fileDescriptor, client, now(),
 				client);
@@ -166,7 +161,6 @@ public class FileSystemEventParser implements EventParser {
 		long dataLength = Long.parseLong(tokenizer.nextToken());// length
 
 		advanceTime(time);
-		DDGClient client = chooseClient(lastTimeStamp);
 
 		return new WriteEvent(dataLength, 0, fileDescriptor, client, now(),
 				client);
@@ -184,7 +178,6 @@ public class FileSystemEventParser implements EventParser {
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 
 		advanceTime(time);
-		DDGClient client = chooseClient(lastTimeStamp);
 
 		return new OpenEvent(fileName, fileDescriptor, client, client, now());
 	}

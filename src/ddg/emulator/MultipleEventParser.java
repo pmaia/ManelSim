@@ -22,11 +22,11 @@ import ddg.kernel.JEEvent;
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class MultipleSourceEventParser implements EventParser {
+public class MultipleEventParser implements EventParser {
 	
 	private final PushBackEventParser [] parsers;
 
-	public MultipleSourceEventParser(EventParser[] parsers) {
+	public MultipleEventParser(EventParser[] parsers) {
 		this.parsers = new PushBackEventParser[parsers.length];
 		
 		for(int i = 0; i < parsers.length; i++) {
@@ -36,12 +36,23 @@ public class MultipleSourceEventParser implements EventParser {
 
 	@Override
 	public JEEvent getNextEvent() {
+		
 		int smallestTimeEventParserId = 0;
-		JEEvent smallestTimeEvent = 
-			parsers[smallestTimeEventParserId].getNextEvent();
+		JEEvent smallestTimeEvent;
+		while((smallestTimeEvent = parsers[smallestTimeEventParserId].getNextEvent()) == null) {
+			smallestTimeEventParserId++;
+			
+			if(smallestTimeEventParserId >= this.parsers.length){
+				break;
+			}
+		}
 
-		for(int i = 1; i < this.parsers.length; i++ ) {
+		for(int i = smallestTimeEventParserId + 1; i < this.parsers.length; i++) {
 			JEEvent smallestTimeEventCandidate = parsers[i].getNextEvent();
+			
+			if(smallestTimeEventCandidate == null){
+				continue;
+			}
 			
 			if(smallestTimeEvent.getTheScheduledTime().compareTo(
 					smallestTimeEventCandidate.getTheScheduledTime()) > 0 ) {

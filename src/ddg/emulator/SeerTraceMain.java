@@ -91,7 +91,7 @@ public class SeerTraceMain {
 		LoginAlgorithm loginAlgorithm = createLoginAlgorithm(false, 0.0, MetadataServer.ONE_DAY,
 				clients);
 		FileSystemEventParser injector = new FileSystemEventParser(
-				new FileInputStream(traceFile), loginAlgorithm);
+				new FileInputStream(traceFile), null);
 		EmulatorControl control = EmulatorControl.build(scheduler, injector,
 				metadataServer);
 
@@ -186,7 +186,7 @@ public class SeerTraceMain {
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
 		for (int i = 0; i < numberOfMachines; i++) {
-			machines.add(new Machine(scheduler, new DSC_UFCGAvailability(), Integer.toString(i)));
+			machines.add(new Machine(scheduler, Integer.toString(i)));
 		}
 
 		return machines;

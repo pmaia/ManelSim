@@ -30,33 +30,30 @@ public class Machine extends JEEventHandler {
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
 	
-	private final Availability availability;
-	
 	private MachineStateTransitionEvent pendingTransition;
 	private JETime lastTransitionTime;
 
 	private final String id;
 
-	public Machine(JEEventScheduler scheduler, Availability availability, String id) {
+	public Machine(JEEventScheduler scheduler, String id) {
 		super(scheduler);
 		
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
-		this.availability = availability;
 				
-		lastTransitionTime = scheduler.now();
-		JETime nextTransitionTime = 
-			lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
-		
-		pendingTransition = 
-			new MachineStateTransitionEvent(this, lastTransitionTime.plus(nextTransitionTime));
-		
-		this.send(pendingTransition);
+//		lastTransitionTime = scheduler.now();
+//		JETime nextTransitionTime = 
+//			lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
+//		
+//		pendingTransition = 
+//			new MachineStateTransitionEvent(this, lastTransitionTime.plus(nextTransitionTime));
+//		
+//		this.send(pendingTransition);
 	}
 	
 	public boolean isBeingUsed() {
-		return availability.currentState().isActive();
+		return true; //FIXME this code must not exist anymore
 	}
 
 	/**
@@ -147,36 +144,36 @@ public class Machine extends JEEventHandler {
 		return "machine" + id;
 	}
 	
-	public void cancelPendingMachineStateTransition() {
-		JETime actualDuration = getScheduler().now().minus(lastTransitionTime);
-		if(availability.currentState().isActive()) {
-			Aggregator.getInstance().aggregateActiveDuration(getId(), actualDuration.asMilliseconds());
-		} else {
-			Aggregator.getInstance().aggregateInactiveDuration(getId(), actualDuration.asMilliseconds());
-		}
-		getScheduler().cancelEvent(pendingTransition);
+	public void cancelPendingMachineStateTransition() { //TODO still necessary?
+//		JETime actualDuration = getScheduler().now().minus(lastTransitionTime);
+//		if(availability.currentState().isActive()) {
+//			Aggregator.getInstance().aggregateActiveDuration(getId(), actualDuration.asMilliseconds());
+//		} else {
+//			Aggregator.getInstance().aggregateInactiveDuration(getId(), actualDuration.asMilliseconds());
+//		}
+//		getScheduler().cancelEvent(pendingTransition);
 	}
 
 	@Override
-	public void handleEvent(JEEvent jeevent) {
-		if(jeevent instanceof MachineStateTransitionEvent) {
-			State justEndedState = availability.currentState(); 
-			if(justEndedState.isActive()) {
-				Aggregator.getInstance().aggregateActiveDuration(getId(), justEndedState.getDuration());
-			} else {
-				Aggregator.getInstance().aggregateInactiveDuration(getId(), justEndedState.getDuration());
-			}
-			
-			availability.advanceState();
-			lastTransitionTime = super.getScheduler().now();
-			JETime nextTransition = 
-				lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
-			
-			pendingTransition = new MachineStateTransitionEvent(this, nextTransition); 
-			
-			this.send(pendingTransition);
-		} else {
-			throw new IllegalArgumentException();
-		}
+	public void handleEvent(JEEvent jeevent) { //TODO implementar
+//		if(jeevent instanceof MachineStateTransitionEvent) {
+//			State justEndedState = availability.currentState(); 
+//			if(justEndedState.isActive()) {
+//				Aggregator.getInstance().aggregateActiveDuration(getId(), justEndedState.getDuration());
+//			} else {
+//				Aggregator.getInstance().aggregateInactiveDuration(getId(), justEndedState.getDuration());
+//			}
+//			
+//			availability.advanceState();
+//			lastTransitionTime = super.getScheduler().now();
+//			JETime nextTransition = 
+//				lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
+//			
+//			pendingTransition = new MachineStateTransitionEvent(this, nextTransition); 
+//			
+//			this.send(pendingTransition);
+//		} else {
+//			throw new IllegalArgumentException();
+//		}
 	}
 }

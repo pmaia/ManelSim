@@ -27,39 +27,50 @@ import java.util.Random;
 import org.junit.Test;
 
 import ddg.emulator.EventParser;
-import ddg.emulator.MultipleSourceEventParser;
 import ddg.emulator.FileSystemEventParser;
+import ddg.emulator.MultipleEventParser;
 import ddg.kernel.JEEvent;
+import ddg.kernel.JEEventScheduler;
+import ddg.model.DDGClient;
+import ddg.model.Machine;
 
 /**
  * A suite of tests to the MultipleSourceEventParser class
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class MultipleSourceEventParserTest {
+public class MultipleEventParserTest {
+	
+	
 	
 	@Test
 	public void eventOrderingTest() throws IOException {
-		EventParser [] injectors = new EventParser[3];
+		EventParser [] parsers = new EventParser[3];
 		
-		InputStream trace1 = new FakeTraceStream(15);
-		InputStream trace2 = new FakeTraceStream(30);
-		InputStream trace3 = new FakeTraceStream(60);
+		InputStream trace1 = new FakeTraceStream(0);
+		InputStream trace2 = new FakeTraceStream(60);
+		InputStream trace3 = new FakeTraceStream(30);
 		
-		/*
-		 * TODO I must decide what to do with client migration now... 
-		 * it is difficult to construct SeerParserAndEventInjectors because of LoginAlgorithm, etc. 
-		 */
-		injectors[0] = new FileSystemEventParser(trace1, null);
-		injectors[1] = new FileSystemEventParser(trace2, null);
-		injectors[2] = new FileSystemEventParser(trace3, null);
+		JEEventScheduler scheduler = new JEEventScheduler();
 		
-		EventParser multipleSourceParser = new MultipleSourceEventParser(injectors);
+		Machine machine1 = new Machine(scheduler, "cherne");
+		Machine machine2 = new Machine(scheduler, "palhaco");
+		Machine machine3 = new Machine(scheduler, "abelhinha");
+		
+		DDGClient client1 = new DDGClient(scheduler, 1, machine1, null);
+		DDGClient client2 = new DDGClient(scheduler, 2, machine2, null);
+		DDGClient client3 = new DDGClient(scheduler, 3, machine3, null);
+		
+		parsers[0] = new FileSystemEventParser(trace1, client1);
+		parsers[1] = new FileSystemEventParser(trace2, client2);
+		parsers[2] = new FileSystemEventParser(trace3, client3);
+		
+		EventParser multipleSourceParser = new MultipleEventParser(parsers);
 		
 		JEEvent currentEvent = multipleSourceParser.getNextEvent();
 		JEEvent nextEvent = null;
 		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
-			assertTrue(currentEvent.getTheScheduledTime().compareTo(nextEvent.getTheScheduledTime()) >= 0);
+			assertTrue(currentEvent.getTheScheduledTime().compareTo(nextEvent.getTheScheduledTime()) <= 0);
 			currentEvent = nextEvent;
 		}
 	}
@@ -102,7 +113,7 @@ public class MultipleSourceEventParserTest {
 			return nextByte;
 		}
 		
-		//TODO I implemented this to generate lines similar to the ones found in the cleaned seer traces.
+		//TODO I implemented this to generate lines similar to the ones found in the cleared SEER traces.
 		private InputStream generateNextEventStream() {
 			final String SEPARATOR = "\t";
 			final String LINE_SEPARATOR = "\n";
@@ -140,7 +151,7 @@ public class MultipleSourceEventParserTest {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		MultipleSourceEventParserTest enclosingTest = new MultipleSourceEventParserTest(); 
+		MultipleEventParserTest enclosingTest = new MultipleEventParserTest(); 
 		FakeTraceStream res = enclosingTest.new FakeTraceStream(1000000);
 		BufferedReader br = new BufferedReader(new InputStreamReader(res));
 		String line;
