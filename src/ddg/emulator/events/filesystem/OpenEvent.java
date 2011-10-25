@@ -16,7 +16,7 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package ddg.emulator.events.fuseEvents;
+package ddg.emulator.events.filesystem;
 
 import ddg.emulator.events.TransactionalDataEvent;
 import ddg.kernel.JEEventHandler;

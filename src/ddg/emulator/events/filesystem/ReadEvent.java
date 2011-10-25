@@ -16,29 +16,76 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package ddg.emulator.events.fuseEvents;
+package ddg.emulator.events.filesystem;
 
 import ddg.emulator.events.TransactionalDataEvent;
 import ddg.kernel.JEEventHandler;
 import ddg.kernel.JETime;
+import ddg.model.DDGClient;
 
 /**
  * TODO make doc
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class ReleaseEvent extends TransactionalDataEvent {
+public class ReadEvent extends TransactionalDataEvent {
 
-	public static final String EVENT_NAME = "release";
+	public static final String EVENT_NAME = "read";
+
+	private final long size;
+	private final long offset;
+	private final int fileDescriptor;
+
+	private final DDGClient client;
 
 	/**
-	 * @param fileName
+	 * @param size
+	 *            TODO
+	 * @param offset
+	 *            TODO
+	 * @param fileDescriptor
+	 *            TODO
 	 * @param handler
 	 * @param scheduledTime
+	 * @param client
+	 *            TODO
 	 */
-	public ReleaseEvent(String fileName, JEEventHandler handler,
-			JETime scheduledTime) {
+	public ReadEvent(long size, long offset, int fileDescriptor,
+			JEEventHandler handler, JETime scheduledTime, DDGClient client) {
+
 		super(EVENT_NAME, handler, scheduledTime);
+		this.fileDescriptor = fileDescriptor;
+		this.size = size;
+		this.offset = offset;
+		this.client = client;
+	}
+
+	/**
+	 * @return
+	 */
+	public int getFileDescriptor() {
+		return fileDescriptor;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getSize() {
+		return size;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getOffset() {
+		return offset;
+	}
+
+	/**
+	 * @return
+	 */
+	public DDGClient getClient() {
+		return client;
 	}
 
 }

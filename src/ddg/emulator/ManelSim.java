@@ -75,7 +75,6 @@ public class ManelSim {
 
 		// building network
 		List<Machine> machines = createMachines(scheduler, numberOfMachines);
-		CancelPendingMachineStateTransitionsEventHandler.build(scheduler, machines);
 		
 		List<DataServer> dataServers = createDataServers(scheduler,
 				numberOfMachines, diskSize, machines);

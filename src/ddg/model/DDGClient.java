@@ -1,9 +1,9 @@
 package ddg.model;
 
 import ddg.emulator.EmulatorControl;
-import ddg.emulator.events.fuseEvents.OpenEvent;
-import ddg.emulator.events.fuseEvents.ReadEvent;
-import ddg.emulator.events.fuseEvents.WriteEvent;
+import ddg.emulator.events.filesystem.OpenEvent;
+import ddg.emulator.events.filesystem.ReadEvent;
+import ddg.emulator.events.filesystem.WriteEvent;
 import ddg.kernel.JEEvent;
 import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;

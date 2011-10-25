@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import ddg.emulator.events.fuseEvents.OpenEvent;
-import ddg.emulator.events.fuseEvents.ReadEvent;
-import ddg.emulator.events.fuseEvents.ReleaseEvent;
-import ddg.emulator.events.fuseEvents.WriteEvent;
+import ddg.emulator.events.filesystem.CloseEvent;
+import ddg.emulator.events.filesystem.OpenEvent;
+import ddg.emulator.events.filesystem.ReadEvent;
+import ddg.emulator.events.filesystem.WriteEvent;
 import ddg.kernel.JEEvent;
 import ddg.kernel.JETime;
 import ddg.model.DDGClient;
@@ -116,7 +116,7 @@ public class FileSystemEventParser implements EventParser {
 
 		advanceTime(time);
 
-		return new ReleaseEvent(null, client, now());
+		return new CloseEvent(null, client, now());
 	}
 
 	private JETime now() {

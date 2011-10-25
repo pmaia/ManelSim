@@ -3,11 +3,9 @@
  */
 package ddg.emulator;
 
-import ddg.emulator.events.CancelPendingMachineStateTransitionsEvent;
 import ddg.kernel.JEEvent;
 import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;
-import ddg.kernel.JETime;
 import ddg.model.MetadataServer;
 
 /**
@@ -84,13 +82,7 @@ public class EmulatorControl {
 
 		if (nextEvent != null) {
 			bootStrapperEventHandler.handleEvent(nextEvent);
-		} else {
-			JETime now = getTheUniqueEventScheduler().now();
-			
-			bootStrapperEventHandler.handleEvent(
-					new CancelPendingMachineStateTransitionsEvent(
-							CancelPendingMachineStateTransitionsEventHandler.getInstance(), now));
-		}
+		} 
 	}
 
 	private class BootStrapperEventHandler extends JEEventHandler {

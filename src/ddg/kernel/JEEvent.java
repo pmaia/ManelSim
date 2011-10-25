@@ -3,7 +3,6 @@
  */
 package ddg.kernel;
 
-import java.util.Vector;
 
 /**
  * TODO make doc
@@ -19,7 +18,6 @@ public class JEEvent {
 
 	private Integer theTargetHandlerId;
 	private JETime theScheduledTime;
-	private Vector theParameterList;
 
 	/**
 	 * @param aName
@@ -33,7 +31,6 @@ public class JEEvent {
 		name = aName;
 		theTargetHandlerId = aHandler.getHandlerId();
 		theScheduledTime = aScheduledTime;
-		theParameterList = new Vector();
 	}
 
 	/**
@@ -55,13 +52,6 @@ public class JEEvent {
 	 */
 	public JETime getTheScheduledTime() {
 		return theScheduledTime;
-	}
-
-	/**
-	 * @return
-	 */
-	public Vector getTheParameterList() {
-		return new Vector(theParameterList);
 	}
 
 	/**

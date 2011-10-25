@@ -71,7 +71,7 @@ public class MultipleEventParser implements EventParser {
 	 * 
 	 *	Adds the ability to "push back" an event to an {@link EventParser}
 	 */
-	private class PushBackEventParser implements EventParser {
+	private static class PushBackEventParser implements EventParser {
 		
 		private final EventParser decoratedEventParser;
 		private JEEvent 	pushedBackEvent;

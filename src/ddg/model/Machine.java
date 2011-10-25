@@ -3,11 +3,9 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import ddg.emulator.events.MachineStateTransitionEvent;
 import ddg.kernel.JEEvent;
 import ddg.kernel.JEEventHandler;
 import ddg.kernel.JEEventScheduler;
-import ddg.kernel.JETime;
 import ddg.model.data.DataServer;
 
 /**
@@ -30,9 +28,6 @@ public class Machine extends JEEventHandler {
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
 	
-	private MachineStateTransitionEvent pendingTransition;
-	private JETime lastTransitionTime;
-
 	private final String id;
 
 	public Machine(JEEventScheduler scheduler, String id) {
@@ -41,15 +36,6 @@ public class Machine extends JEEventHandler {
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
-				
-//		lastTransitionTime = scheduler.now();
-//		JETime nextTransitionTime = 
-//			lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
-//		
-//		pendingTransition = 
-//			new MachineStateTransitionEvent(this, lastTransitionTime.plus(nextTransitionTime));
-//		
-//		this.send(pendingTransition);
 	}
 	
 	public boolean isBeingUsed() {
@@ -144,16 +130,6 @@ public class Machine extends JEEventHandler {
 		return "machine" + id;
 	}
 	
-	public void cancelPendingMachineStateTransition() { //TODO still necessary?
-//		JETime actualDuration = getScheduler().now().minus(lastTransitionTime);
-//		if(availability.currentState().isActive()) {
-//			Aggregator.getInstance().aggregateActiveDuration(getId(), actualDuration.asMilliseconds());
-//		} else {
-//			Aggregator.getInstance().aggregateInactiveDuration(getId(), actualDuration.asMilliseconds());
-//		}
-//		getScheduler().cancelEvent(pendingTransition);
-	}
-
 	@Override
 	public void handleEvent(JEEvent jeevent) { //TODO implementar
 //		if(jeevent instanceof MachineStateTransitionEvent) {
