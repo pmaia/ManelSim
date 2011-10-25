@@ -15,19 +15,19 @@
  */
 package ddg.emulator.events.filesystem;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JETime;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.Time;
 
 /**
  * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class DeleteEvent extends JEEvent {
+public class DeleteEvent extends Event {
 
-	public DeleteEvent(String aName, JEEventHandler aHandler,
-			JETime aScheduledTime) {
+	public DeleteEvent(String aName, EventHandler aHandler,
+			Time aScheduledTime) {
 		super(aName, aHandler, aScheduledTime);
 	}
 

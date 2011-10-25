@@ -18,9 +18,9 @@
 
 package ddg.emulator.events.filesystem;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JETime;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.Time;
 import ddg.model.DDGClient;
 
 /**
@@ -28,7 +28,7 @@ import ddg.model.DDGClient;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class OpenEvent extends JEEvent {
+public class OpenEvent extends Event {
 
 	public static final String EVENT_NAME = "open";
 	private final DDGClient client;
@@ -43,7 +43,7 @@ public class OpenEvent extends JEEvent {
 	 * @param scheduledTime
 	 */
 	public OpenEvent(String fileName, int fileDescriptor, DDGClient client,
-			JEEventHandler handler, JETime scheduledTime) {
+			EventHandler handler, Time scheduledTime) {
 		super(EVENT_NAME, handler, scheduledTime);
 		this.fileName = fileName;
 		this.fileDescriptor = fileDescriptor;

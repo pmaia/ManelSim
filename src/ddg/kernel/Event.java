@@ -9,7 +9,7 @@ package ddg.kernel;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public abstract class JEEvent {
+public abstract class Event {
 
 	private static int eventId = 0;
 
@@ -17,14 +17,14 @@ public abstract class JEEvent {
 	private final String name;
 
 	private Integer theTargetHandlerId;
-	private JETime theScheduledTime;
+	private Time theScheduledTime;
 
 	/**
 	 * @param aName
 	 * @param aHandler
 	 * @param aScheduledTime
 	 */
-	public JEEvent(String aName, JEEventHandler aHandler, JETime aScheduledTime) {
+	public Event(String aName, EventHandler aHandler, Time aScheduledTime) {
 
 		myEventId = eventId++;
 
@@ -50,7 +50,7 @@ public abstract class JEEvent {
 	/**
 	 * @return
 	 */
-	public JETime getTheScheduledTime() {
+	public Time getTheScheduledTime() {
 		return theScheduledTime;
 	}
 

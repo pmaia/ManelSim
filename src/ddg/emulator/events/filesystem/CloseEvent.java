@@ -18,16 +18,16 @@
 
 package ddg.emulator.events.filesystem;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JETime;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.Time;
 
 /**
  * TODO make doc
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class CloseEvent extends JEEvent {
+public class CloseEvent extends Event {
 
 	public static final String EVENT_NAME = "close";
 
@@ -36,8 +36,8 @@ public class CloseEvent extends JEEvent {
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public CloseEvent(String fileName, JEEventHandler handler,
-			JETime scheduledTime) {
+	public CloseEvent(String fileName, EventHandler handler,
+			Time scheduledTime) {
 		super(EVENT_NAME, handler, scheduledTime);
 	}
 

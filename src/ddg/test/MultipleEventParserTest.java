@@ -29,8 +29,8 @@ import org.junit.Test;
 import ddg.emulator.EventParser;
 import ddg.emulator.FileSystemEventParser;
 import ddg.emulator.MultipleEventParser;
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventScheduler;
+import ddg.kernel.Event;
+import ddg.kernel.EventScheduler;
 import ddg.model.DDGClient;
 import ddg.model.Machine;
 
@@ -51,7 +51,7 @@ public class MultipleEventParserTest {
 		InputStream trace2 = new FakeTraceStream(60);
 		InputStream trace3 = new FakeTraceStream(30);
 		
-		JEEventScheduler scheduler = new JEEventScheduler();
+		EventScheduler scheduler = new EventScheduler();
 		
 		Machine machine1 = new Machine(scheduler, "cherne");
 		Machine machine2 = new Machine(scheduler, "palhaco");
@@ -67,8 +67,8 @@ public class MultipleEventParserTest {
 		
 		EventParser multipleSourceParser = new MultipleEventParser(parsers);
 		
-		JEEvent currentEvent = multipleSourceParser.getNextEvent();
-		JEEvent nextEvent = null;
+		Event currentEvent = multipleSourceParser.getNextEvent();
+		Event nextEvent = null;
 		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
 			assertTrue(currentEvent.getTheScheduledTime().isEarlierThan(nextEvent.getTheScheduledTime()));
 			currentEvent = nextEvent;

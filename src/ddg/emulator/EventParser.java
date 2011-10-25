@@ -15,7 +15,7 @@
  */
 package ddg.emulator;
 
-import ddg.kernel.JEEvent;
+import ddg.kernel.Event;
 
 /**
  * TODO make doc
@@ -27,6 +27,6 @@ public interface EventParser {
 	/**
 	 * @return
 	 */
-	JEEvent getNextEvent();
+	Event getNextEvent();
 
 }

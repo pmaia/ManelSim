@@ -15,7 +15,7 @@
  */
 package ddg.emulator;
 
-import ddg.kernel.JEEvent;
+import ddg.kernel.Event;
 
 /**
  * An {@link EventParser} that aggregates a bunch of {@link EventParser}s and delivery their events in order.  
@@ -35,10 +35,10 @@ public class MultipleEventParser implements EventParser {
 	}
 
 	@Override
-	public JEEvent getNextEvent() {
+	public Event getNextEvent() {
 		
 		int smallestTimeEventParserId = 0;
-		JEEvent smallestTimeEvent;
+		Event smallestTimeEvent;
 		while((smallestTimeEvent = parsers[smallestTimeEventParserId].getNextEvent()) == null) {
 			smallestTimeEventParserId++;
 			
@@ -48,7 +48,7 @@ public class MultipleEventParser implements EventParser {
 		}
 
 		for(int i = smallestTimeEventParserId + 1; i < this.parsers.length; i++) {
-			JEEvent smallestTimeEventCandidate = parsers[i].getNextEvent();
+			Event smallestTimeEventCandidate = parsers[i].getNextEvent();
 			
 			if(smallestTimeEventCandidate == null){
 				continue;
@@ -74,15 +74,15 @@ public class MultipleEventParser implements EventParser {
 	private static class PushBackEventParser implements EventParser {
 		
 		private final EventParser decoratedEventParser;
-		private JEEvent 	pushedBackEvent;
+		private Event 	pushedBackEvent;
 		
 		public PushBackEventParser(EventParser parser) {
 			this.decoratedEventParser = parser;
 		}
 
 		@Override
-		public JEEvent getNextEvent() {
-			JEEvent nextEvent;
+		public Event getNextEvent() {
+			Event nextEvent;
 			if (pushedBackEvent != null) {
 				nextEvent = pushedBackEvent;
 				pushedBackEvent = null;
@@ -93,7 +93,7 @@ public class MultipleEventParser implements EventParser {
 			return nextEvent;
 		}
 		
-		public void pushBack(JEEvent event) {
+		public void pushBack(Event event) {
 			this.pushedBackEvent = event;
 		}
 		

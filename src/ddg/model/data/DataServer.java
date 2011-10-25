@@ -3,7 +3,7 @@ package ddg.model.data;
 import java.util.HashMap;
 import java.util.Map;
 
-import ddg.kernel.JEEventScheduler;
+import ddg.kernel.EventScheduler;
 import ddg.model.DDGClient;
 import ddg.model.File;
 import ddg.model.HasNotSpaceOnDeviceException;
@@ -31,7 +31,7 @@ public class DataServer implements Comparable<DataServer> {
 	 * @param machine
 	 * @param diskSize
 	 */
-	public DataServer(JEEventScheduler scheduler, Machine machine,
+	public DataServer(EventScheduler scheduler, Machine machine,
 			double diskSize) {
 		this.machine = machine;
 		this.id = "ds" + machine.deploy(this) + machine;

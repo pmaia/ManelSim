@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import ddg.kernel.JEEventScheduler;
+import ddg.kernel.EventScheduler;
 import ddg.model.Aggregator;
 import ddg.model.DDGClient;
 import ddg.model.Machine;
@@ -59,7 +59,7 @@ public class ManelSim {
 
 		System.out.println(Arrays.toString(args));
 
-		final JEEventScheduler scheduler = new JEEventScheduler();
+		final EventScheduler scheduler = new EventScheduler();
 
 		String traceFile = args[0];
 		String placementPoliceName = args[1];
@@ -121,7 +121,7 @@ public class ManelSim {
 	 * @param machines2
 	 * @return
 	 */
-	private static List<DDGClient> createClients(JEEventScheduler scheduler,
+	private static List<DDGClient> createClients(EventScheduler scheduler,
 			int numberOfClients, List<Machine> machines, MetadataServer herald) {
 
 		Iterator<Machine> iterator = machines.iterator();
@@ -142,7 +142,7 @@ public class ManelSim {
 		return newClients;
 	}
 
-	private static List<Machine> createMachines(JEEventScheduler scheduler,	int numberOfMachines) {
+	private static List<Machine> createMachines(EventScheduler scheduler,	int numberOfMachines) {
 
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
@@ -163,7 +163,7 @@ public class ManelSim {
 	 * @return
 	 */
 	private static List<DataServer> createDataServers(
-			JEEventScheduler scheduler, int numberOfDataServers,
+			EventScheduler scheduler, int numberOfDataServers,
 			double diskSize, List<Machine> machines) {
 
 		List<DataServer> dataServers = new ArrayList<DataServer>();

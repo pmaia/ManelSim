@@ -8,7 +8,7 @@ package ddg.kernel;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public final class JETime implements Comparable<JETime> {
+public final class Time implements Comparable<Time> {
 
 	// FIXME: CREATE A STATIC SUBCLASS TO MODEL AN INFINITY JETIME
 
@@ -17,7 +17,7 @@ public final class JETime implements Comparable<JETime> {
 	/**
 	 * @param aTime
 	 */
-	public JETime(long timeMilliSeconds) {
+	public Time(long timeMilliSeconds) {
 		this.timeMilliSeconds = timeMilliSeconds;
 	}
 
@@ -25,12 +25,12 @@ public final class JETime implements Comparable<JETime> {
 	 * @param otherETime
 	 * @return
 	 */
-	public JETime plus(JETime otherETime) {
-		return new JETime(timeMilliSeconds + otherETime.timeMilliSeconds);
+	public Time plus(Time otherETime) {
+		return new Time(timeMilliSeconds + otherETime.timeMilliSeconds);
 	}
 	
-	public JETime minus(JETime otherETime) {
-		return new JETime(timeMilliSeconds - otherETime.timeMilliSeconds);
+	public Time minus(Time otherETime) {
+		return new Time(timeMilliSeconds - otherETime.timeMilliSeconds);
 	}
 	
 	public long asMilliseconds() {
@@ -41,7 +41,7 @@ public final class JETime implements Comparable<JETime> {
 	 * @param otherTime
 	 * @return
 	 */
-	public boolean isEarlierThan(JETime otherTime) {
+	public boolean isEarlierThan(Time otherTime) {
 		return (compareTo(otherTime) < 0);
 	}
 
@@ -50,7 +50,7 @@ public final class JETime implements Comparable<JETime> {
 	 * @return
 	 */
 	@Override
-	public int compareTo(JETime o) {
+	public int compareTo(Time o) {
 		long diff = timeMilliSeconds - o.timeMilliSeconds;
 		if (diff < 0) {
 			return -1;

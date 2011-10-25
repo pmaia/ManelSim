@@ -11,17 +11,17 @@ import java.util.List;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public abstract class JEEventHandler {
+public abstract class EventHandler {
 
 	private static Integer theUniqueHandlerId;
 	private final Integer HandlerId;
 	protected List parameterlist;
-	private final JEEventScheduler theUniqueEventScheduler;
+	private final EventScheduler theUniqueEventScheduler;
 
 	/**
 	 * @param scheduler
 	 */
-	public JEEventHandler(JEEventScheduler scheduler) {
+	public EventHandler(EventScheduler scheduler) {
 
 		if (theUniqueHandlerId != null) {
 			theUniqueHandlerId = Integer.valueOf(theUniqueHandlerId.intValue() + 1);
@@ -37,19 +37,19 @@ public abstract class JEEventHandler {
 	/**
 	 * @return
 	 */
-	protected JEEventScheduler getScheduler() {
+	protected EventScheduler getScheduler() {
 		return theUniqueEventScheduler;
 	}
 
 	/**
 	 * @param jeevent
 	 */
-	public abstract void handleEvent(JEEvent jeevent);
+	public abstract void handleEvent(Event jeevent);
 
 	/**
 	 * @param anEvent
 	 */
-	public void send(JEEvent anEvent) {
+	public void send(Event anEvent) {
 		theUniqueEventScheduler.schedule(anEvent);
 	}
 

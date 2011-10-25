@@ -18,9 +18,9 @@
 
 package ddg.emulator.events.filesystem;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JETime;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.Time;
 import ddg.model.DDGClient;
 
 /**
@@ -28,7 +28,7 @@ import ddg.model.DDGClient;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class ReadEvent extends JEEvent {
+public class ReadEvent extends Event {
 
 	public static final String EVENT_NAME = "read";
 
@@ -51,7 +51,7 @@ public class ReadEvent extends JEEvent {
 	 *            TODO
 	 */
 	public ReadEvent(long size, long offset, int fileDescriptor,
-			JEEventHandler handler, JETime scheduledTime, DDGClient client) {
+			EventHandler handler, Time scheduledTime, DDGClient client) {
 
 		super(EVENT_NAME, handler, scheduledTime);
 		this.fileDescriptor = fileDescriptor;

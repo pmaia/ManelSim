@@ -1,10 +1,10 @@
 package ddg.emulator.events;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JETime;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.Time;
 
-public class MachineStateTransitionEvent extends JEEvent {
+public class MachineStateTransitionEvent extends Event {
 	
 	public static final String EVENT_NAME = "state-transition";
 
@@ -13,8 +13,8 @@ public class MachineStateTransitionEvent extends JEEvent {
 	 * @param aHandler
 	 * @param aScheduledTime
 	 */
-	public MachineStateTransitionEvent(JEEventHandler aHandler,
-			JETime aScheduledTime) {
+	public MachineStateTransitionEvent(EventHandler aHandler,
+			Time aScheduledTime) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 	}
 }

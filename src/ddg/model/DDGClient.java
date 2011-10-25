@@ -4,9 +4,9 @@ import ddg.emulator.EmulatorControl;
 import ddg.emulator.events.filesystem.OpenEvent;
 import ddg.emulator.events.filesystem.ReadEvent;
 import ddg.emulator.events.filesystem.WriteEvent;
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JEEventScheduler;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.EventScheduler;
 import ddg.model.data.ReplicationGroup;
 
 /**
@@ -15,7 +15,7 @@ import ddg.model.data.ReplicationGroup;
  * @author Thiago Emmanuel Pereira da Cunha Silva, thiago.manel@gmail.com
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  */
-public class DDGClient extends JEEventHandler {
+public class DDGClient extends EventHandler {
 
 	private final String id;
 	private final MetadataServer herald;
@@ -29,7 +29,7 @@ public class DDGClient extends JEEventHandler {
 	 * @param machine
 	 * @param herald
 	 */
-	public DDGClient(JEEventScheduler scheduler, int clientIndex,
+	public DDGClient(EventScheduler scheduler, int clientIndex,
 			Machine machine, MetadataServer herald) {
 
 		super(scheduler);
@@ -41,7 +41,7 @@ public class DDGClient extends JEEventHandler {
 	}
 
 	@Override
-	public void handleEvent(JEEvent anEvent) {
+	public void handleEvent(Event anEvent) {
 
 		String anEventName = anEvent.getName();
 

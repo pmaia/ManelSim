@@ -3,9 +3,9 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JEEventScheduler;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.EventScheduler;
 import ddg.model.data.DataServer;
 
 /**
@@ -14,7 +14,7 @@ import ddg.model.data.DataServer;
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
-public class Machine extends JEEventHandler {
+public class Machine extends EventHandler {
 
 	/*
 	 * The source of the values below is Lesandro's work: 
@@ -30,7 +30,7 @@ public class Machine extends JEEventHandler {
 	
 	private final String id;
 
-	public Machine(JEEventScheduler scheduler, String id) {
+	public Machine(EventScheduler scheduler, String id) {
 		super(scheduler);
 		
 		this.id = id;
@@ -131,7 +131,7 @@ public class Machine extends JEEventHandler {
 	}
 	
 	@Override
-	public void handleEvent(JEEvent jeevent) { //TODO implementar
+	public void handleEvent(Event jeevent) { //TODO implementar
 //		if(jeevent instanceof MachineStateTransitionEvent) {
 //			State justEndedState = availability.currentState(); 
 //			if(justEndedState.isActive()) {

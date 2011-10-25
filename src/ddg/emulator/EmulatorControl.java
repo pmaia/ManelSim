@@ -3,9 +3,9 @@
  */
 package ddg.emulator;
 
-import ddg.kernel.JEEvent;
-import ddg.kernel.JEEventHandler;
-import ddg.kernel.JEEventScheduler;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.EventScheduler;
 import ddg.model.MetadataServer;
 
 /**
@@ -16,7 +16,7 @@ import ddg.model.MetadataServer;
  */
 public class EmulatorControl {
 
-	private final JEEventScheduler theUniqueEventScheduler;
+	private final EventScheduler theUniqueEventScheduler;
 	private final EventParser eventInjector;
 
 	// ugly but works
@@ -25,7 +25,7 @@ public class EmulatorControl {
 	private final MetadataServer metadataServer;
 	private final BootStrapperEventHandler bootStrapperEventHandler;
 
-	public static EmulatorControl build(JEEventScheduler eventScheduler,
+	public static EmulatorControl build(EventScheduler eventScheduler,
 			EventParser eventInjector, MetadataServer metadataServer) {
 
 		if (singleInstace != null)
@@ -54,7 +54,7 @@ public class EmulatorControl {
 		return metadataServer;
 	}
 
-	private EmulatorControl(JEEventScheduler eventScheduler,
+	private EmulatorControl(EventScheduler eventScheduler,
 			EventParser injector, MetadataServer metadataServer) {
 
 		this.theUniqueEventScheduler = eventScheduler;
@@ -64,7 +64,7 @@ public class EmulatorControl {
 				theUniqueEventScheduler);
 	}
 
-	public JEEventScheduler getTheUniqueEventScheduler() {
+	public EventScheduler getTheUniqueEventScheduler() {
 		return theUniqueEventScheduler;
 	}
 
@@ -78,19 +78,19 @@ public class EmulatorControl {
 	/**
 	 * @param nextEvent
 	 */
-	public void scheduleNext(JEEvent nextEvent) {
+	public void scheduleNext(Event nextEvent) {
 
 		if (nextEvent != null) {
 			bootStrapperEventHandler.handleEvent(nextEvent);
 		} 
 	}
 
-	private class BootStrapperEventHandler extends JEEventHandler {
+	private class BootStrapperEventHandler extends EventHandler {
 
 		/**
 		 * @param scheduler
 		 */
-		public BootStrapperEventHandler(JEEventScheduler scheduler) {
+		public BootStrapperEventHandler(EventScheduler scheduler) {
 			super(scheduler);
 		}
 
@@ -98,7 +98,7 @@ public class EmulatorControl {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void handleEvent(JEEvent arg) {
+		public void handleEvent(Event arg) {
 			send(arg);
 		}
 

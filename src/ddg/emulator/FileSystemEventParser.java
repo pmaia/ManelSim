@@ -25,8 +25,8 @@ import ddg.emulator.events.filesystem.CloseEvent;
 import ddg.emulator.events.filesystem.OpenEvent;
 import ddg.emulator.events.filesystem.ReadEvent;
 import ddg.emulator.events.filesystem.WriteEvent;
-import ddg.kernel.JEEvent;
-import ddg.kernel.JETime;
+import ddg.kernel.Event;
+import ddg.kernel.Time;
 import ddg.model.DDGClient;
 
 /**
@@ -60,7 +60,7 @@ public class FileSystemEventParser implements EventParser {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public JEEvent getNextEvent() {
+	public Event getNextEvent() {
 
 		String nextLine;
 
@@ -105,7 +105,7 @@ public class FileSystemEventParser implements EventParser {
 		return readLine;
 	}
 
-	private JEEvent readCloseEvent(String nextLine) {
+	private Event readCloseEvent(String nextLine) {
 
 		// close 960254662.240045 3
 		StringTokenizer tokenizer = new StringTokenizer(nextLine);
@@ -119,8 +119,8 @@ public class FileSystemEventParser implements EventParser {
 		return new CloseEvent(null, client, now());
 	}
 
-	private JETime now() {
-		return new JETime(lastTimeStamp - firstTimeStamp);
+	private Time now() {
+		return new Time(lastTimeStamp - firstTimeStamp);
 	}
 
 	private void advanceTime(long time) {
@@ -132,7 +132,7 @@ public class FileSystemEventParser implements EventParser {
 		lastTimeStamp = time;
 	}
 
-	private JEEvent readReadEvent(String traceLine) {
+	private Event readReadEvent(String traceLine) {
 
 		// read 960254162.929275 3 4096
 
@@ -149,7 +149,7 @@ public class FileSystemEventParser implements EventParser {
 				client);
 	}
 
-	private JEEvent readWriteEvent(String traceLine) {
+	private Event readWriteEvent(String traceLine) {
 
 		// write 960254662.240004 3 1137
 
@@ -166,7 +166,7 @@ public class FileSystemEventParser implements EventParser {
 				client);
 	}
 
-	private JEEvent readOpenEvent(String line) {
+	private Event readOpenEvent(String line) {
 
 		// open /usr/X11R6/lib/X11/fonts/misc/fonts.dir 960254165 5
 		StringTokenizer tokenizer = new StringTokenizer(line);

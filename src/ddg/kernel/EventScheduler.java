@@ -10,29 +10,29 @@ import java.util.Vector;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public final class JEEventScheduler {
+public final class EventScheduler {
 
-	private JETime now = new JETime(0L);
-	private Vector<JEEvent> eventList = new Vector<JEEvent>();
-	private Vector<JEEventHandler> handlerList;
+	private Time now = new Time(0L);
+	private Vector<Event> eventList = new Vector<Event>();
+	private Vector<EventHandler> handlerList;
 	private Boolean isActive;
-	private JETime theEmulationEnd;
+	private Time theEmulationEnd;
 
 	/**
      * 
      */
-	public JEEventScheduler() {
+	public EventScheduler() {
 		this(null);
 	}
 
 	/**
 	 * @param emulationEnd
 	 */
-	public JEEventScheduler(JETime emulationEnd) {
+	public EventScheduler(Time emulationEnd) {
 
 		eventList.setSize(10000);
 		eventList.clear();
-		handlerList = new Vector<JEEventHandler>();
+		handlerList = new Vector<EventHandler>();
 		handlerList.setSize(100);
 		handlerList.clear();
 		isActive = Boolean.valueOf(false);
@@ -42,9 +42,9 @@ public final class JEEventScheduler {
 	/**
 	 * @param aNewEvent
 	 */
-	public void schedule(JEEvent aNewEvent) {
+	public void schedule(Event aNewEvent) {
 
-		JETime anEventTime = aNewEvent.getTheScheduledTime();
+		Time anEventTime = aNewEvent.getTheScheduledTime();
 
 		if (anEventTime.isEarlierThan(now())) {
 			throw new RuntimeException("ERROR: emulation time(" + now()
@@ -82,7 +82,7 @@ public final class JEEventScheduler {
 	/**
 	 * @param anObsoleteEvent
 	 */
-	public void cancelEvent(JEEvent anObsoleteEvent) {
+	public void cancelEvent(Event anObsoleteEvent) {
 
 		if (anObsoleteEvent == null) {
 			throw new NullPointerException();
@@ -94,7 +94,7 @@ public final class JEEventScheduler {
 	 * @param aNewEventHandler
 	 * @return
 	 */
-	public JEEventScheduler registerHandler(JEEventHandler aNewEventHandler) {
+	public EventScheduler registerHandler(EventHandler aNewEventHandler) {
 
 		Integer aHandlerId = aNewEventHandler.getHandlerId();
 
@@ -124,10 +124,10 @@ public final class JEEventScheduler {
 	/**
 	 * @return
 	 */
-	private JEEvent peek() {
+	private Event peek() {
 
 		if (!eventList.isEmpty()) {
-			JEEvent aNextEvent = eventList.elementAt(0);
+			Event aNextEvent = eventList.elementAt(0);
 			eventList.removeElementAt(0);
 			return aNextEvent;
 		}
@@ -145,11 +145,11 @@ public final class JEEventScheduler {
 		while (!eventList.isEmpty() & isActive.booleanValue()
 				& isEarlierThanEmulationEnd(now())) {
 
-			JEEvent aNextEvent = peek();
+			Event aNextEvent = peek();
 
 			if (aNextEvent != null) {
 
-				JETime anEventTime = aNextEvent.getTheScheduledTime();
+				Time anEventTime = aNextEvent.getTheScheduledTime();
 
 				if (anEventTime.isEarlierThan(now())) {
 					throw new RuntimeException("ERROR: emulation time(" + now()
@@ -170,7 +170,7 @@ public final class JEEventScheduler {
 		isActive = Boolean.valueOf(false);
 	}
 
-	private boolean isEarlierThanEmulationEnd(JETime time) {
+	private boolean isEarlierThanEmulationEnd(Time time) {
 		return (theEmulationEnd != null) ? time.isEarlierThan(theEmulationEnd)
 				: true;
 	}
@@ -178,7 +178,7 @@ public final class JEEventScheduler {
 	/**
 	 * @param aNextEvent
 	 */
-	private void processEvent(JEEvent aNextEvent) {
+	private void processEvent(Event aNextEvent) {
 
 		Integer aTargetHandlerId = aNextEvent.getTheTargetHandlerId();
 
@@ -195,7 +195,7 @@ public final class JEEventScheduler {
 	/**
 	 * @return
 	 */
-	public JETime now() {
+	public Time now() {
 		return now;
 	}
 }
