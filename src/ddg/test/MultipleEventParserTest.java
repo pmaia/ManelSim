@@ -70,7 +70,7 @@ public class MultipleEventParserTest {
 		JEEvent currentEvent = multipleSourceParser.getNextEvent();
 		JEEvent nextEvent = null;
 		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
-			assertTrue(currentEvent.getTheScheduledTime().compareTo(nextEvent.getTheScheduledTime()) <= 0);
+			assertTrue(currentEvent.getTheScheduledTime().isEarlierThan(nextEvent.getTheScheduledTime()));
 			currentEvent = nextEvent;
 		}
 	}
@@ -82,7 +82,7 @@ public class MultipleEventParserTest {
 	 *
 	 * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
 	 */
-	private class FakeTraceStream extends InputStream {
+	private static class FakeTraceStream extends InputStream {
 		
 		private final String [] operations = {"read", "write", "open", "close"};
 		private final Random random = new Random();
@@ -151,8 +151,7 @@ public class MultipleEventParserTest {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		MultipleEventParserTest enclosingTest = new MultipleEventParserTest(); 
-		FakeTraceStream res = enclosingTest.new FakeTraceStream(1000000);
+		FakeTraceStream res = new FakeTraceStream(1000000);
 		BufferedReader br = new BufferedReader(new InputStreamReader(res));
 		String line;
 		while((line = br.readLine()) != null) {

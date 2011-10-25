@@ -18,7 +18,7 @@
 
 package ddg.emulator.events.filesystem;
 
-import ddg.emulator.events.TransactionalDataEvent;
+import ddg.kernel.JEEvent;
 import ddg.kernel.JEEventHandler;
 import ddg.kernel.JETime;
 
@@ -27,9 +27,9 @@ import ddg.kernel.JETime;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class CloseEvent extends TransactionalDataEvent {
+public class CloseEvent extends JEEvent {
 
-	public static final String EVENT_NAME = "release";
+	public static final String EVENT_NAME = "close";
 
 	/**
 	 * @param fileName

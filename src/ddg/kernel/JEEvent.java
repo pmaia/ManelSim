@@ -9,7 +9,7 @@ package ddg.kernel;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public class JEEvent {
+public abstract class JEEvent {
 
 	private static int eventId = 0;
 

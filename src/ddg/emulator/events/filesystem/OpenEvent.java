@@ -18,7 +18,7 @@
 
 package ddg.emulator.events.filesystem;
 
-import ddg.emulator.events.TransactionalDataEvent;
+import ddg.kernel.JEEvent;
 import ddg.kernel.JEEventHandler;
 import ddg.kernel.JETime;
 import ddg.model.DDGClient;
@@ -28,7 +28,7 @@ import ddg.model.DDGClient;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class OpenEvent extends TransactionalDataEvent {
+public class OpenEvent extends JEEvent {
 
 	public static final String EVENT_NAME = "open";
 	private final DDGClient client;
