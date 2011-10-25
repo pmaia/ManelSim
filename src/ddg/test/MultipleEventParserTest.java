@@ -15,6 +15,7 @@
  */
 package ddg.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -44,7 +45,7 @@ public class MultipleEventParserTest {
 	
 	
 	@Test
-	public void eventOrderingTest() throws IOException {
+	public void eventOrderingTest() {
 		EventParser [] parsers = new EventParser[3];
 		
 		InputStream trace1 = new FakeTraceStream(0);
@@ -73,6 +74,38 @@ public class MultipleEventParserTest {
 			assertTrue(currentEvent.getTheScheduledTime().isEarlierThan(nextEvent.getTheScheduledTime()));
 			currentEvent = nextEvent;
 		}
+	}
+	
+	@Test
+	public void eventsDeliveredCountTest() {
+		EventParser [] parsers = new EventParser[3];
+		
+		InputStream trace1 = new FakeTraceStream(50);
+		InputStream trace2 = new FakeTraceStream(1000);
+		InputStream trace3 = new FakeTraceStream(50);
+		
+		EventScheduler scheduler = new EventScheduler();
+		
+		Machine machine1 = new Machine(scheduler, "cherne");
+		Machine machine2 = new Machine(scheduler, "palhaco");
+		Machine machine3 = new Machine(scheduler, "abelhinha");
+		
+		DDGClient client1 = new DDGClient(scheduler, 1, machine1, null);
+		DDGClient client2 = new DDGClient(scheduler, 2, machine2, null);
+		DDGClient client3 = new DDGClient(scheduler, 3, machine3, null);
+		
+		parsers[0] = new FileSystemEventParser(trace1, client1);
+		parsers[1] = new FileSystemEventParser(trace2, client2);
+		parsers[2] = new FileSystemEventParser(trace3, client3);
+		
+		EventParser multipleSourceParser = new MultipleEventParser(parsers);
+		
+		int eventCount = 0;
+		while(multipleSourceParser.getNextEvent() != null) {
+			eventCount++;
+		}
+		
+		assertEquals(1100, eventCount);
 	}
 	
 	/**

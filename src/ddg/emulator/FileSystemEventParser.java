@@ -49,8 +49,7 @@ public class FileSystemEventParser implements EventParser {
 	 * @param traceStream
 	 * @throws IOException
 	 */
-	public FileSystemEventParser(InputStream traceStream,
-			DDGClient client) throws IOException {
+	public FileSystemEventParser(InputStream traceStream, DDGClient client) {
 		this.lastTimeStamp = -1;
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.client = client;
