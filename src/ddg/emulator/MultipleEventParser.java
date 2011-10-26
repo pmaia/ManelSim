@@ -42,7 +42,7 @@ public class MultipleEventParser implements EventParser {
 		while((smallestTimeEvent = parsers[smallestTimeEventParserId].getNextEvent()) == null) {
 			smallestTimeEventParserId++;
 			
-			if(smallestTimeEventParserId >= this.parsers.length){
+			if(smallestTimeEventParserId == this.parsers.length){
 				break;
 			}
 		}
@@ -50,18 +50,20 @@ public class MultipleEventParser implements EventParser {
 		for(int i = smallestTimeEventParserId + 1; i < this.parsers.length; i++) {
 			Event smallestTimeEventCandidate = parsers[i].getNextEvent();
 			
-			if(smallestTimeEventCandidate == null){
-				continue;
+			if(smallestTimeEventCandidate != null){
+				
+				if(smallestTimeEvent.getTheScheduledTime().
+						compareTo(smallestTimeEventCandidate.getTheScheduledTime()) <= 0) {
+					parsers[i].pushBack(smallestTimeEventCandidate);
+				} else {
+					parsers[smallestTimeEventParserId].pushBack(smallestTimeEvent);
+					
+					smallestTimeEventParserId = i;
+					smallestTimeEvent = smallestTimeEventCandidate;
+				}
+				
 			}
 			
-			if(smallestTimeEvent.getTheScheduledTime().compareTo(
-					smallestTimeEventCandidate.getTheScheduledTime()) > 0 ) {
-				
-				parsers[smallestTimeEventParserId].pushBack(smallestTimeEvent);
-				
-				smallestTimeEventParserId = i;
-				smallestTimeEvent = smallestTimeEventCandidate;
-			}
 		}
 		
 		return smallestTimeEvent;
