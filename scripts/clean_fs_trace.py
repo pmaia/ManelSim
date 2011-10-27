@@ -16,7 +16,7 @@ close_without_open_count = 0
 #	open	/dev/sdb	1318539063003892-2505	7
 def clean_open(tokens):
 	if not tokens[7].startswith('/'):
-		fullpath = tokens[6].join(tokens[7])
+		fullpath = tokens[6] + tokens[7]
 	else:
 		fullpath = tokens[7]
 
@@ -85,4 +85,4 @@ for line in sys.stdin:
 	if clean_line != None:
 		print clean_line
 
-print close_without_open_count
+#print close_without_open_count
