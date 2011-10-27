@@ -9,6 +9,11 @@ global_opened_files_map = dict()
 close_without_open_count = 0
 read_without_open_count = 0
 write_without_open_count = 0
+bad_format_open = 0
+bad_format_close = 0
+bad_format_read = 0
+bad_format_write = 0
+bad_format_unlink = 0
 
 # line sample from the original trace
 #	uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
@@ -17,6 +22,11 @@ write_without_open_count = 0
 #	open	begin-elapsed	fullpath	fd-pid
 #	open	1318539063003892-2505	/dev/sdb	7-2097
 def clean_open(tokens):
+	if len(tokens) != 11:
+		global bad_format_open
+		bad_format_open = bad_format_open + 1
+		return None;
+
 	if not tokens[7].startswith('/'):
 		fullpath = tokens[6] + tokens[7]
 	else:
@@ -38,6 +48,11 @@ def clean_open(tokens):
 #	close	begin-elapsed	fd-pid
 #	close	1318539063006403-37	7-2097
 def clean_close(tokens):
+	if len(tokens) != 8:
+		global bad_format_close
+		bad_format_close = bad_format_close + 1
+		return None;
+
 	unique_file_id = tokens[6] + '-' + tokens[1]
 	fullpath = global_opened_files_map.get(unique_file_id, None)
 
@@ -61,6 +76,11 @@ def clean_close(tokens):
 #	write	begin-elapsed	fd-pid	length
 #	write	1318539063058255-131	1-6194	17
 def clean_write(tokens):
+	if len(tokens) != 15:
+		global bad_format_write
+		bad_format_write = bad_format_write + 1
+		return None;
+
 	unique_file_id = tokens[12] + '-' + tokens[1]
 
 	if not global_opened_files_map.has_key(unique_file_id):
@@ -81,6 +101,11 @@ def clean_write(tokens):
 #	read	begin-elapsed	fd-pid	length
 #	read	1318539063447564-329	8-1562	2971
 def clean_read(tokens):
+	if len(tokens) != 15:
+		global bad_format_read
+		bad_format_read = bad_format_read + 1
+		return None;
+
 	unique_file_id = tokens[12] + '-' + tokens[1]
 
 	if not global_opened_files_map.has_key(unique_file_id):
@@ -101,6 +126,11 @@ def clean_read(tokens):
 #	unlink	begin-elapsed	fullpath	
 #	unlink	1318539134533662-8118	/local/thiagoepdc/workspace_beefs/.metadata/.plugins/org.eclipse.jdt.ui/jdt-images/1.png	
 def clean_unlink(tokens):
+	if len(tokens) != 0:
+		global bad_format_unlink
+		bad_format_unlink = bad_format_unlink + 1
+		return None;
+
 	if not tokens[7].startswith('/'):
 		fullpath = tokens[6] + tokens[7]
 	else:
@@ -135,5 +165,11 @@ print '# number of readings, writings and closings without preceding openings'
 print '# closes:\t' + str(close_without_open_count)
 print '# reads:\t' + str(read_without_open_count)
 print '# writes:\t' + str(write_without_open_count)
+print '# number of bad formatted reads, writes, opens, closes and unlinks'
+print '# reads:\t' + str(bad_format_read)
+print '# writes:\t' + str(bad_format_write)
+print '# opens:\t' + str(bad_format_open)
+print '# closes:\t' + str(bad_format_close)
+print '# unlinks:\t' + str(bad_format_unlink)
 
 ### End ###
