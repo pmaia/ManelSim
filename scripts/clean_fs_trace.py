@@ -59,11 +59,34 @@ def clean_write(tokens):
 	else:
 		return "\t".join(['write', tokens[5], tokens[12], tokens[14]])
 
+# line sample from the original trace: 
+#	uid pid tid exec_name sys_read begin-elapsed (root pwd fullpath f_size f_type ino) fd count return
+#	114 1562 1562 (snmpd) sys_read 1318539063447564-329 (/ / /proc/stat/ 0 S_IFREG|S_IROTH|S_IRGRP|S_IRUSR 4026531975) 8 3072 2971
+# line transformed by clean_read
+#	read	begin-elapsed	fd	length
+#	read	1318539063447564-329	8	2971
 def clean_read(tokens):
-	return None
+	if not tokens[8].startswith("/home"):
+		return None
+	else:
+		return "\t".join(['read', tokens[5], tokens[12], tokens[14]])
 
+# line sample from the original trace: 
+#	uid pid tid exec_name sys_unlink begin-elapsed cwd pathname return
+#	1159 2364 32311 (eclipse) sys_unlink 1318539134533662-8118 /home/thiagoepdc/ /local/thiagoepdc/workspace_beefs/.metadata/.plugins/org.eclipse.jdt.ui/jdt-images/1.png 0
+# line transformed by clean_unlink
+#	unlink	begin-elapsed	fullpath	
+#	unlink	1318539134533662-8118	/local/thiagoepdc/workspace_beefs/.metadata/.plugins/org.eclipse.jdt.ui/jdt-images/1.png	
 def clean_unlink(tokens):
-	return None
+	if not tokens[7].startswith('/'):
+		fullpath = tokens[6] + tokens[7]
+	else:
+		fullpath = tokens[7]
+
+	if not fullpath.startswith("/home"):
+		return None
+	else:
+		return "\t".join(['unlink', tokens[5], fullpath])
 
 
 
