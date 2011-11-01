@@ -15,11 +15,12 @@
  */
 package ddg.test;
 
+
 /**
- * TODO make doc
+ * A suite of tests to the UserIdlenessEventParser class
  *
- * @author patrickjem - patrickjem@lsd.ufcg.edu.br
+ * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class UserIdlenessEventParserTest {
-//TODO implement!
+	//TODO implement!
 }

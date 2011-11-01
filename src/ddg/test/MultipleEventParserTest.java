@@ -19,11 +19,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Random;
 
 import org.junit.Test;
 
@@ -42,15 +40,13 @@ import ddg.model.Machine;
  */
 public class MultipleEventParserTest {
 	
-	
-	
 	@Test
 	public void eventOrderingTest() {
 		EventParser [] parsers = new EventParser[3];
 		
-		InputStream trace1 = new FakeTraceStream(0);
-		InputStream trace2 = new FakeTraceStream(60);
-		InputStream trace3 = new FakeTraceStream(30);
+		InputStream trace1 = new FakeFileSystemTraceStream(0);
+		InputStream trace2 = new FakeFileSystemTraceStream(60);
+		InputStream trace3 = new FakeFileSystemTraceStream(30);
 		
 		EventScheduler scheduler = new EventScheduler();
 		
@@ -80,9 +76,9 @@ public class MultipleEventParserTest {
 	public void eventsDeliveredCountTest() {
 		EventParser [] parsers = new EventParser[3];
 		
-		InputStream trace1 = new FakeTraceStream(50);
-		InputStream trace2 = new FakeTraceStream(1000);
-		InputStream trace3 = new FakeTraceStream(50);
+		InputStream trace1 = new FakeFileSystemTraceStream(50);
+		InputStream trace2 = new FakeFileSystemTraceStream(1000);
+		InputStream trace3 = new FakeFileSystemTraceStream(50);
 		
 		EventScheduler scheduler = new EventScheduler();
 		
@@ -107,84 +103,9 @@ public class MultipleEventParserTest {
 		
 		assertEquals(1100, eventCount);
 	}
-	
-	/**
-	 * 
-	 * An InputStream that simulates an InputStream over a trace file whose events are in the format expected by 
-	 * {@link FileSystemEventParser}. <code>numberOfEvents</code> events will be generated.  
-	 *
-	 * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
-	 */
-	private static class FakeTraceStream extends InputStream {
-		
-		private final String [] operations = {"read", "write", "open", "close"};
-		private final Random random = new Random();
-		
-		private int remainingEvents;
-		private long nextTimeStamp = System.currentTimeMillis();
-		private InputStream currentEventStream;
-		
-		public FakeTraceStream(int numberOfEvents) {
-			this.remainingEvents = numberOfEvents - 1;
-			this.currentEventStream = generateNextEventStream();
-		}
-
-		@Override
-		public int read() throws IOException {
-			
-			int nextByte = currentEventStream.read();
-
-			if(nextByte == -1) {
-				if(remainingEvents > 0) {
-					currentEventStream = generateNextEventStream();
-					remainingEvents--;	
-				} else {
-					return -1;
-				}
-			}
-			
-			return nextByte;
-		}
-		
-		//TODO I implemented this to generate lines similar to the ones found in the cleared SEER traces.
-		private InputStream generateNextEventStream() {
-			final String SEPARATOR = "\t";
-			final String LINE_SEPARATOR = "\n";
-			final int uniqueFileHandle = 33;
-			final int lengthReadOrWrite = 1024;
-			
-			StringBuilder strBuilder = new StringBuilder();
-			
-			String op = operations[random.nextInt(4)];
-			
-			strBuilder.append(op);
-			strBuilder.append(SEPARATOR);
-			
-			if(op.equals("open")) {
-				strBuilder.append("/home/unique/file");
-				strBuilder.append(SEPARATOR);
-			}
-			
-			strBuilder.append(nextTimeStamp);
-			strBuilder.append(SEPARATOR);
-			strBuilder.append(uniqueFileHandle);
-			strBuilder.append(SEPARATOR);
-			
-			if(op.equals("read") || op.equals("write")) {
-				strBuilder.append(lengthReadOrWrite);
-			}
-			
-			strBuilder.append(LINE_SEPARATOR);
-			
-			nextTimeStamp += random.nextInt(1000);
-			
-			return new ByteArrayInputStream(strBuilder.toString().getBytes());
-		}
-	
-	}
-	
+	 
 	public static void main(String[] args) throws IOException {
-		FakeTraceStream res = new FakeTraceStream(1000000);
+		FakeFileSystemTraceStream res = new FakeFileSystemTraceStream(1000000);
 		BufferedReader br = new BufferedReader(new InputStreamReader(res));
 		String line;
 		while((line = br.readLine()) != null) {
