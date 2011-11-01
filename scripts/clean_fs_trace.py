@@ -13,6 +13,8 @@ bad_format_close = 0
 bad_format_read = 0
 bad_format_write = 0
 bad_format_unlink = 0
+recovered_write = 0
+recovered_read = 0
 
 # line sample from the original trace
 #	uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
@@ -73,6 +75,7 @@ def clean_close(tokens):
 #	write	begin-elapsed	fullpath	length
 #	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	17
 def clean_write(tokens):
+	recovered = False
 	if len(tokens) != 15:
 		global bad_format_write
 		bad_format_write = bad_format_write + 1
@@ -80,6 +83,7 @@ def clean_write(tokens):
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
 		length = tokens[8]
+		recovered = True
 	else:
 		unique_file_id = tokens[12] + '-' + tokens[1]
 		fullpath = tokens[8]
@@ -87,6 +91,9 @@ def clean_write(tokens):
 		length = tokens[14]
 
 	if fullpath != None and filetype != None:
+		if recovered:
+			global recovered_write
+			recovered_write = recovered_write + 1
 		fdpid_to_fullpath[unique_file_id] = fullpath
 		fullpath_to_filetype[fullpath] = filetype
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
@@ -103,6 +110,7 @@ def clean_write(tokens):
 #	read	begin-elapsed	fullpath	length
 #	read	1318539063447564-329	/proc/stat/	2971
 def clean_read(tokens):
+	recovered = False
 	if len(tokens) != 15:
 		global bad_format_read
 		bad_format_read = bad_format_read + 1
@@ -110,6 +118,7 @@ def clean_read(tokens):
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
 		length = tokens[8]
+		recovered = True
 	else:
 		unique_file_id = tokens[12] + '-' + tokens[1]
 		fullpath = tokens[8]
@@ -117,6 +126,9 @@ def clean_read(tokens):
 		length = tokens[14]
 
 	if fullpath != None and filetype != None:
+		if recovered:
+			global recovered_read
+			recovered_read = recovered_read + 1
  		fdpid_to_fullpath[unique_file_id] = fullpath
 		fullpath_to_filetype[fullpath] = filetype
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
@@ -169,8 +181,8 @@ for line in sys.stdin:
 		print clean_line
 
 print '# number of bad formatted reads, writes, opens, closes and unlinks'
-print '# reads:\t' + str(bad_format_read)
-print '# writes:\t' + str(bad_format_write)
+print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
+print '# writes:\t' + str(bad_format_write) + ' (recovered = ' + str(recovered_write) + ')'
 print '# opens:\t' + str(bad_format_open)
 print '# do filp opens:\t' + str(bad_format_do_filp_open)
 print '# closes:\t' + str(bad_format_close)
