@@ -37,10 +37,6 @@ import ddg.model.DDGClient;
  */
 public class FileSystemEventParser implements EventParser {
 
-	private long lastTimeStamp;
-
-	private long firstTimeStamp;
-
 	private final BufferedReader bufferedReader;
 	
 	private final DDGClient client;
@@ -50,7 +46,6 @@ public class FileSystemEventParser implements EventParser {
 	 * @throws IOException
 	 */
 	public FileSystemEventParser(InputStream traceStream, DDGClient client) {
-		this.lastTimeStamp = -1;
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.client = client;
 	}
@@ -110,25 +105,10 @@ public class FileSystemEventParser implements EventParser {
 		StringTokenizer tokenizer = new StringTokenizer(nextLine);
 
 		tokenizer.nextToken();// close
-		long time = Long.valueOf(tokenizer.nextToken());// time stamp
+		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time stamp
 		tokenizer.nextToken();// fd
 
-		advanceTime(time);
-
-		return new CloseEvent(null, client, now());
-	}
-
-	private Time now() {
-		return new Time(lastTimeStamp - firstTimeStamp);
-	}
-
-	private void advanceTime(long time) {
-
-		if (lastTimeStamp == -1) {
-			firstTimeStamp = time;
-		}
-
-		lastTimeStamp = time;
+		return new CloseEvent(null, client, time);
 	}
 
 	private Event readReadEvent(String traceLine) {
@@ -138,14 +118,11 @@ public class FileSystemEventParser implements EventParser {
 		StringTokenizer tokenizer = new StringTokenizer(traceLine);
 
 		tokenizer.nextToken();// read
-		long time = Long.valueOf(tokenizer.nextToken());// time stamp
+		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time stamp
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 		long dataLength = Long.parseLong(tokenizer.nextToken());// length
 
-		advanceTime(time);
-
-		return new ReadEvent(dataLength, 0, fileDescriptor, client, now(),
-				client);
+		return new ReadEvent(dataLength, 0, fileDescriptor, client, time, client);
 	}
 
 	private Event readWriteEvent(String traceLine) {
@@ -155,14 +132,11 @@ public class FileSystemEventParser implements EventParser {
 		StringTokenizer tokenizer = new StringTokenizer(traceLine);
 
 		tokenizer.nextToken();// write
-		long time = Long.valueOf(tokenizer.nextToken());// time
+		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 		long dataLength = Long.parseLong(tokenizer.nextToken());// length
 
-		advanceTime(time);
-
-		return new WriteEvent(dataLength, 0, fileDescriptor, client, now(),
-				client);
+		return new WriteEvent(dataLength, 0, fileDescriptor, client, time, client);
 	}
 
 	private Event readOpenEvent(String line) {
@@ -173,12 +147,10 @@ public class FileSystemEventParser implements EventParser {
 		tokenizer.nextToken();// open
 		String fileName = tokenizer.nextToken(); // filename
 
-		long time = Long.valueOf(tokenizer.nextToken());// time stamp
+		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time stamp
 		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
 
-		advanceTime(time);
-
-		return new OpenEvent(fileName, fileDescriptor, client, client, now());
+		return new OpenEvent(fileName, fileDescriptor, client, client, time);
 	}
 
 	private Operation readNextOperation(String nextLine) {
