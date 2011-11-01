@@ -167,7 +167,9 @@ for line in sys.stdin:
 
 	clean_line = None
 	if tokens[4] == 'sys_open':
-		clean_line = handle_sys_open(tokens)
+		handle_sys_open(tokens)
+	elif tokens[4] == 'do_filp_open':
+		handle_do_filp_open(tokens)
 	elif tokens[4] == 'sys_close':
 		clean_line = clean_close(tokens)
 	elif tokens[4] == 'sys_write':
