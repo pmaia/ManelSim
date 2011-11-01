@@ -5,8 +5,10 @@
 
 import sys
 
-global_opened_files_map = dict()
+fdpid_to_fullpath = dict()
+fullpath_to_filetype = dict()
 bad_format_open = 0
+bad_format_do_filp_open = 0
 bad_format_close = 0
 bad_format_read = 0
 bad_format_write = 0
@@ -15,7 +17,7 @@ bad_format_unlink = 0
 # line sample from the original trace
 #	uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
 #	0 2097 2097 (udisks-daemon) sys_open 1318539063003892-2505 / /dev/sdb 34816 0 7
-def open_file(tokens):
+def handle_sys_open(tokens):
 	if len(tokens) != 11:
 		global bad_format_open
 		bad_format_open = bad_format_open + 1
@@ -27,7 +29,18 @@ def open_file(tokens):
 	
 		unique_file_id =  tokens[10] + '-' + tokens[1]
 	
-		global_opened_files_map[unique_file_id] = fullpath 
+		fdpid_to_fullpath[unique_file_id] = fullpath 
+
+# line sample from the original trace
+# uid pid tid exec_name do_filp_open begin-elapsed (root pwd fullpath f_size f_type ino) pathname openflag mode acc_mode
+# 1159 2076 2194 (gnome-do) do_filp_open 1318539555109420-33 (/ /home/thiagoepdc/ /tmp/tmp2b688269.tmp/ 10485760 S_IFREG|S_IWUSR|S_IRUSR 12) <unknown> 32834 420 0
+def handle_do_filp_open(tokens):
+	if len(tokens) != 16:
+		global bad_format_do_filp_open
+		bad_format_do_filp_open = bad_format_do_filp_open + 1
+	else:
+		fullpath_to_filetype[tokens[8]] = tokens[10].split('|')[0]
+
 
 # line sample from the original trace
 #	uid pid tid exec_name sys_close begin-elapsed fd return
@@ -42,15 +55,16 @@ def clean_close(tokens):
 		return None;
 
 	unique_file_id = tokens[6] + '-' + tokens[1]
-	fullpath = global_opened_files_map.get(unique_file_id, None)
+	fullpath = fdpid_to_fullpath.get(unique_file_id, None)
+	filetype = fullpath_to_filetype.get(fullpath, None)
 
-	if fullpath != None:
-		del global_opened_files_map[unique_file_id]
+	if fullpath != None and filetype != None:
+		del fdpid_to_fullpath[unique_file_id]
 
-		if not fullpath.startswith("/home"):
-			return None
-		else:
+		if fullpath.startswith("/home") and filetype == 'S_IFREG':
 			return "\t".join(['close', tokens[5], fullpath])
+		else:
+			return None
 
 # line sample from the original trace: 
 #	uid pid tid exec_name sys_write begin-elapsed (root pwd fullpath f_size f_type ino) fd count return
@@ -63,19 +77,22 @@ def clean_write(tokens):
 		global bad_format_write
 		bad_format_write = bad_format_write + 1
 		unique_file_id = tokens[6] + '-' + tokens[1]
-		fullpath = global_opened_files_map.get(unique_file_id, None)
+		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
+		filetype = fullpath_to_filetype.get(fullpath, None)
 		length = tokens[8]
 	else:
 		unique_file_id = tokens[12] + '-' + tokens[1]
 		fullpath = tokens[8]
+		filetype = tokens[10].split('|')[0]
 		length = tokens[14]
 
-	if fullpath != None:
-		global_opened_files_map[unique_file_id] = fullpath
-		if not fullpath.startswith("/home"):
-			return None
-		else:
+	if fullpath != None and filetype != None:
+		fdpid_to_fullpath[unique_file_id] = fullpath
+		fullpath_to_filetype[fullpath] = filetype
+		if fullpath.startswith("/home") and filetype == 'S_IFREG':
 			return "\t".join(['write', tokens[5], fullpath, length])
+		else:
+			return None
 	else:
 		return None
 
@@ -90,19 +107,22 @@ def clean_read(tokens):
 		global bad_format_read
 		bad_format_read = bad_format_read + 1
 		unique_file_id = tokens[6] + '-' + tokens[1]
-		fullpath = global_opened_files_map.get(unique_file_id, None)
+		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
+		filetype = fullpath_to_filetype.get(fullpath, None)
 		length = tokens[8]
 	else:
 		unique_file_id = tokens[12] + '-' + tokens[1]
 		fullpath = tokens[8]
+		filetype = tokens[10].split('|')[0]
 		length = tokens[14]
 
-	if fullpath != None:
- 		global_opened_files_map[unique_file_id] = fullpath
-		if not fullpath.startswith("/home"):
-			return None
-		else:
+	if fullpath != None and filetype != None:
+ 		fdpid_to_fullpath[unique_file_id] = fullpath
+		fullpath_to_filetype[fullpath] = filetype
+		if fullpath.startswith("/home") and filetype == 'S_IFREG':
 			return "\t".join(['read', tokens[5], fullpath, length])
+		else:
+			return None
 	else:
 		return None
 
@@ -135,7 +155,7 @@ for line in sys.stdin:
 
 	clean_line = None
 	if tokens[4] == 'sys_open':
-		clean_line = open_file(tokens)
+		clean_line = handle_sys_open(tokens)
 	elif tokens[4] == 'sys_close':
 		clean_line = clean_close(tokens)
 	elif tokens[4] == 'sys_write':
@@ -152,6 +172,7 @@ print '# number of bad formatted reads, writes, opens, closes and unlinks'
 print '# reads:\t' + str(bad_format_read)
 print '# writes:\t' + str(bad_format_write)
 print '# opens:\t' + str(bad_format_open)
+print '# do filp opens:\t' + str(bad_format_do_filp_open)
 print '# closes:\t' + str(bad_format_close)
 print '# unlinks:\t' + str(bad_format_unlink)
 
