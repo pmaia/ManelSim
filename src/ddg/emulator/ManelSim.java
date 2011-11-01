@@ -147,7 +147,7 @@ public class ManelSim {
 		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
 
 		for (int i = 0; i < numberOfMachines; i++) {
-			machines.add(new Machine(scheduler, Integer.toString(i)));
+			machines.add(new Machine(scheduler, Integer.toString(i), 30 * 60));
 		}
 
 		return machines;

@@ -54,9 +54,9 @@ public class MultipleEventParserTest {
 		
 		EventScheduler scheduler = new EventScheduler();
 		
-		Machine machine1 = new Machine(scheduler, "cherne");
-		Machine machine2 = new Machine(scheduler, "palhaco");
-		Machine machine3 = new Machine(scheduler, "abelhinha");
+		Machine machine1 = new Machine(scheduler, "cherne", 30 * 60);
+		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
+		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
 		
 		DDGClient client1 = new DDGClient(scheduler, 1, machine1, null);
 		DDGClient client2 = new DDGClient(scheduler, 2, machine2, null);
@@ -86,9 +86,9 @@ public class MultipleEventParserTest {
 		
 		EventScheduler scheduler = new EventScheduler();
 		
-		Machine machine1 = new Machine(scheduler, "cherne");
-		Machine machine2 = new Machine(scheduler, "palhaco");
-		Machine machine3 = new Machine(scheduler, "abelhinha");
+		Machine machine1 = new Machine(scheduler, "cherne", 30 * 60);
+		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
+		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
 		
 		DDGClient client1 = new DDGClient(scheduler, 1, machine1, null);
 		DDGClient client2 = new DDGClient(scheduler, 2, machine2, null);

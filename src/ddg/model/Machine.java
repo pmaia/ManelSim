@@ -3,9 +3,13 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import ddg.emulator.events.Sleep;
+import ddg.emulator.events.UserIdlenessStart;
+import ddg.emulator.events.WakeUp;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
+import ddg.kernel.Time;
 import ddg.model.data.DataServer;
 
 /**
@@ -28,18 +32,34 @@ public class Machine extends EventHandler {
 	private final List<DataServer> deployedDataServers;
 	private final List<DDGClient> clients;
 	
+	private boolean sleeping;
+	private Time lastStateTransition;
+	/**
+	 * The time in the simulation in which the idleness period ends
+	 */
+	private Time idlenessEnd;
+	private final Time timeBeforeSleep;
+	
 	private final String id;
 
-	public Machine(EventScheduler scheduler, String id) {
+	/**
+	 * 
+	 * @param scheduler
+	 * @param id
+	 * @param sleeping
+	 * @param timeBeforeSleep the amount of time in seconds this machine should remain idle before sleep
+	 */
+	public Machine(EventScheduler scheduler, String id, long timeBeforeSleep) {
 		super(scheduler);
 		
 		this.id = id;
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
+		this.timeBeforeSleep = new Time(timeBeforeSleep * 1000);
 	}
 	
-	public boolean isBeingUsed() {
-		return true; //FIXME this code must not exist anymore
+	public boolean isSleeping() {
+		return sleeping;
 	}
 
 	/**
@@ -131,25 +151,60 @@ public class Machine extends EventHandler {
 	}
 	
 	@Override
-	public void handleEvent(Event jeevent) { //TODO implementar
-//		if(jeevent instanceof MachineStateTransitionEvent) {
-//			State justEndedState = availability.currentState(); 
-//			if(justEndedState.isActive()) {
-//				Aggregator.getInstance().aggregateActiveDuration(getId(), justEndedState.getDuration());
-//			} else {
-//				Aggregator.getInstance().aggregateInactiveDuration(getId(), justEndedState.getDuration());
-//			}
-//			
-//			availability.advanceState();
-//			lastTransitionTime = super.getScheduler().now();
-//			JETime nextTransition = 
-//				lastTransitionTime.plus(new JETime(availability.currentState().getDuration()));
-//			
-//			pendingTransition = new MachineStateTransitionEvent(this, nextTransition); 
-//			
-//			this.send(pendingTransition);
-//		} else {
-//			throw new IllegalArgumentException();
-//		}
+	public void handleEvent(Event event) {
+		if(event instanceof UserIdlenessStart) {
+			handleUserIdlenessStart((UserIdlenessStart) event);
+		} else if(event instanceof WakeUp) {
+			handleWakeUp((WakeUp) event);
+		} else if(event instanceof Sleep) {
+			handleSleep((Sleep) event);
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+	
+	private void handleWakeUp(WakeUp event) {
+		Time now = getScheduler().now();
+		
+		if(event.isUserIdle()) {
+			if(now.plus(timeBeforeSleep).isEarlierThan(idlenessEnd)) {
+				Time bedTime = now.plus(timeBeforeSleep);
+				send(new Sleep(this, bedTime));
+			}
+		} else {
+			this.idlenessEnd = null;
+		}
+		
+		if(this.sleeping) {
+			Aggregator.getInstance().
+				aggregateSleepingDuration(getId(), now.minus(lastStateTransition).asMilliseconds());
+			this.sleeping = false;
+			this.lastStateTransition = now;
+		}
+	}
+	
+	private void handleUserIdlenessStart(UserIdlenessStart event) {
+		Time idlenessDuration = new Time(event.getIdlenessDuration() * 1000);
+		Time now = getScheduler().now();
+		
+		if(!idlenessDuration.isEarlierThan(timeBeforeSleep)) {
+			Time bedTime = now.plus(timeBeforeSleep);
+			send(new Sleep(this, bedTime));
+			Time wakeUpTime = now.plus(idlenessDuration);
+			send(new WakeUp(this, wakeUpTime, false));
+		}
+		
+		this.idlenessEnd = now.plus(idlenessDuration);
+	}
+	
+	private void handleSleep(Sleep event) {
+		Time now = getScheduler().now();
+		
+		if(!this.sleeping) {
+			Aggregator.getInstance().
+				aggregateActiveDuration(getId(), now.minus(lastStateTransition).asMilliseconds());
+			this.sleeping = true;
+			this.lastStateTransition = now;
+		}
 	}
 }

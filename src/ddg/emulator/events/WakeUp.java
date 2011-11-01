@@ -20,29 +20,30 @@ import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
 
 /**
- * An {@link Event} representing the start of an idleness period.
+ * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserIdlenessStart extends Event {
+public class WakeUp extends Event {
 	
-	public static final String EVENT_NAME = "user-idleness-start";
+	public static final String EVENT_NAME = "wake-up";
 	
-	private final long userIdlenessDuration; 
-
-	public UserIdlenessStart(EventHandler aHandler, Time aScheduledTime, 
-			long userIdlenessDuration) {
-		
-		super(EVENT_NAME, aHandler, aScheduledTime);
-		this.userIdlenessDuration = userIdlenessDuration;
-	}
+	private final boolean userIdle;
 
 	/**
 	 * 
-	 * @return the idleness duration in seconds
+	 * @param aHandler
+	 * @param aScheduledTime
+	 * @param userIdle false if the wake up was caused by user activity 
 	 */
-	public long getIdlenessDuration() {
-		return userIdlenessDuration;
+	public WakeUp(EventHandler aHandler, Time aScheduledTime, boolean userIdle) {
+		super(EVENT_NAME, aHandler, aScheduledTime);
+		
+		this.userIdle = userIdle;
+	}
+	
+	public boolean isUserIdle() {
+		return this.userIdle;
 	}
 
 }

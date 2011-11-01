@@ -60,7 +60,7 @@ public class ReplicationGroup {
 	 */
 	public void write(String fileName, long offset, long length, DDGClient client) {
 
-		if(!client.getMachine().equals(primary.getMachine()) && !primary.getMachine().isBeingUsed())
+		if(!client.getMachine().equals(primary.getMachine()) && !primary.getMachine().isSleeping())
 			Aggregator.getInstance().reportPerturbation(primary.getMachine().getId(), 
 					(long)(length / NETWORK_BYTES_RW_PER_MILLISECOND));
 		
@@ -68,7 +68,7 @@ public class ReplicationGroup {
 		
 		// considering synchronous replication
 		for (DataServer dataserver : secondaries.values()) {
-			if(!client.getMachine().equals(dataserver.getMachine()) && !dataserver.getMachine().isBeingUsed())
+			if(!client.getMachine().equals(dataserver.getMachine()) && !dataserver.getMachine().isSleeping())
 				Aggregator.getInstance().reportPerturbation(dataserver.getMachine().getId(), 
 						(long)(length / NETWORK_BYTES_RW_PER_MILLISECOND));
 			
@@ -95,7 +95,7 @@ public class ReplicationGroup {
 	 * @param client
 	 */
 	public void read(String fileName, long offset, long length, DDGClient client) {
-		if(!client.getMachine().equals(primary.getMachine()) && !primary.getMachine().isBeingUsed())
+		if(!client.getMachine().equals(primary.getMachine()) && !primary.getMachine().isSleeping())
 			Aggregator.getInstance().
 			reportPerturbation(primary.getMachine().getId(), (long)(length/NETWORK_BYTES_RW_PER_MILLISECOND));
 	}

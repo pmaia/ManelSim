@@ -42,7 +42,7 @@ public class Aggregator {
 		getMachineAvailability(machine).addActiveDuration(activeDuration);
 	}
 	
-	public void aggregateInactiveDuration(String machine, long inactiveDuration) {
+	public void aggregateSleepingDuration(String machine, long inactiveDuration) {
 		getMachineAvailability(machine).addInactiveDuration(inactiveDuration);
 	}
 	
