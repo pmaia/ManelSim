@@ -16,8 +16,8 @@
 package ddg.emulator.events;
 
 import ddg.kernel.Event;
-import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
+import ddg.model.Machine;
 
 /**
  * TODO make doc
@@ -36,7 +36,7 @@ public class WakeUp extends Event {
 	 * @param aScheduledTime
 	 * @param userIdle false if the wake up was caused by user activity 
 	 */
-	public WakeUp(EventHandler aHandler, Time aScheduledTime, boolean userIdle) {
+	public WakeUp(Machine aHandler, Time aScheduledTime, boolean userIdle) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 		
 		this.userIdle = userIdle;

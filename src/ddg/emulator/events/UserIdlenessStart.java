@@ -16,8 +16,8 @@
 package ddg.emulator.events;
 
 import ddg.kernel.Event;
-import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
+import ddg.model.Machine;
 
 /**
  * An {@link Event} representing the start of an idleness period.
@@ -30,7 +30,7 @@ public class UserIdlenessStart extends Event {
 	
 	private final long userIdlenessDuration; 
 
-	public UserIdlenessStart(EventHandler aHandler, Time aScheduledTime, 
+	public UserIdlenessStart(Machine aHandler, Time aScheduledTime, 
 			long userIdlenessDuration) {
 		
 		super(EVENT_NAME, aHandler, aScheduledTime);

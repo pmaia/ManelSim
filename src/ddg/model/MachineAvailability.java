@@ -13,23 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator.events;
-
-import ddg.kernel.Event;
-import ddg.kernel.Time;
-import ddg.model.Machine;
+package ddg.model;
 
 /**
  * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class Sleep extends Event {
+public class MachineAvailability {
+	private long activeDurationTotal = 0;
+	private long inactiveDurationTotal = 0;
+	private long transitionsCount = 0;
 	
-	public static final String EVENT_NAME = "go-sleep";
-
-	public Sleep(Machine aHandler, Time aScheduledTime) {
-		super(EVENT_NAME, aHandler, aScheduledTime);
+	public void addActiveDuration(long activeIncrement) {
+		transitionsCount++;
+		activeDurationTotal += activeIncrement;
 	}
-
+	
+	public void addSleepingDuration(long inactiveIncrement) {
+		transitionsCount++;
+		inactiveDurationTotal += inactiveIncrement;
+	}
+	
+	public long getActiveDurationTotal() {
+		return activeDurationTotal;
+	}
+	
+	public long getSleepingDurationTotal() {
+		return inactiveDurationTotal;
+	}
+	
+	public long getTransitionsCount() {
+		return transitionsCount;
+	}
 }

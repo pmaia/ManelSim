@@ -38,6 +38,9 @@ public class Machine extends EventHandler {
 	 * The time in the simulation in which the idleness period ends
 	 */
 	private Time idlenessEnd;
+	/**
+	 * The amount of time this machine must wait idle before sleep
+	 */
 	private final Time timeBeforeSleep;
 	
 	private final String id;
@@ -56,6 +59,7 @@ public class Machine extends EventHandler {
 		this.deployedDataServers = new ArrayList<DataServer>();
 		this.clients = new ArrayList<DDGClient>();
 		this.timeBeforeSleep = new Time(timeBeforeSleep * 1000);
+		this.lastStateTransition = scheduler.now();
 	}
 	
 	public boolean isSleeping() {

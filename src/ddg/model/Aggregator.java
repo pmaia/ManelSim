@@ -28,6 +28,16 @@ public class Aggregator {
 
 	private Aggregator() { /* empty */ }
 	
+	/**
+	 * Clean all aggregated result. This method exists to make testing easy.
+	 */
+	public void reset() {
+		loginlogs.clear();
+		generalLogs.clear();
+		perturbationTotalsPerMachine.clear();
+		availabilityTotalsPerMachine.clear();
+	}
+	
 	public void reportPerturbation(String machine, long duration) {
 		MachinePerturbation machinePerturbation = perturbationTotalsPerMachine.get(machine);
 		if(machinePerturbation == null) {
@@ -42,11 +52,11 @@ public class Aggregator {
 		getMachineAvailability(machine).addActiveDuration(activeDuration);
 	}
 	
-	public void aggregateSleepingDuration(String machine, long inactiveDuration) {
-		getMachineAvailability(machine).addInactiveDuration(inactiveDuration);
+	public void aggregateSleepingDuration(String machine, long sleepingDuration) {
+		getMachineAvailability(machine).addSleepingDuration(sleepingDuration);
 	}
 	
-	private MachineAvailability getMachineAvailability(String machine) {
+	public MachineAvailability getMachineAvailability(String machine) {
 		MachineAvailability machineAvailability = availabilityTotalsPerMachine.get(machine);
 		if(machineAvailability == null) {
 			machineAvailability = new MachineAvailability();
@@ -88,11 +98,11 @@ public class Aggregator {
 			MachineAvailability mAvailability = availabilityTotalsPerMachine.get(machine);
 			
 			summary.append(String.format("\nMachine=%s\tActive=%d ms\tInactive=%d ms\tTransitions=%d", 
-					machine, mAvailability.getActiveDurationTotal(), mAvailability.getInactiveDurationTotal(), 
+					machine, mAvailability.getActiveDurationTotal(), mAvailability.getSleepingDurationTotal(), 
 					mAvailability.getTransitionsCount()));
 			
 			totalActiveDurationMillis += mAvailability.getActiveDurationTotal();
-			totalInactiveDurationMillis += mAvailability.getInactiveDurationTotal();
+			totalInactiveDurationMillis += mAvailability.getSleepingDurationTotal();
 			totalTransitions += mAvailability.getTransitionsCount();
 		}
 		
@@ -157,31 +167,4 @@ public class Aggregator {
 		}
 	}
 	
-	private class MachineAvailability {
-		private long activeDurationTotal = 0;
-		private long inactiveDurationTotal = 0;
-		private long transitionsCount = 0;
-		
-		public void addActiveDuration(long activeIncrement) {
-			transitionsCount++;
-			activeDurationTotal += activeIncrement;
-		}
-		
-		public void addInactiveDuration(long inactiveIncrement) {
-			transitionsCount++;
-			inactiveDurationTotal += inactiveIncrement;
-		}
-		
-		public long getActiveDurationTotal() {
-			return activeDurationTotal;
-		}
-		
-		public long getInactiveDurationTotal() {
-			return inactiveDurationTotal;
-		}
-		
-		public long getTransitionsCount() {
-			return transitionsCount;
-		}
-	}
 }
