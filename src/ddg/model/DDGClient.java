@@ -29,15 +29,13 @@ public class DDGClient extends EventHandler {
 	 * @param machine
 	 * @param herald
 	 */
-	public DDGClient(EventScheduler scheduler, int clientIndex,
-			Machine machine, MetadataServer herald) {
+	public DDGClient(EventScheduler scheduler, Machine machine, MetadataServer herald) {
 
 		super(scheduler);
 
 		this.herald = herald;
 		this.machine = machine;
-		machine.bindClient(this);
-		this.id = "client" + clientIndex + machine;
+		this.id = "client" + machine.bindClient(this) + machine;
 	}
 
 	@Override

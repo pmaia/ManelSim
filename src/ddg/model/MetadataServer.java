@@ -8,7 +8,6 @@ import java.util.Map;
 import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 import ddg.model.placement.DataPlacementAlgorithm;
-import ddg.model.populateAlgorithm.PopulateAlgorithm;
 import ddg.util.FileSizeDistribution;
 import ddg.util.Pair;
 
@@ -27,7 +26,6 @@ public class MetadataServer {
 
 	private final Map<String, ReplicationGroup> files;
 	private final Map<Integer, ReplicationGroup> openFiles;
-	private final PopulateAlgorithm populateAlgorithm;
 	
 	private final int replicationLevel;
 
@@ -42,8 +40,7 @@ public class MetadataServer {
 	 * @param popAlgorithm
 	 */
 	public MetadataServer(List<DataServer> dataServers, DataPlacementAlgorithm dataPlacementAlgorithm, 
-			int replicationLevel,FileSizeDistribution fileSizeDistribution,
-			PopulateAlgorithm popAlgorithm) {
+			int replicationLevel,FileSizeDistribution fileSizeDistribution) {
 
 		if (dataServers == null)
 			throw new IllegalArgumentException();
@@ -53,13 +50,10 @@ public class MetadataServer {
 			throw new IllegalArgumentException();
 		if (fileSizeDistribution == null)
 			throw new IllegalArgumentException();
-		if (popAlgorithm == null)
-			throw new IllegalArgumentException();
 		if(replicationLevel < 1)
 			throw new IllegalArgumentException();
 
 		this.dataPlacement = dataPlacementAlgorithm;
-		this.populateAlgorithm = popAlgorithm;
 		this.availableDataServers = new LinkedList<DataServer>(dataServers);
 
 		this.files = new HashMap<String, ReplicationGroup>();
@@ -104,17 +98,6 @@ public class MetadataServer {
 		}
 
 		return group;
-	}
-
-	/**
-	 * @param numOfFullDataServers
-	 * @param replicationLevel
-	 * @param dataServers
-	 */
-	public void populateNamespace(int numOfFullDataServers,
-			int replicationLevel, List<DataServer> dataServers) {
-		populateAlgorithm.populateNamespace(numOfFullDataServers,
-				replicationLevel, dataServers, fileSizeDistribution, files);
 	}
 
 	/**

@@ -15,11 +15,14 @@
  */
 package ddg.emulator;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +36,6 @@ import ddg.model.placement.CoLocatedWithSecondariesLoadBalance;
 import ddg.model.placement.CoLocatedWithSecondaryRandomPlacement;
 import ddg.model.placement.DataPlacementAlgorithm;
 import ddg.model.placement.RandomDataPlacementAlgorithm;
-import ddg.model.populateAlgorithm.NOPAlgorithm;
 import ddg.util.FileSizeDistribution;
 
 /**
@@ -43,27 +45,45 @@ import ddg.util.FileSizeDistribution;
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class ManelSim {
-	
-	private static final int NUMBER_OF_CLIENTS = 1;
 
+	private static final FilenameFilter fsTracesFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.startsWith("fs-");
+		}
+	};
+
+	private static final FilenameFilter idlenessTracesFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.startsWith("idleness-");
+		}
+	};
+
+	/**
+	 * @param args
+	 * [0] (traces dir) - the traces in the directory must have the name &lt;trace type&gt;-&lt;machine name&gt;, 
+	 * where &lt;trace type&gt; could be either fs or idleness. All traces must come in pairs of fs and idleness. Single traces will be ignored.
+	 * Ex.: fs-cherne, idleness-cherne
+	 * @param args
+	 * [1] (data placement police) - random, co-random or co-balance
+	 * @param args 
+	 * [2] time before sleep (secs)
+	 * @param args 
+	 * [3] replication level
+	 */
 	public static void main(String[] args) throws IOException {
-
-		/**
-		 * Arguments
-		 * 
-		 * 0. trace file 
-		 * 1. Data placement police [random, co-random, co-balance] 
-		 * 2. number of machines 
-		 * 3. replication level
-		 */
 
 		System.out.println(Arrays.toString(args));
 
 		final EventScheduler scheduler = new EventScheduler();
 
-		String traceFile = args[0];
+		File tracesDir = new File(args[0]);
+		if(!tracesDir.exists() || !tracesDir.isDirectory())
+			throw new IllegalArgumentException(args[0] + " doesn't exist or is not a directory");
+
 		String placementPoliceName = args[1];
-		Integer numberOfMachines = Integer.valueOf(args[2]);
+		Long timeBeforeSleep = Long.valueOf(args[2]);
 		Integer replicationLevel = Integer.valueOf(args[3]);
 
 		DataPlacementAlgorithm placement = createPlacementPolice(placementPoliceName);
@@ -74,28 +94,50 @@ public class ManelSim {
 				8.46, 2.38, diskSize);
 
 		// building network
-		List<Machine> machines = createMachines(scheduler, numberOfMachines);
-		
-		List<DataServer> dataServers = createDataServers(scheduler,
-				numberOfMachines, diskSize, machines);
+		List<Machine> machines = createMachines(scheduler, tracesDir, timeBeforeSleep);
 
-		MetadataServer metadataServer = new MetadataServer(dataServers, 
-				placement, replicationLevel, fileSizeDistribution, new NOPAlgorithm());
-		
-		List<DDGClient> clients = createClients(scheduler, NUMBER_OF_CLIENTS,
-				machines, metadataServer);
+		List<DataServer> dataServers = createDataServers(scheduler, diskSize, machines);
 
-		FileSystemEventParser injector = new FileSystemEventParser(
-				new FileInputStream(traceFile), null);
-		EmulatorControl control = EmulatorControl.build(scheduler, injector,
-				metadataServer);
+		MetadataServer metadataServer = 
+			new MetadataServer(dataServers, placement, replicationLevel, fileSizeDistribution);
 
-		metadataServer.populateNamespace(0, 2, dataServers);
+		List<DDGClient> clients = createClients(scheduler, machines, metadataServer);
+
+		MultipleEventParser multipleEventParser = 
+			createMultipleEventParser(clients, machines, tracesDir);
+
+		EmulatorControl control = 
+			EmulatorControl.build(scheduler, multipleEventParser, metadataServer);
 
 		control.scheduleNext();
 		scheduler.start();
 
 		System.out.println(Aggregator.getInstance().summarize());
+	}
+
+	private static MultipleEventParser createMultipleEventParser(
+			List<DDGClient> clients, List<Machine> machines, File tracesDir) {
+
+		EventParser []  parsers = new EventParser[machines.size() + clients.size()];
+
+		try {
+			int parserCount = 0;
+			InputStream traceStream;
+			for(Machine machine : machines) {
+				traceStream = 
+					new FileInputStream(new File(tracesDir, "idleness-" + machine.getId()));
+				parsers[parserCount++] = new UserIdlenessEventParser(machine, traceStream);
+			}
+			for(DDGClient client : clients) {
+				traceStream = 
+					new FileInputStream(new File(tracesDir, "fs-" + client.getMachine().getId()));
+				parsers[parserCount++] = new FileSystemEventParser(traceStream, client);
+			}
+		} catch (FileNotFoundException e) {
+			throw new IllegalStateException(e);
+		}
+
+		return new MultipleEventParser(parsers);
 	}
 
 	private static DataPlacementAlgorithm createPlacementPolice(String police) {
@@ -115,39 +157,32 @@ public class ManelSim {
 	 * It create all clients.
 	 * 
 	 * @param scheduler
-	 * @param numberOfClients
 	 * @param herald
 	 * @param aggregator
 	 * @param machines2
 	 * @return
 	 */
-	private static List<DDGClient> createClients(EventScheduler scheduler,
-			int numberOfClients, List<Machine> machines, MetadataServer herald) {
-
-		Iterator<Machine> iterator = machines.iterator();
+	private static List<DDGClient> createClients(EventScheduler scheduler, List<Machine> machines, MetadataServer herald) {
 
 		List<DDGClient> newClients = new LinkedList<DDGClient>();
 
-		for (int i = 0; i < numberOfClients; i++) {
-
-			if (!iterator.hasNext()) {
-				iterator = machines.iterator();
-			}
-
-			Machine machine = iterator.next();
-			DDGClient newClient = new DDGClient(scheduler, i, machine, herald);
-			newClients.add(newClient);
+		for(Machine machine : machines) {
+			newClients.add(new DDGClient(scheduler, machine, herald));
 		}
 
 		return newClients;
 	}
 
-	private static List<Machine> createMachines(EventScheduler scheduler,	int numberOfMachines) {
+	private static List<Machine> createMachines(EventScheduler scheduler, File tracesDir, long timeBeforeSleep) {
+		List<Machine> machines = new LinkedList<Machine>();
+		List<String> fsTracesFiles = Arrays.asList(tracesDir.list(fsTracesFilter));
+		List<String> idlenessTracesFiles = Arrays.asList(tracesDir.list(idlenessTracesFilter));
 
-		List<Machine> machines = new ArrayList<Machine>(numberOfMachines);
-
-		for (int i = 0; i < numberOfMachines; i++) {
-			machines.add(new Machine(scheduler, Integer.toString(i), 30 * 60));
+		for(String fsTraceFile : fsTracesFiles) {
+			String machineName = fsTraceFile.split("-")[1];
+			if(idlenessTracesFiles.contains("idleness-" + machineName)) {
+				machines.add(new Machine(scheduler, machineName, timeBeforeSleep));
+			}
 		}
 
 		return machines;
@@ -162,16 +197,12 @@ public class ManelSim {
 	 * @param machines
 	 * @return
 	 */
-	private static List<DataServer> createDataServers(
-			EventScheduler scheduler, int numberOfDataServers,
-			double diskSize, List<Machine> machines) {
+	private static List<DataServer> createDataServers(EventScheduler scheduler, double diskSize, List<Machine> machines) {
 
 		List<DataServer> dataServers = new ArrayList<DataServer>();
 
 		for (Machine machine : machines) {
-			DataServer newDataServer = new DataServer(scheduler, machine,
-					diskSize);
-			dataServers.add(newDataServer);
+			dataServers.add(new DataServer(scheduler, machine, diskSize));
 		}
 
 		return dataServers;

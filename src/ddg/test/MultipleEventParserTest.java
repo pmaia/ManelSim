@@ -54,9 +54,9 @@ public class MultipleEventParserTest {
 		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
 		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
 		
-		DDGClient client1 = new DDGClient(scheduler, 1, machine1, null);
-		DDGClient client2 = new DDGClient(scheduler, 2, machine2, null);
-		DDGClient client3 = new DDGClient(scheduler, 3, machine3, null);
+		DDGClient client1 = new DDGClient(scheduler, machine1, null);
+		DDGClient client2 = new DDGClient(scheduler, machine2, null);
+		DDGClient client3 = new DDGClient(scheduler, machine3, null);
 		
 		parsers[0] = new FileSystemEventParser(trace1, client1);
 		parsers[1] = new FileSystemEventParser(trace2, client2);
@@ -86,9 +86,9 @@ public class MultipleEventParserTest {
 		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
 		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
 		
-		DDGClient client1 = new DDGClient(scheduler, 1, machine1, null);
-		DDGClient client2 = new DDGClient(scheduler, 2, machine2, null);
-		DDGClient client3 = new DDGClient(scheduler, 3, machine3, null);
+		DDGClient client1 = new DDGClient(scheduler, machine1, null);
+		DDGClient client2 = new DDGClient(scheduler, machine2, null);
+		DDGClient client3 = new DDGClient(scheduler, machine3, null);
 		
 		parsers[0] = new FileSystemEventParser(trace1, client1);
 		parsers[1] = new FileSystemEventParser(trace2, client2);
