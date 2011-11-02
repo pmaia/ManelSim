@@ -15,6 +15,14 @@
  */
 package ddg.test;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import ddg.emulator.UserIdlenessEventParser;
+import ddg.kernel.EventScheduler;
+import ddg.model.Machine;
+
 
 /**
  * A suite of tests to the UserIdlenessEventParser class
@@ -22,5 +30,24 @@ package ddg.test;
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class UserIdlenessEventParserTest {
-	//TODO implement!
+	
+	@Test
+	public void eventCountTest() {
+		int expectedEventCount = 10;
+		FakeUserIdlenessTraceStream fakeEventStream = 
+			new FakeUserIdlenessTraceStream(expectedEventCount);
+		
+		EventScheduler scheduler = new EventScheduler();
+		Machine machine = new Machine(scheduler, "machine", 30 * 60);
+		
+		UserIdlenessEventParser eventParser = new UserIdlenessEventParser(machine, fakeEventStream);
+		
+		int eventCount = 0;
+		while(eventParser.getNextEvent() != null) {
+			eventCount++;
+		}
+		
+		assertEquals(expectedEventCount, eventCount);
+	}
+	
 }

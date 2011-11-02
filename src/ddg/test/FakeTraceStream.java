@@ -17,7 +17,6 @@ package ddg.test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Random;
 
 /**
  * TODO make doc
@@ -28,17 +27,18 @@ public abstract class FakeTraceStream extends InputStream {
 	private int remainingEvents;
 	private InputStream currentEventStream;
 	
-	protected final Random random = new Random();
-	protected long nextTimeStamp = System.currentTimeMillis();
-
 	public FakeTraceStream(int numberOfEvents) {
-		this.remainingEvents = numberOfEvents - 1;
-		this.currentEventStream = generateNextEventStream();
+		this.remainingEvents = numberOfEvents;
 	}
 
 	@Override
 	public int read() throws IOException {
 
+		if(currentEventStream == null) {
+			currentEventStream = generateNextEventStream();
+			remainingEvents--;
+		}
+		
 		int nextByte = currentEventStream.read();
 
 		if(nextByte == -1) {

@@ -54,12 +54,17 @@ public class UserIdlenessEventParser implements EventParser {
 		UserIdlenessStart event = null;
 		
 		try {
-			String [] tokens = eventReader.readLine().split("\\s");
-
-			Time aScheduledTime = new Time(Long.parseLong(tokens[0]));
-			long inactivityTime = Long.parseLong(tokens[1]);
+			String traceLine = eventReader.readLine();
 			
-			event = new UserIdlenessStart(machine, aScheduledTime, inactivityTime);
+			if(traceLine != null) {
+				String [] tokens = traceLine.split("\\s");
+
+				Time aScheduledTime = new Time(Long.parseLong(tokens[0]));
+				long inactivityTime = Long.parseLong(tokens[1]);
+				
+				event = new UserIdlenessStart(machine, aScheduledTime, inactivityTime);
+			}
+			
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
