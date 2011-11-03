@@ -1,7 +1,6 @@
 package ddg.model;
 
 import ddg.emulator.EmulatorControl;
-import ddg.emulator.events.filesystem.OpenEvent;
 import ddg.emulator.events.filesystem.ReadEvent;
 import ddg.emulator.events.filesystem.WriteEvent;
 import ddg.kernel.Event;
@@ -22,10 +21,8 @@ public class DDGClient extends EventHandler {
 	private final Machine machine;
 
 	/**
-	 * Default constructor using fields.
 	 * 
-	 * @param schedulerwasLocal
-	 * @param clientIndex
+	 * @param scheduler
 	 * @param machine
 	 * @param herald
 	 */
@@ -43,20 +40,7 @@ public class DDGClient extends EventHandler {
 
 		String anEventName = anEvent.getName();
 
-		if (anEventName.equals(OpenEvent.EVENT_NAME)) {
-
-			OpenEvent ev = (OpenEvent) anEvent;
-
-			ReplicationGroup replicationGroup = herald.openPath(
-					ev.getFileName(), ev.getFileDescriptor(), this);
-
-			if (replicationGroup == null) {
-				throw new RuntimeException(
-						"The metadata server returned a null group for file: "
-								+ ev.getFileName());
-			}
-
-		} else if (anEventName.equals(ReadEvent.EVENT_NAME)) {
+		if (anEventName.equals(ReadEvent.EVENT_NAME)) {
 
 			ReadEvent event = (ReadEvent) anEvent;
 			int fileDescriptor = event.getFileDescriptor();

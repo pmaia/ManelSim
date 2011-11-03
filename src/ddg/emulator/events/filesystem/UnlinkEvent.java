@@ -16,19 +16,28 @@
 package ddg.emulator.events.filesystem;
 
 import ddg.kernel.Event;
-import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
+import ddg.model.DDGClient;
 
 /**
  * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class DeleteEvent extends Event {
+public class UnlinkEvent extends Event {
+	
+	public static final String EVENT_NAME = "unlink";
+	
+	private final String targetPath;
 
-	public DeleteEvent(String aName, EventHandler aHandler,
-			Time aScheduledTime) {
-		super(aName, aHandler, aScheduledTime);
+	public UnlinkEvent(DDGClient aHandler, Time aScheduledTime, String targetPath) {
+		super(EVENT_NAME, aHandler, aScheduledTime);
+		
+		this.targetPath = targetPath;
+	}
+	
+	public String getTargetPath() {
+		return this.targetPath;
 	}
 
 }
