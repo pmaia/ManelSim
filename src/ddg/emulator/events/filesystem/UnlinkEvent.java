@@ -28,16 +28,21 @@ public class UnlinkEvent extends Event {
 	
 	public static final String EVENT_NAME = "unlink";
 	
-	private final String targetPath;
+	private final String filePath;
 
-	public UnlinkEvent(DDGClient aHandler, Time aScheduledTime, String targetPath) {
+	public UnlinkEvent(DDGClient aHandler, Time aScheduledTime, String filePath) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 		
-		this.targetPath = targetPath;
+		this.filePath = filePath;
 	}
 	
-	public String getTargetPath() {
-		return this.targetPath;
+	public String getFilePath() {
+		return this.filePath;
+	}
+	
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath;
 	}
 
 }

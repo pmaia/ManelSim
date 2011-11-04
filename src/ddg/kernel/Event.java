@@ -50,7 +50,7 @@ public abstract class Event {
 	/**
 	 * @return
 	 */
-	public Time getTheScheduledTime() {
+	public Time getScheduledTime() {
 		return theScheduledTime;
 	}
 

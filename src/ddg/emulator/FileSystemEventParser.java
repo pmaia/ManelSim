@@ -99,43 +99,49 @@ public class FileSystemEventParser implements EventParser {
 		return readLine;
 	}
 	
-	private Event parseUnlinkEvent(StringTokenizer tokenizer) {
+	private UnlinkEvent parseUnlinkEvent(StringTokenizer tokenizer) {
 		// unlink  begin-elapsed   fullpath
 		
-		Time time = null; //TODO continuar daqui
+		Time time = parseTime(tokenizer.nextToken());
 		String targetPath = tokenizer.nextToken();
 		
 		return new UnlinkEvent(client, time, targetPath);
 	}
 
-	private Event parseCloseEvent(StringTokenizer tokenizer) {
+	private CloseEvent parseCloseEvent(StringTokenizer tokenizer) {
 		// close   begin-elapsed   fullpath
 
-		tokenizer.nextToken();// close
-		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time stamp
-		tokenizer.nextToken();// fd
+		Time time = parseTime(tokenizer.nextToken());
+		String targetPath = tokenizer.nextToken();
 
-		return new CloseEvent(null, client, time);
+		return new CloseEvent(client, time, targetPath);
 	}
 
-	private Event parseReadEvent(StringTokenizer tokenizer) {
+	private ReadEvent parseReadEvent(StringTokenizer tokenizer) {
 		// read    begin-elapsed   fullpath        length
-		tokenizer.nextToken();// read
-		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time stamp
-		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
-		long dataLength = Long.parseLong(tokenizer.nextToken());// length
+		
+		Time time = parseTime(tokenizer.nextToken());
+		String filePath = tokenizer.nextToken();
+		long length = Long.parseLong(tokenizer.nextToken());
 
-		return new ReadEvent(dataLength, 0, fileDescriptor, client, time, client);
+		return new ReadEvent(client, time, filePath, length);
 	}
 
 	private Event parseWriteEvent(StringTokenizer tokenizer) {
 		// write   begin-elapsed   fullpath        length
-		tokenizer.nextToken();// write
-		Time time = new Time(Long.valueOf(tokenizer.nextToken()));// time
-		int fileDescriptor = new Integer(tokenizer.nextToken());// fd
-		long dataLength = Long.parseLong(tokenizer.nextToken());// length
+		
+		Time time = parseTime(tokenizer.nextToken());
+		String filePath = tokenizer.nextToken();
+		long length = Long.parseLong(tokenizer.nextToken());
 
-		return new WriteEvent(dataLength, 0, fileDescriptor, client, time, client);
+		return new WriteEvent(client, time, length, filePath); 
+	}
+	
+	private Time parseTime(String traceTimestamp) {
+		long timeInMilli = 
+				Long.parseLong(traceTimestamp.split("-")[0]) / 1000;
+		
+		return new Time(timeInMilli);
 	}
 
 }

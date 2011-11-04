@@ -67,7 +67,7 @@ public class MultipleEventParserTest {
 		Event currentEvent = multipleSourceParser.getNextEvent();
 		Event nextEvent = null;
 		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
-			assertTrue(currentEvent.getTheScheduledTime().compareTo(nextEvent.getTheScheduledTime()) <= 0);
+			assertTrue(currentEvent.getScheduledTime().compareTo(nextEvent.getScheduledTime()) <= 0);
 			currentEvent = nextEvent;
 		}
 	}

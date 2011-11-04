@@ -11,13 +11,6 @@ import ddg.model.placement.DataPlacementAlgorithm;
 import ddg.util.FileSizeDistribution;
 import ddg.util.Pair;
 
-/**
- * Herald's emulation abstraction. This code does not match exactly with
- * Herald's protocol
- * 
- * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
- * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
- */
 public class MetadataServer {
 	
 	private final DataPlacementAlgorithm dataPlacement;
@@ -32,15 +25,13 @@ public class MetadataServer {
 	public final static int ONE_DAY = 1000 * 60 * 60 * 24;
 
 	/**
-	 * 
 	 * @param dataServers
 	 * @param dataPlacementAlgorithm
 	 * @param replicationLevel
 	 * @param fileSizeDistribution
-	 * @param popAlgorithm
 	 */
 	public MetadataServer(List<DataServer> dataServers, DataPlacementAlgorithm dataPlacementAlgorithm, 
-			int replicationLevel,FileSizeDistribution fileSizeDistribution) {
+			int replicationLevel, FileSizeDistribution fileSizeDistribution) {
 
 		if (dataServers == null)
 			throw new IllegalArgumentException();

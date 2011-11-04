@@ -45,5 +45,10 @@ public class WakeUp extends Event {
 	public boolean isUserIdle() {
 		return this.userIdle;
 	}
+	
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime();
+	}
 
 }

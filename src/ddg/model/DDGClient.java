@@ -1,7 +1,9 @@
 package ddg.model;
 
 import ddg.emulator.EmulatorControl;
+import ddg.emulator.events.filesystem.CloseEvent;
 import ddg.emulator.events.filesystem.ReadEvent;
+import ddg.emulator.events.filesystem.UnlinkEvent;
 import ddg.emulator.events.filesystem.WriteEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
@@ -17,7 +19,7 @@ import ddg.model.data.ReplicationGroup;
 public class DDGClient extends EventHandler {
 
 	private final String id;
-	private final MetadataServer herald;
+	private final MetadataServer metadataServer;
 	private final Machine machine;
 
 	/**
@@ -30,7 +32,7 @@ public class DDGClient extends EventHandler {
 
 		super(scheduler);
 
-		this.herald = herald;
+		this.metadataServer = herald;
 		this.machine = machine;
 		this.id = "client" + machine.bindClient(this) + machine;
 	}
@@ -41,27 +43,29 @@ public class DDGClient extends EventHandler {
 		String anEventName = anEvent.getName();
 
 		if (anEventName.equals(ReadEvent.EVENT_NAME)) {
-
-			ReadEvent event = (ReadEvent) anEvent;
-			int fileDescriptor = event.getFileDescriptor();
-			ReplicationGroup group = herald
-					.lookupReplicationGroup(fileDescriptor);
-			herald.read(this, group.getFileName(), event.getOffset(),
-					event.getSize());
+//			ReadEvent event = (ReadEvent) anEvent;
+//			
+//			String filePath = event.getFilePath();
+//			ReplicationGroup group = 
+//					metadataServer.lookupReplicationGroup(fileDescriptor);
+//			metadataServer.read(this, group.getFileName(), event.getOffset(),
+//					event.getLength());
 
 		} else if (anEventName.equals(WriteEvent.EVENT_NAME)) {
+//			WriteEvent event = (WriteEvent) anEvent;
+//			int fileDescriptor = event.getFileDescriptor();
+//			ReplicationGroup group = herald
+//					.lookupReplicationGroup(fileDescriptor);
+//			String fileName = group.getFileName();
+//			herald.write(this, fileName, event.getOffset(), event.getSize());
 
-			WriteEvent event = (WriteEvent) anEvent;
-			int fileDescriptor = event.getFileDescriptor();
-			ReplicationGroup group = herald
-					.lookupReplicationGroup(fileDescriptor);
-			String fileName = group.getFileName();
-			herald.write(this, fileName, event.getOffset(), event.getSize());
-
+		} else if(anEventName.equals(CloseEvent.EVENT_NAME)) { 
+			
+		} else if(anEventName.equals(UnlinkEvent.EVENT_NAME)) {
+			
 		} else {
-
-			// throw new RuntimeException();
-		}
+			throw new RuntimeException();
+		} 
 
 		EmulatorControl.getInstance().scheduleNext();
 	}

@@ -19,7 +19,6 @@
 package ddg.emulator.events.filesystem;
 
 import ddg.kernel.Event;
-import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
 import ddg.model.DDGClient;
 
@@ -31,60 +30,34 @@ import ddg.model.DDGClient;
 public class WriteEvent extends Event {
 
 	public static final String EVENT_NAME = "write";
-
-	private final long size;
-	private final long offset;
-	private final DDGClient client;
-
-	private final int fileDescriptor;
+	
+	private final long length;
+	private final String filePath;
 
 	/**
+	 * 
 	 * @param size
-	 *            TODO
-	 * @param offset
-	 *            TODO
-	 * @param fileDescriptor
-	 *            TODO
+	 * @param filePath
 	 * @param handler
 	 * @param scheduledTime
-	 * @param client
-	 *            TODO
 	 */
-	public WriteEvent(long size, long offset, int fileDescriptor,
-			EventHandler handler, Time scheduledTime, DDGClient client) {
+	public WriteEvent(DDGClient handler, Time scheduledTime, long length, String filePath) {
 		super(EVENT_NAME, handler, scheduledTime);
-		this.fileDescriptor = fileDescriptor;
-		this.size = size;
-		this.offset = offset;
-		this.client = client;
+		
+		this.length = length;
+		this.filePath = filePath;
 	}
 
-	/**
-	 * @return
-	 */
-	public int getFileDescriptor() {
-		return fileDescriptor;
+	public long getLength() {
+		return length;
 	}
 
-	/**
-	 * @return
-	 */
-	public long getSize() {
-		return size;
+	public String getFilePath() {
+		return filePath;
 	}
 
-	/**
-	 * @return
-	 */
-	public long getOffset() {
-		return offset;
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath + "\t" + length;
 	}
-
-	/**
-	 * @return
-	 */
-	public DDGClient getClient() {
-		return client;
-	}
-
 }

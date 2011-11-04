@@ -44,7 +44,7 @@ public final class EventScheduler {
 	 */
 	public void schedule(Event aNewEvent) {
 
-		Time anEventTime = aNewEvent.getTheScheduledTime();
+		Time anEventTime = aNewEvent.getScheduledTime();
 
 		if (anEventTime.isEarlierThan(now())) {
 			throw new RuntimeException("ERROR: emulation time(" + now()
@@ -56,7 +56,7 @@ public final class EventScheduler {
 
 		if (queueSize == 0) {
 			eventList.addElement(aNewEvent);
-		} else if (eventList.lastElement().getTheScheduledTime()
+		} else if (eventList.lastElement().getScheduledTime()
 				.isEarlierThan(anEventTime)) {
 			eventList.addElement(aNewEvent);
 		} else {
@@ -65,13 +65,13 @@ public final class EventScheduler {
 
 			for (queuePos = queueSize - 1; ((queuePos > 0) & anEventTime
 					.isEarlierThan(eventList.elementAt(queuePos)
-							.getTheScheduledTime())); queuePos--) {
+							.getScheduledTime())); queuePos--) {
 				/* empty */
 			}
 
 			if (++queuePos == 1
 					& anEventTime.isEarlierThan(eventList.elementAt(0)
-							.getTheScheduledTime())) {
+							.getScheduledTime())) {
 				queuePos--;
 			}
 
@@ -149,7 +149,7 @@ public final class EventScheduler {
 
 			if (aNextEvent != null) {
 
-				Time anEventTime = aNextEvent.getTheScheduledTime();
+				Time anEventTime = aNextEvent.getScheduledTime();
 
 				if (anEventTime.isEarlierThan(now())) {
 					throw new RuntimeException("ERROR: emulation time(" + now()

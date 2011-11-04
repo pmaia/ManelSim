@@ -44,5 +44,10 @@ public class UserIdlenessStart extends Event {
 	public long getIdlenessDuration() {
 		return userIdlenessDuration;
 	}
+	
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime();
+	}
 
 }

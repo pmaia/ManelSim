@@ -19,7 +19,6 @@
 package ddg.emulator.events.filesystem;
 
 import ddg.kernel.Event;
-import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
 import ddg.model.DDGClient;
 
@@ -32,60 +31,40 @@ public class ReadEvent extends Event {
 
 	public static final String EVENT_NAME = "read";
 
-	private final long size;
-	private final long offset;
-	private final int fileDescriptor;
-
-	private final DDGClient client;
+	private final long length;
+	private final String filePath;
 
 	/**
-	 * @param size
-	 *            TODO
-	 * @param offset
-	 *            TODO
-	 * @param fileDescriptor
-	 *            TODO
+	 * 
+	 * @param filePath
+	 * @param length
 	 * @param handler
 	 * @param scheduledTime
-	 * @param client
-	 *            TODO
 	 */
-	public ReadEvent(long size, long offset, int fileDescriptor,
-			EventHandler handler, Time scheduledTime, DDGClient client) {
-
+	public ReadEvent(DDGClient handler, Time scheduledTime, String filePath, long length) {
 		super(EVENT_NAME, handler, scheduledTime);
-		this.fileDescriptor = fileDescriptor;
-		this.size = size;
-		this.offset = offset;
-		this.client = client;
+		
+		this.filePath = filePath;
+		this.length = length;
 	}
 
 	/**
 	 * @return
 	 */
-	public int getFileDescriptor() {
-		return fileDescriptor;
+	public String getFilePath() {
+		return filePath;
 	}
 
 	/**
 	 * @return
 	 */
-	public long getSize() {
-		return size;
+	public long getLength() {
+		return length;
 	}
-
-	/**
-	 * @return
-	 */
-	public long getOffset() {
-		return offset;
-	}
-
-	/**
-	 * @return
-	 */
-	public DDGClient getClient() {
-		return client;
+	
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath + "\t" + length;
 	}
 
 }

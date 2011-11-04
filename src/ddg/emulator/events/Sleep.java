@@ -26,10 +26,15 @@ import ddg.model.Machine;
  */
 public class Sleep extends Event {
 	
-	public static final String EVENT_NAME = "go-sleep";
+	public static final String EVENT_NAME = "sleep";
 
 	public Sleep(Machine aHandler, Time aScheduledTime) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
+	}
+	
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime();
 	}
 
 }

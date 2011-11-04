@@ -52,8 +52,8 @@ public class MultipleEventParser implements EventParser {
 			
 			if(smallestTimeEventCandidate != null){
 				
-				if(smallestTimeEvent.getTheScheduledTime().
-						compareTo(smallestTimeEventCandidate.getTheScheduledTime()) <= 0) {
+				if(smallestTimeEvent.getScheduledTime().
+						compareTo(smallestTimeEventCandidate.getScheduledTime()) <= 0) {
 					parsers[i].pushBack(smallestTimeEventCandidate);
 				} else {
 					parsers[smallestTimeEventParserId].pushBack(smallestTimeEvent);

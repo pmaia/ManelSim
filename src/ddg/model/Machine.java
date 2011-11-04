@@ -3,6 +3,7 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import ddg.emulator.EmulatorControl;
 import ddg.emulator.events.Sleep;
 import ddg.emulator.events.UserIdlenessStart;
 import ddg.emulator.events.WakeUp;
@@ -165,6 +166,8 @@ public class Machine extends EventHandler {
 		} else {
 			throw new IllegalArgumentException();
 		}
+		
+		EmulatorControl.getInstance().scheduleNext();
 	}
 	
 	private void handleWakeUp(WakeUp event) {
