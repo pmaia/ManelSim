@@ -43,7 +43,7 @@ public class DDGClient extends EventHandler {
 		String anEventName = anEvent.getName();
 
 		if (anEventName.equals(ReadEvent.EVENT_NAME)) {
-//			ReadEvent event = (ReadEvent) anEvent;
+			ReadEvent event = (ReadEvent) anEvent;
 //			
 //			String filePath = event.getFilePath();
 //			ReplicationGroup group = 
