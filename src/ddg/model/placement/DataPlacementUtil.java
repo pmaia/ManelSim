@@ -16,7 +16,9 @@
 package ddg.model.placement;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ddg.model.data.DataServer;
 import ddg.util.RandomUtil;
@@ -33,21 +35,23 @@ public class DataPlacementUtil {
 	 * @param numberOfWantedServers
 	 * @return
 	 */
-	public static List<DataServer> chooseRandomDataServers(
-			List<DataServer> availableServers, int numberOfWantedServers) {
+	public static Set<DataServer> chooseRandomDataServers(Set<DataServer> availableServers, int numberOfWantedServers) {
+		
+		List<DataServer> availableServersAsList = new ArrayList<DataServer>();
+		availableServersAsList.addAll(availableServers);
 
-		int numberOfSelectedDataServers = (availableServers.size() > numberOfWantedServers) ? numberOfWantedServers
-				: availableServers.size();
+		int numberOfSelectedDataServers = 
+			(availableServers.size() > numberOfWantedServers) ? numberOfWantedServers : availableServers.size();
 
-		List<DataServer> list = new ArrayList<DataServer>();
+		Set<DataServer> randomDataServers = new HashSet<DataServer>();
 
-		List<Integer> randomList = RandomUtil.random(availableServers.size());// random
-																				// police
+		List<Integer> randomList = RandomUtil.random(availableServers.size());
+
 		for (int i = 0; i < numberOfSelectedDataServers; i++) {
-			list.add(availableServers.get(randomList.get(i)));
+			randomDataServers.add(availableServersAsList.get(randomList.get(i)));
 		}
 
-		return list;
+		return randomDataServers;
 	}
 
 }

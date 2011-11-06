@@ -30,8 +30,8 @@ public class Machine extends EventHandler {
 	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
 	public static final long TRANSITION_DURATION_IN_MILLISECONDS = 2500;
 	
-	private final List<DataServer> deployedDataServers;
-	private final List<DDGClient> clients;
+	private final List<DataServer> deployedDataServers; //FIXME this should be a Set
+	private final List<DDGClient> clients; //FIXME this should be a Set
 	
 	private boolean sleeping;
 	private Time lastStateTransition;

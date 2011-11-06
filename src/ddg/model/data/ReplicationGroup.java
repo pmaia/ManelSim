@@ -10,6 +10,7 @@ public class ReplicationGroup {
 	private final String fileName;
 	private final DataServer primary;
 	private final Set<DataServer> secondaries;
+	private boolean changed;
 
 	public ReplicationGroup(String fileName, DataServer primary, Set<DataServer> secondaries) {
 
@@ -38,15 +39,20 @@ public class ReplicationGroup {
 		return secondaries;
 	}
 
+	public void setChanged(boolean changed) {
+		this.changed = changed;
+	}
+	
+	public boolean isChanged() {
+		return this.changed;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
 				+ ((fileName == null) ? 0 : fileName.hashCode());
-		result = prime * result + ((primary == null) ? 0 : primary.hashCode());
-		result = prime * result
-				+ ((secondaries == null) ? 0 : secondaries.hashCode());
 		return result;
 	}
 
@@ -64,17 +70,7 @@ public class ReplicationGroup {
 				return false;
 		} else if (!fileName.equals(other.fileName))
 			return false;
-		if (primary == null) {
-			if (other.primary != null)
-				return false;
-		} else if (!primary.equals(other.primary))
-			return false;
-		if (secondaries == null) {
-			if (other.secondaries != null)
-				return false;
-		} else if (!secondaries.equals(other.secondaries))
-			return false;
 		return true;
 	}
-
+	
 }

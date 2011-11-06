@@ -1,19 +1,14 @@
 package ddg.model;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
-import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 import ddg.model.placement.DataPlacementAlgorithm;
-import ddg.util.Pair;
 
 public class MetadataServer {
 	
 	private final DataPlacementAlgorithm dataPlacement;
-	private final List<DataServer> availableDataServers;
 
 	private final Map<String, ReplicationGroup> files;
 	private final Map<String, ReplicationGroup> openFiles;
@@ -21,94 +16,54 @@ public class MetadataServer {
 	private final int replicationLevel;
 
 
-	public MetadataServer(List<DataServer> dataServers, DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel) {
+	public MetadataServer(DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel) {
 
-		if (dataServers == null)
-			throw new IllegalArgumentException();
-		if (dataServers.isEmpty())
-			throw new IllegalArgumentException();
 		if (dataPlacementAlgorithm == null)
 			throw new IllegalArgumentException();
 		if(replicationLevel < 1)
 			throw new IllegalArgumentException();
 
 		this.dataPlacement = dataPlacementAlgorithm;
-		this.availableDataServers = new LinkedList<DataServer>(dataServers);
-
 		this.files = new HashMap<String, ReplicationGroup>();
 		this.openFiles = new HashMap<String, ReplicationGroup>();
-		
 		this.replicationLevel = replicationLevel;
 	}
 
-	/**
-	 * @param fileName
-	 * @param fileDescriptor
-	 * @param client
-	 * @return
-	 */
-	public ReplicationGroup openPath(String fileName, DDGClient client) {
+	public ReplicationGroup openPath(DDGClient client, String fileName) {
 
 		if (!files.containsKey(fileName)) {
 			createFile(fileName, replicationLevel, client);// FIXME externalize
 		}
 
 		ReplicationGroup replicationGroup = files.get(fileName);
-		openFiles.put(fileName, replicationGroup);// FIXME do release
-														// memory leak
+		openFiles.put(fileName, replicationGroup);
 
 		return replicationGroup;
 	}
-
-	/**
-	 * @param fileDescriptor
-	 * @return
-	 */
-	public ReplicationGroup lookupReplicationGroup(int fileDescriptor) {
-
-		ReplicationGroup group = openFiles.get(fileDescriptor);
-
-		if (group == null) {
-			throw new RuntimeException("The file descriptor: " + fileDescriptor
-					+ " is not open on this client: " + this
-					+ " Open descriptors: " + openFiles.keySet());
+	
+	public void closePath(DDGClient client, String fileName) {
+		ReplicationGroup replicationGroup = openFiles.remove(fileName);
+		
+		if(replicationGroup != null && replicationGroup.isChanged()) {
+			throw new RuntimeException("must implement this");
+			/*
+			 * TODO make MetadataServer implement EventHandler
+			 * TODO schedule replica update
+			 * TODO implement handleEvent to deal with replicas updates and replicas deletions
+			 */
 		}
-
-		return group;
 	}
 
-	private ReplicationGroup createReplicationGroup(
-			DataPlacementAlgorithm placement, String fileName,
-			int replicationLevel, List<DataServer> nonFullDataServers,
-			DDGClient client) {
+	private ReplicationGroup createFile(String filePath, int replicationLevel, DDGClient client) {
 
-		Pair<DataServer, List<DataServer>> group = 
-			placement.createFile(fileName, replicationLevel, nonFullDataServers, client);
-
-		DataServer primaryDataServer = group.first;
-
-//		return new ReplicationGroup(fileName, primaryDataServer, group.second);
-		return null;
-	}
-
-	/**
-	 * @param fileName
-	 * @param fileSize
-	 * @param replicationLevel
-	 * @param client
-	 * @return
-	 */
-	private ReplicationGroup createFile(String fileName, int replicationLevel,
-			DDGClient client) {
-
-		if (files.containsKey(fileName)) {
+		if (files.containsKey(filePath)) {
 			return null;
 		}
 
-		ReplicationGroup replicationGroup = createReplicationGroup(
-				dataPlacement, fileName, replicationLevel,
-				this.availableDataServers, client);
-		files.put(fileName, replicationGroup);
+		ReplicationGroup replicationGroup = 
+			dataPlacement.createFile(client, filePath, replicationLevel);
+			
+		files.put(filePath, replicationGroup);
 
 		return replicationGroup;
 	}

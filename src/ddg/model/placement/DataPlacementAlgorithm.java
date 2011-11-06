@@ -15,11 +15,8 @@
  */
 package ddg.model.placement;
 
-import java.util.List;
-
 import ddg.model.DDGClient;
-import ddg.model.data.DataServer;
-import ddg.util.Pair;
+import ddg.model.data.ReplicationGroup;
 
 /**
  * TODO make doc
@@ -28,15 +25,6 @@ import ddg.util.Pair;
  */
 public interface DataPlacementAlgorithm {
 
-	/**
-	 * @param fileName
-	 * @param replicationLevel
-	 * @param availableDataServers
-	 * @param client
-	 * @return
-	 */
-	Pair<DataServer, List<DataServer>> createFile(String fileName,
-			int replicationLevel, List<DataServer> availableDataServers,
-			DDGClient client);
+	ReplicationGroup createFile(DDGClient client, String fileName, int replicationLevel);
 	
 }

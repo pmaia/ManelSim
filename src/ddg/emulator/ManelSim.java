@@ -21,10 +21,10 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ddg.kernel.EventScheduler;
 import ddg.model.Aggregator;
@@ -36,7 +36,6 @@ import ddg.model.placement.CoLocatedWithSecondariesLoadBalance;
 import ddg.model.placement.CoLocatedWithSecondaryRandomPlacement;
 import ddg.model.placement.DataPlacementAlgorithm;
 import ddg.model.placement.RandomDataPlacementAlgorithm;
-import ddg.util.FileSizeDistribution;
 
 /**
  * TODO make doc
@@ -86,22 +85,24 @@ public class ManelSim {
 		Long timeBeforeSleep = Long.valueOf(args[2]);
 		Integer replicationLevel = Integer.valueOf(args[3]);
 
-		DataPlacementAlgorithm placement = createPlacementPolice(placementPoliceName);
-
 		// 1 GiBytes
-		long diskSize = 1024 * 1024 * 1024 * 1L;
-		FileSizeDistribution fileSizeDistribution = new FileSizeDistribution(
-				8.46, 2.38, diskSize);
-
+		long one_GB = 1024 * 1024 * 1024 * 1L;
+		
 		// building network
-		List<Machine> machines = createMachines(scheduler, tracesDir, timeBeforeSleep);
+		Set<Machine> machines = 
+			createMachines(scheduler, tracesDir, timeBeforeSleep);
 
-		List<DataServer> dataServers = createDataServers(scheduler, diskSize, machines);
+		Set<DataServer> dataServers = 
+			createDataServers(scheduler, one_GB, machines);
+		
+		DataPlacementAlgorithm placement = 
+			createPlacementPolice(placementPoliceName, dataServers);
 
 		MetadataServer metadataServer = 
-			new MetadataServer(dataServers, placement, replicationLevel, fileSizeDistribution);
+			new MetadataServer(placement, replicationLevel);
 
-		List<DDGClient> clients = createClients(scheduler, machines, metadataServer);
+		Set<DDGClient> clients = 
+			createClients(scheduler, machines, metadataServer);
 
 		MultipleEventParser multipleEventParser = 
 			createMultipleEventParser(clients, machines, tracesDir);
@@ -116,7 +117,7 @@ public class ManelSim {
 	}
 
 	private static MultipleEventParser createMultipleEventParser(
-			List<DDGClient> clients, List<Machine> machines, File tracesDir) {
+			Set<DDGClient> clients, Set<Machine> machines, File tracesDir) {
 
 		EventParser []  parsers = new EventParser[machines.size() + clients.size()];
 
@@ -140,14 +141,14 @@ public class ManelSim {
 		return new MultipleEventParser(parsers);
 	}
 
-	private static DataPlacementAlgorithm createPlacementPolice(String police) {
+	private static DataPlacementAlgorithm createPlacementPolice(String police, Set<DataServer> dataServers) {
 
 		if (police.equals("random")) {
-			return new RandomDataPlacementAlgorithm();
+			return new RandomDataPlacementAlgorithm(dataServers);
 		} else if (police.equals("co-random")) {
-			return new CoLocatedWithSecondaryRandomPlacement();
+			return new CoLocatedWithSecondaryRandomPlacement(dataServers);
 		} else if (police.equals("co-balance")) {
-			return new CoLocatedWithSecondariesLoadBalance();
+			return new CoLocatedWithSecondariesLoadBalance(dataServers);
 		}
 
 		return null;
@@ -162,9 +163,9 @@ public class ManelSim {
 	 * @param machines2
 	 * @return
 	 */
-	private static List<DDGClient> createClients(EventScheduler scheduler, List<Machine> machines, MetadataServer herald) {
+	private static Set<DDGClient> createClients(EventScheduler scheduler, Set<Machine> machines, MetadataServer herald) {
 
-		List<DDGClient> newClients = new LinkedList<DDGClient>();
+		Set<DDGClient> newClients = new HashSet<DDGClient>();
 
 		for(Machine machine : machines) {
 			newClients.add(new DDGClient(scheduler, machine, herald));
@@ -173,8 +174,8 @@ public class ManelSim {
 		return newClients;
 	}
 
-	private static List<Machine> createMachines(EventScheduler scheduler, File tracesDir, long timeBeforeSleep) {
-		List<Machine> machines = new LinkedList<Machine>();
+	private static Set<Machine> createMachines(EventScheduler scheduler, File tracesDir, long timeBeforeSleep) {
+		Set<Machine> machines = new HashSet<Machine>();
 		List<String> fsTracesFiles = Arrays.asList(tracesDir.list(fsTracesFilter));
 		List<String> idlenessTracesFiles = Arrays.asList(tracesDir.list(idlenessTracesFilter));
 
@@ -197,9 +198,9 @@ public class ManelSim {
 	 * @param machines
 	 * @return
 	 */
-	private static List<DataServer> createDataServers(EventScheduler scheduler, double diskSize, List<Machine> machines) {
+	private static Set<DataServer> createDataServers(EventScheduler scheduler, double diskSize, Set<Machine> machines) {
 
-		List<DataServer> dataServers = new ArrayList<DataServer>();
+		Set<DataServer> dataServers = new HashSet<DataServer>();
 
 		for (Machine machine : machines) {
 			dataServers.add(new DataServer(scheduler, machine, diskSize));

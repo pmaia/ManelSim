@@ -16,55 +16,56 @@
 package ddg.model.placement;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import ddg.model.DDGClient;
 import ddg.model.data.DataServer;
-import ddg.util.Pair;
+import ddg.model.data.ReplicationGroup;
 
 /**
  * TODO make doc
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class CoLocatedWithSecondariesLoadBalance implements
-		DataPlacementAlgorithm {
+public class CoLocatedWithSecondariesLoadBalance implements DataPlacementAlgorithm {
+	
+	private final Set<DataServer> dataServers;
+	
+	public CoLocatedWithSecondariesLoadBalance(Set<DataServer> dataServers) {
+		this.dataServers = dataServers;
+	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public Pair<DataServer, List<DataServer>> createFile(String fileName,
-			int replicationLevel, List<DataServer> availableDataServers,
-			DDGClient client) {
+	public ReplicationGroup createFile(DDGClient client, String fileName,
+			int replicationLevel) {
+		
+		List<DataServer> secondaries = fromLessToMoreOccupied();
 
-		List<DataServer> dataServersToRequest = fromLessToMoreOccupied(availableDataServers);
-
-		// choose one oh the co-located data servers
+		// choose one of the co-located data servers
 		List<DataServer> dss = client.getMachine().getDeployedDataServers();
 		DataServer coAllocated = dss.get(new Random().nextInt(dss.size()));
 
-		if (dataServersToRequest.contains(coAllocated)) {
-			dataServersToRequest.remove(coAllocated);
+		if (secondaries.contains(coAllocated)) {
+			secondaries.remove(coAllocated);
 		} else {
-			dataServersToRequest.remove(dataServersToRequest.size() - 1);
+			secondaries.remove(secondaries.size() - 1); //FIXME is this else necessary?
 		}
 
-		while (dataServersToRequest.size() > (replicationLevel - 1)) {
-			dataServersToRequest.remove(dataServersToRequest.size() - 1);
+		while (secondaries.size() > (replicationLevel - 1)) { //FIXME why - 1? replication level is the number of copies or the primary is considered?
+			secondaries.remove(secondaries.size() - 1);
 		}
 
-		return new Pair<DataServer, List<DataServer>>(coAllocated,
-				dataServersToRequest);
+		return new ReplicationGroup(fileName, coAllocated, new HashSet<DataServer>(secondaries));
 	}
+	
 
-	private List<DataServer> fromLessToMoreOccupied(
-			List<DataServer> availableDataServers) {
+	private List<DataServer> fromLessToMoreOccupied() {
 
-		List<DataServer> copiedList = new LinkedList<DataServer>(
-				availableDataServers);
+		List<DataServer> copiedList = new LinkedList<DataServer>(dataServers);
 
 		Collections.sort(copiedList);
 

@@ -17,11 +17,12 @@ package ddg.model.placement;
 
 import static ddg.model.placement.DataPlacementUtil.chooseRandomDataServers;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import ddg.model.DDGClient;
 import ddg.model.data.DataServer;
-import ddg.util.Pair;
+import ddg.model.data.ReplicationGroup;
 
 /**
  * TODO make doc
@@ -29,19 +30,33 @@ import ddg.util.Pair;
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
+	
+	private final Set<DataServer> dataServers;
+	
+	public RandomDataPlacementAlgorithm(Set<DataServer> dataServers) {
+		this.dataServers = dataServers;
+	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public Pair<DataServer, List<DataServer>> createFile(String fileName,
-			int replicationLevel, List<DataServer> availableDataServers,
-			DDGClient client) {
-		List<DataServer> dataServersToRequest = chooseRandomDataServers(
-				availableDataServers, replicationLevel);
-		DataServer primary = dataServersToRequest.remove(0);
-		return new Pair<DataServer, List<DataServer>>(primary,
-				dataServersToRequest);
+	public ReplicationGroup createFile(DDGClient client, String fileName,
+			int replicationLevel) {
+		
+		Set<DataServer> choosenDataServes = 
+			chooseRandomDataServers(dataServers, replicationLevel);
+		
+		DataServer primary = null;
+		Set<DataServer> secondaries = new HashSet<DataServer>();
+		
+		for(DataServer dataServer : choosenDataServes) {
+			if(primary == null) {
+				primary = dataServer;
+			} else {
+				secondaries.add(dataServer);
+			}
+		}
+		
+		return new ReplicationGroup(fileName, primary, secondaries);
+		
 	}
 
 }
