@@ -39,7 +39,7 @@ public class FakeFileSystemTraceStream extends FakeTraceStream {
 		super(numberOfEvents);
 	}
 
-	//TODO I implemented this to generate lines similar to the ones found in the cleared SEER traces.
+	//FIXME update this method to generate lines accordingly with the new fs trace format 
 	protected InputStream generateNextEventStream() {
 		final String SEPARATOR = "\t";
 		final String LINE_SEPARATOR = "\n";
