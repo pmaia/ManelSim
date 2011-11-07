@@ -34,7 +34,6 @@ import ddg.model.DDGClient;
 import ddg.model.Machine;
 import ddg.model.MetadataServer;
 import ddg.model.data.DataServer;
-import ddg.model.placement.CoLocatedWithSecondariesLoadBalance;
 import ddg.model.placement.CoLocatedWithSecondaryRandomPlacement;
 import ddg.model.placement.DataPlacementAlgorithm;
 import ddg.model.placement.RandomDataPlacementAlgorithm;
@@ -93,15 +92,12 @@ public class ManelSim {
 		Long timeBeforeUpdateData = Long.valueOf(args[4]);
 		Long timeBeforeDeleteData = Long.valueOf(args[5]);
 
-		// 1 GiBytes
-		long one_GB = 1024 * 1024 * 1024 * 1L;
-		
 		// building network
 		Set<Machine> machines = 
 			createMachines(scheduler, tracesDir, timeBeforeSleep);
 
 		Set<DataServer> dataServers = 
-			createDataServers(scheduler, one_GB, machines);
+			createDataServers(scheduler, machines);
 		
 		DataPlacementAlgorithm placement = 
 			createPlacementPolice(placementPoliceName, dataServers);
@@ -156,11 +152,10 @@ public class ManelSim {
 			return new RandomDataPlacementAlgorithm(dataServers);
 		} else if (police.equals("co-random")) {
 			return new CoLocatedWithSecondaryRandomPlacement(dataServers);
-		} else if (police.equals("co-balance")) {
-			return new CoLocatedWithSecondariesLoadBalance(dataServers);
+		} else {
+			throw new RuntimeException("unknown data placement algorithm");
 		}
 
-		return null;
 	}
 
 	/**
@@ -202,17 +197,15 @@ public class ManelSim {
 	 * Create Data Servers.
 	 * 
 	 * @param scheduler
-	 * @param numberOfDataServers
-	 * @param diskSize
 	 * @param machines
 	 * @return
 	 */
-	private static Set<DataServer> createDataServers(EventScheduler scheduler, double diskSize, Set<Machine> machines) {
+	private static Set<DataServer> createDataServers(EventScheduler scheduler, Set<Machine> machines) {
 
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 
 		for (Machine machine : machines) {
-			dataServers.add(new DataServer(scheduler, machine, diskSize));
+			dataServers.add(new DataServer(scheduler, machine));
 		}
 
 		return dataServers;
