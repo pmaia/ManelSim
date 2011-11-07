@@ -33,34 +33,30 @@ public class FakeFileSystemTraceStream extends FakeTraceStream {
 	private final Random random = new Random();
 	private long nextTimeStamp = System.currentTimeMillis();
 
-	private static final String [] operations = {"read", "write", "open", "close"};
+	private static final String [] operations = {"read", "write", "close", "unlink"};
 
 	public FakeFileSystemTraceStream(int numberOfEvents) {
 		super(numberOfEvents);
 	}
 
-	//FIXME update this method to generate lines accordingly with the new fs trace format 
 	protected InputStream generateNextEventStream() {
 		final String SEPARATOR = "\t";
 		final String LINE_SEPARATOR = "\n";
-		final int uniqueFileHandle = 33;
+		final String uniqueFilePath = "/home/unique/file";
+		final String operationDuration = "-12345"; 
 		final int lengthReadOrWrite = 1024;
 
 		StringBuilder strBuilder = new StringBuilder();
 
-		String op = operations[random.nextInt(4)];
+		String op = operations[random.nextInt(operations.length)];
 
 		strBuilder.append(op);
 		strBuilder.append(SEPARATOR);
 
-		if(op.equals("open")) {
-			strBuilder.append("/home/unique/file");
-			strBuilder.append(SEPARATOR);
-		}
-
 		strBuilder.append(nextTimeStamp);
+		strBuilder.append(operationDuration);
 		strBuilder.append(SEPARATOR);
-		strBuilder.append(uniqueFileHandle);
+		strBuilder.append(uniqueFilePath);
 		strBuilder.append(SEPARATOR);
 
 		if(op.equals("read") || op.equals("write")) {
@@ -68,6 +64,8 @@ public class FakeFileSystemTraceStream extends FakeTraceStream {
 		}
 
 		strBuilder.append(LINE_SEPARATOR);
+		
+		nextTimeStamp += random.nextInt(5000);
 
 		return new ByteArrayInputStream(strBuilder.toString().getBytes());
 	}
