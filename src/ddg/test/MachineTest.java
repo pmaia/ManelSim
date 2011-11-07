@@ -22,9 +22,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import ddg.emulator.events.Sleep;
-import ddg.emulator.events.UserIdlenessStart;
-import ddg.emulator.events.WakeUp;
+import ddg.emulator.event.machine.Sleep;
+import ddg.emulator.event.machine.UserIdlenessStart;
+import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.model.Aggregator;

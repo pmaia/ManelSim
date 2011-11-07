@@ -1,11 +1,11 @@
 package ddg.model;
 
 import ddg.emulator.EmulatorControl;
-import ddg.emulator.events.WakeUp;
-import ddg.emulator.events.filesystem.CloseEvent;
-import ddg.emulator.events.filesystem.ReadEvent;
-import ddg.emulator.events.filesystem.UnlinkEvent;
-import ddg.emulator.events.filesystem.WriteEvent;
+import ddg.emulator.event.filesystem.CloseEvent;
+import ddg.emulator.event.filesystem.ReadEvent;
+import ddg.emulator.event.filesystem.UnlinkEvent;
+import ddg.emulator.event.filesystem.WriteEvent;
+import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
@@ -47,7 +47,7 @@ public class DDGClient extends EventHandler {
 		} else if(anEventName.equals(UnlinkEvent.EVENT_NAME)) {
 			handleUnlink((UnlinkEvent) anEvent);
 		} else {
-			throw new RuntimeException();
+			throw new RuntimeException("Unknown event: " + anEvent);
 		} 
 
 		EmulatorControl.getInstance().scheduleNext();
@@ -60,7 +60,8 @@ public class DDGClient extends EventHandler {
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		if(primaryDataServerMachine.isSleeping()) {
+		if(primaryDataServerMachine.isSleeping()) { 
+			//FIXME checar estado invalido: client machine is the same as server's but server is sleeping
 			Time now = getScheduler().now();
 			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
 			primaryDataServerMachine.handleEvent(wakeUp);
@@ -76,6 +77,7 @@ public class DDGClient extends EventHandler {
 			group.getPrimary().getMachine();
 		
 		if(primaryDataServerMachine.isSleeping()) {
+			//FIXME checar estado invalido: client machine is the same as server's but server is sleeping
 			Time now = getScheduler().now();
 			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
 			primaryDataServerMachine.handleEvent(wakeUp);

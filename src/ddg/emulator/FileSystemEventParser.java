@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import ddg.emulator.events.filesystem.CloseEvent;
-import ddg.emulator.events.filesystem.ReadEvent;
-import ddg.emulator.events.filesystem.UnlinkEvent;
-import ddg.emulator.events.filesystem.WriteEvent;
+import ddg.emulator.event.filesystem.CloseEvent;
+import ddg.emulator.event.filesystem.ReadEvent;
+import ddg.emulator.event.filesystem.UnlinkEvent;
+import ddg.emulator.event.filesystem.WriteEvent;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.DDGClient;

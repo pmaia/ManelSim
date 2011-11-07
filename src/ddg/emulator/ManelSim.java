@@ -70,6 +70,10 @@ public class ManelSim {
 	 * [2] time before sleep (secs)
 	 * @param args 
 	 * [3] replication level
+	 * @param args
+	 * [4] time before update replicas' data (secs)
+	 * @param args
+	 * [5] time before delete replicas' data (secs)
 	 */
 	public static void main(String[] args) throws IOException {
 
@@ -84,6 +88,8 @@ public class ManelSim {
 		String placementPoliceName = args[1];
 		Long timeBeforeSleep = Long.valueOf(args[2]);
 		Integer replicationLevel = Integer.valueOf(args[3]);
+		Long timeBeforeUpdateData = Long.valueOf(args[4]);
+		Long timeBeforeDeleteData = Long.valueOf(args[5]);
 
 		// 1 GiBytes
 		long one_GB = 1024 * 1024 * 1024 * 1L;
@@ -99,7 +105,8 @@ public class ManelSim {
 			createPlacementPolice(placementPoliceName, dataServers);
 
 		MetadataServer metadataServer = 
-			new MetadataServer(placement, replicationLevel);
+			new MetadataServer(scheduler, placement, replicationLevel, 
+					timeBeforeDeleteData, timeBeforeUpdateData);
 
 		Set<DDGClient> clients = 
 			createClients(scheduler, machines, metadataServer);

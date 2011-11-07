@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ddg.emulator.EmulatorControl;
-import ddg.emulator.events.Sleep;
-import ddg.emulator.events.UserIdlenessStart;
-import ddg.emulator.events.WakeUp;
+import ddg.emulator.event.machine.Sleep;
+import ddg.emulator.event.machine.UserIdlenessStart;
+import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;

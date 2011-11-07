@@ -13,28 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator.events;
+package ddg.emulator.event.filesystem;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;
-import ddg.model.Machine;
+import ddg.model.MetadataServer;
 
 /**
  * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class Sleep extends Event {
+public class UpdateReplicationGroup extends Event {
 	
-	public static final String EVENT_NAME = "sleep";
+	public static final String EVENT_NAME = "update-replication-group";
+	
+	private final String filePath;
 
-	public Sleep(Machine aHandler, Time aScheduledTime) {
+	public UpdateReplicationGroup(MetadataServer aHandler, Time aScheduledTime, String filePath) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
+		
+		this.filePath = filePath;
+	}
+	
+	public String getFilePath() {
+		return this.filePath;
 	}
 	
 	@Override
 	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime();
+		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath;
 	}
 
 }

@@ -3,32 +3,60 @@ package ddg.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import ddg.emulator.EmulatorControl;
+import ddg.emulator.event.filesystem.DeleteReplicationGroup;
+import ddg.emulator.event.filesystem.UpdateReplicationGroup;
+import ddg.emulator.event.machine.WakeUp;
+import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
+import ddg.kernel.EventScheduler;
+import ddg.kernel.Time;
+import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 import ddg.model.placement.DataPlacementAlgorithm;
 
-public class MetadataServer {
+public class MetadataServer extends EventHandler {
 	
 	private final DataPlacementAlgorithm dataPlacement;
+	private final Time timeBeforeDeleteData;
+	private final Time timeBeforeUpdateReplicas;
 
 	private final Map<String, ReplicationGroup> files;
 	private final Map<String, ReplicationGroup> openFiles;
-	private final Map<String, ReplicationGroup> deletePending;
+	private final Map<String, ReplicationGroup> toDelete;
 	
 	private final int replicationLevel;
 
-
-	public MetadataServer(DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel) {
+	/**
+	 * 
+	 * @param scheduler
+	 * @param dataPlacementAlgorithm
+	 * @param replicationLevel
+	 * @param timeBeforeDeleteData in seconds
+	 * @param timeBeforeUpdateReplicas in seconds
+	 */
+	public MetadataServer(EventScheduler scheduler, 
+			DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
+			long timeBeforeDeleteData, long timeBeforeUpdateReplicas) {
+		
+		super(scheduler);
 
 		if (dataPlacementAlgorithm == null)
 			throw new IllegalArgumentException();
 		if(replicationLevel < 1)
 			throw new IllegalArgumentException();
+		if(timeBeforeDeleteData < 0)
+			throw new IllegalArgumentException();
+		if(timeBeforeUpdateReplicas < 0)
+			throw new IllegalArgumentException();
 
 		this.dataPlacement = dataPlacementAlgorithm;
 		this.files = new HashMap<String, ReplicationGroup>();
 		this.openFiles = new HashMap<String, ReplicationGroup>();
-		this.deletePending = new HashMap<String, ReplicationGroup>();
+		this.toDelete = new HashMap<String, ReplicationGroup>();
 		this.replicationLevel = replicationLevel;
+		this.timeBeforeDeleteData = new Time(timeBeforeDeleteData * 1000);
+		this.timeBeforeUpdateReplicas = new Time(timeBeforeUpdateReplicas * 1000);
 	}
 
 	public ReplicationGroup openPath(DDGClient client, String filePath) {
@@ -47,12 +75,8 @@ public class MetadataServer {
 		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
 		if(replicationGroup != null && replicationGroup.isChanged()) {
-			throw new RuntimeException("must implement this");
-			/*
-			 * TODO make MetadataServer implement EventHandler
-			 * TODO schedule replica update
-			 * TODO implement handleEvent to deal with replicas updates and replicas deletions
-			 */
+			Time time = getScheduler().now().plus(timeBeforeUpdateReplicas);
+			send(new UpdateReplicationGroup(this, time, filePath));
 		}
 	}
 	
@@ -60,11 +84,11 @@ public class MetadataServer {
 		ReplicationGroup replicationGroup = files.remove(filePath);
 		
 		if(replicationGroup != null) {
-			deletePending.put(filePath, replicationGroup);
+			toDelete.put(filePath, replicationGroup);
+			Time time = getScheduler().now().plus(timeBeforeDeleteData);
+			send(new DeleteReplicationGroup(this, time, filePath));
 		}
-		/*
-		 * TODO schedule a DeleteReplicationGroup task 
-		 */
+		
 	}
 
 	private ReplicationGroup createFile(String filePath, int replicationLevel, DDGClient client) {
@@ -81,4 +105,49 @@ public class MetadataServer {
 		return replicationGroup;
 	}
 
+	@Override
+	public void handleEvent(Event anEvent) {
+		String anEventName = anEvent.getName();
+
+		if (anEventName.equals(DeleteReplicationGroup.EVENT_NAME)) {
+			handleDeleteReplicationGroup((DeleteReplicationGroup) anEvent);
+		} else if (anEventName.equals(UpdateReplicationGroup.EVENT_NAME)) {
+			handleUpdateReplicationGroup((UpdateReplicationGroup) anEvent);
+		} else {
+			throw new RuntimeException("Unknown event: " + anEvent);
+		} 
+
+		EmulatorControl.getInstance().scheduleNext();
+	}
+
+	private void handleUpdateReplicationGroup(UpdateReplicationGroup anEvent) {
+		ReplicationGroup replicationGroup = 
+				files.get(anEvent.getFilePath());
+		
+		if(replicationGroup != null) {
+			Machine primaryMachine = replicationGroup.getPrimary().getMachine();
+			for(DataServer dataServer : replicationGroup.getSecondaries()) {
+				wakeUpIfSleeping(primaryMachine);
+				wakeUpIfSleeping(dataServer.getMachine());
+			}
+		}
+	}
+
+	private void handleDeleteReplicationGroup(DeleteReplicationGroup anEvent) {
+		ReplicationGroup replicationGroup =
+				files.get(anEvent.getFilePath());
+		
+		if(replicationGroup != null) {
+			wakeUpIfSleeping(replicationGroup.getPrimary().getMachine());
+			for(DataServer dataServer : replicationGroup.getSecondaries()) {
+				wakeUpIfSleeping(dataServer.getMachine());
+			}
+		}
+	}
+
+	private void wakeUpIfSleeping(Machine machine) {
+		if(machine.isSleeping()) {
+			machine.handleEvent(new WakeUp(machine, getScheduler().now(), true));
+		}
+	}
 }

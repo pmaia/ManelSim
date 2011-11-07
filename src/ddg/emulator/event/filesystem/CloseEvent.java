@@ -16,7 +16,7 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package ddg.emulator.events.filesystem;
+package ddg.emulator.event.filesystem;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;

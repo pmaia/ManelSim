@@ -13,36 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator.events;
+package ddg.emulator.event.machine;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.Machine;
 
 /**
- * An {@link Event} representing the start of an idleness period.
+ * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserIdlenessStart extends Event {
+public class Sleep extends Event {
 	
-	public static final String EVENT_NAME = "user-idleness-start";
-	
-	private final long userIdlenessDuration; 
+	public static final String EVENT_NAME = "sleep";
 
-	public UserIdlenessStart(Machine aHandler, Time aScheduledTime, 
-			long userIdlenessDuration) {
-		
+	public Sleep(Machine aHandler, Time aScheduledTime) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
-		this.userIdlenessDuration = userIdlenessDuration;
-	}
-
-	/**
-	 * 
-	 * @return the idleness duration in seconds
-	 */
-	public long getIdlenessDuration() {
-		return userIdlenessDuration;
 	}
 	
 	@Override

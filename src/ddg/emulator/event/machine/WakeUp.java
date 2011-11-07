@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator.events;
+package ddg.emulator.event.machine;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;

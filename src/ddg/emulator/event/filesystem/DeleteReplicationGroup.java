@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator.events.filesystem;
+package ddg.emulator.event.filesystem;
 
 import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
-import ddg.model.DDGClient;
 
 /**
  * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UnlinkEvent extends Event {
+public class DeleteReplicationGroup extends Event {
 	
-	public static final String EVENT_NAME = "unlink";
+	public static final String EVENT_NAME = "delete-replication-group";
 	
 	private final String filePath;
 
-	public UnlinkEvent(DDGClient aHandler, Time aScheduledTime, String filePath) {
+	public DeleteReplicationGroup(EventHandler aHandler, Time aScheduledTime, String filePath) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 		
 		this.filePath = filePath;
 	}
 	
-	public String getFilePath() {
+	public String getFilePath() { 
 		return this.filePath;
 	}
 	

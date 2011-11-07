@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import ddg.emulator.events.UserIdlenessStart;
+import ddg.emulator.event.machine.UserIdlenessStart;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.Machine;
