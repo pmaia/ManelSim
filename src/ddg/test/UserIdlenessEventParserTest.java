@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ddg.emulator.UserIdlenessEventParser;
+import ddg.emulator.event.machine.UserIdlenessEventParser;
 import ddg.kernel.EventScheduler;
 import ddg.model.Machine;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator;
+package ddg.emulator.event.filesystem;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,10 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import ddg.emulator.event.filesystem.CloseEvent;
-import ddg.emulator.event.filesystem.ReadEvent;
-import ddg.emulator.event.filesystem.UnlinkEvent;
-import ddg.emulator.event.filesystem.WriteEvent;
+import ddg.emulator.EventParser;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.DDGClient;

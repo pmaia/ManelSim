@@ -19,7 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Random;
 
-import ddg.emulator.UserIdlenessEventParser;
+import ddg.emulator.event.machine.UserIdlenessEventParser;
 
 /**
  * 

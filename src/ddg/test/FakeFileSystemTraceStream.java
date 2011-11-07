@@ -19,7 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Random;
 
-import ddg.emulator.FileSystemEventParser;
+import ddg.emulator.event.filesystem.FileSystemEventParser;
 
 /**
  * 

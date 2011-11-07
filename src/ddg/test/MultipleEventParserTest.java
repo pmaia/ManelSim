@@ -26,8 +26,8 @@ import java.io.InputStreamReader;
 import org.junit.Test;
 
 import ddg.emulator.EventParser;
-import ddg.emulator.FileSystemEventParser;
 import ddg.emulator.MultipleEventParser;
+import ddg.emulator.event.filesystem.FileSystemEventParser;
 import ddg.kernel.Event;
 import ddg.kernel.EventScheduler;
 import ddg.model.DDGClient;

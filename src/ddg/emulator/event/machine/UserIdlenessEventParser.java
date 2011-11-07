@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ddg.emulator;
+package ddg.emulator.event.machine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import ddg.emulator.event.machine.UserIdlenessStart;
+import ddg.emulator.EventParser;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.Machine;

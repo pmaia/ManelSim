@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ddg.emulator.event.filesystem.FileSystemEventParser;
+import ddg.emulator.event.machine.UserIdlenessEventParser;
 import ddg.kernel.EventScheduler;
 import ddg.model.Aggregator;
 import ddg.model.DDGClient;
