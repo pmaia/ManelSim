@@ -1,7 +1,7 @@
 package ddg.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import ddg.emulator.EmulatorControl;
 import ddg.emulator.event.machine.Sleep;
@@ -30,8 +30,8 @@ public class Machine extends EventHandler {
 	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
 	public static final long TRANSITION_DURATION_IN_MILLISECONDS = 2500;
 	
-	private final List<DataServer> deployedDataServers; //FIXME this should be a Set
-	private final List<DDGClient> clients; //FIXME this should be a Set
+	private final Set<DataServer> deployedDataServers;
+	private final Set<DDGClient> clients;
 	
 	private boolean sleeping;
 	private Time lastStateTransition;
@@ -57,8 +57,8 @@ public class Machine extends EventHandler {
 		super(scheduler);
 		
 		this.id = id;
-		this.deployedDataServers = new ArrayList<DataServer>();
-		this.clients = new ArrayList<DDGClient>();
+		this.deployedDataServers = new HashSet<DataServer>();
+		this.clients = new HashSet<DDGClient>();
 		this.timeBeforeSleep = new Time(timeBeforeSleep * 1000);
 		this.lastStateTransition = scheduler.now();
 	}
@@ -77,14 +77,14 @@ public class Machine extends EventHandler {
 	/**
 	 * @return the deployedDataServers
 	 */
-	public List<DataServer> getDeployedDataServers() {
+	public Set<DataServer> getDeployedDataServers() {
 		return deployedDataServers;
 	}
 
 	/**
 	 * @return
 	 */
-	public List<DDGClient> getDeployedClients() {
+	public Set<DDGClient> getDeployedClients() {
 		return clients;
 	}
 
@@ -126,18 +126,16 @@ public class Machine extends EventHandler {
 	 * @param newClient
 	 * @return
 	 */
-	public int bindClient(DDGClient newClient) {
-		clients.add(newClient);
-		return clients.indexOf(newClient);
+	public boolean bindClient(DDGClient newClient) {
+		return clients.add(newClient);
 	}
 
 	/**
 	 * @param newDataServer
 	 * @return
 	 */
-	public int deploy(DataServer newDataServer) {
-		deployedDataServers.add(newDataServer);
-		return deployedDataServers.indexOf(newDataServer);
+	public boolean deploy(DataServer newDataServer) {
+		return deployedDataServers.add(newDataServer);
 	}
 
 	/**

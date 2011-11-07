@@ -18,7 +18,6 @@ package ddg.model.placement;
 import static ddg.model.placement.DataPlacementUtil.chooseRandomDataServers;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -47,7 +46,7 @@ public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgor
 		DataServer primary = null;
 		Set<DataServer> secondaries;
 		
-		List<DataServer> colocatedDataServers = 
+		Set<DataServer> colocatedDataServers = 
 			client.getMachine().getDeployedDataServers();
 		
 		if(!colocatedDataServers.isEmpty()) {
@@ -59,7 +58,13 @@ public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgor
 			secondaries = 
 				chooseRandomDataServers(copyOfAvailableDataServers, replicationLevel - 1);
 			// choose one of the co-located data servers
-			primary = colocatedDataServers.get(new Random().nextInt(colocatedDataServers.size()));
+			int theOne = new Random().nextInt(colocatedDataServers.size());
+			int i = 1;
+			for(DataServer dataServer : colocatedDataServers) {
+				if(i++ >= theOne) {
+					primary = dataServer;
+				}
+			}
 		} else {
 			
 			secondaries = new HashSet<DataServer>();
