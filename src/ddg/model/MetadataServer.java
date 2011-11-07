@@ -12,6 +12,7 @@ public class MetadataServer {
 
 	private final Map<String, ReplicationGroup> files;
 	private final Map<String, ReplicationGroup> openFiles;
+	private final Map<String, ReplicationGroup> deletePending;
 	
 	private final int replicationLevel;
 
@@ -26,23 +27,24 @@ public class MetadataServer {
 		this.dataPlacement = dataPlacementAlgorithm;
 		this.files = new HashMap<String, ReplicationGroup>();
 		this.openFiles = new HashMap<String, ReplicationGroup>();
+		this.deletePending = new HashMap<String, ReplicationGroup>();
 		this.replicationLevel = replicationLevel;
 	}
 
-	public ReplicationGroup openPath(DDGClient client, String fileName) {
+	public ReplicationGroup openPath(DDGClient client, String filePath) {
 
-		if (!files.containsKey(fileName)) {
-			createFile(fileName, replicationLevel, client);// FIXME externalize
+		if (!files.containsKey(filePath)) {
+			createFile(filePath, replicationLevel, client);
 		}
 
-		ReplicationGroup replicationGroup = files.get(fileName);
-		openFiles.put(fileName, replicationGroup);
+		ReplicationGroup replicationGroup = files.get(filePath);
+		openFiles.put(filePath, replicationGroup);
 
 		return replicationGroup;
 	}
 	
-	public void closePath(DDGClient client, String fileName) {
-		ReplicationGroup replicationGroup = openFiles.remove(fileName);
+	public void closePath(DDGClient client, String filePath) {
+		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
 		if(replicationGroup != null && replicationGroup.isChanged()) {
 			throw new RuntimeException("must implement this");
@@ -52,6 +54,17 @@ public class MetadataServer {
 			 * TODO implement handleEvent to deal with replicas updates and replicas deletions
 			 */
 		}
+	}
+	
+	public void deletePath(DDGClient client, String filePath) {
+		ReplicationGroup replicationGroup = files.remove(filePath);
+		
+		if(replicationGroup != null) {
+			deletePending.put(filePath, replicationGroup);
+		}
+		/*
+		 * TODO schedule a DeleteReplicationGroup task 
+		 */
 	}
 
 	private ReplicationGroup createFile(String filePath, int replicationLevel, DDGClient client) {

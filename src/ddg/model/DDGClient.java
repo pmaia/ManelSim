@@ -12,12 +12,6 @@ import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.model.data.ReplicationGroup;
 
-/**
- * A single client.
- * 
- * @author Thiago Emmanuel Pereira da Cunha Silva, thiago.manel@gmail.com
- * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
- */
 public class DDGClient extends EventHandler {
 
 	private final String id;
@@ -28,13 +22,13 @@ public class DDGClient extends EventHandler {
 	 * 
 	 * @param scheduler
 	 * @param machine
-	 * @param herald
+	 * @param metadataServer
 	 */
-	public DDGClient(EventScheduler scheduler, Machine machine, MetadataServer herald) {
+	public DDGClient(EventScheduler scheduler, Machine machine, MetadataServer metadataServer) {
 
 		super(scheduler);
 
-		this.metadataServer = herald;
+		this.metadataServer = metadataServer;
 		this.machine = machine;
 		this.id = "client" + machine.bindClient(this) + machine;
 	}
@@ -45,51 +39,59 @@ public class DDGClient extends EventHandler {
 		String anEventName = anEvent.getName();
 
 		if (anEventName.equals(ReadEvent.EVENT_NAME)) {
-			ReadEvent readEvent = (ReadEvent) anEvent;
-			
-			String filePath = readEvent.getFilePath();
-			ReplicationGroup group = metadataServer.openPath(this, filePath);
-			
-			Machine primaryDataServerMachine =
-				group.getPrimary().getMachine();
-			
-			if(primaryDataServerMachine.isSleeping()) {
-				Time now = getScheduler().now();
-				WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
-				primaryDataServerMachine.handleEvent(wakeUp);
-			}
-
+			handleRead((ReadEvent) anEvent);
 		} else if (anEventName.equals(WriteEvent.EVENT_NAME)) {
-			WriteEvent writeEvent = (WriteEvent) anEvent;
-			
-			String filePath = writeEvent.getFilePath();
-			ReplicationGroup group = metadataServer.openPath(this, filePath);
-			group.setChanged(true);
-			
-			Machine primaryDataServerMachine =
-				group.getPrimary().getMachine();
-			
-			if(primaryDataServerMachine.isSleeping()) {
-				Time now = getScheduler().now();
-				WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
-				primaryDataServerMachine.handleEvent(wakeUp);
-			}
-			
+			handleWrite((WriteEvent) anEvent);
 		} else if(anEventName.equals(CloseEvent.EVENT_NAME)) {
-			CloseEvent closeEvent = (CloseEvent) anEvent;
-			
-			String filePath = closeEvent.getFilePath();
-			
-			metadataServer.closePath(this, filePath);
-			
+			handleClose((CloseEvent) anEvent);
 		} else if(anEventName.equals(UnlinkEvent.EVENT_NAME)) {
-			throw new UnsupportedOperationException("falta implementar");
-			//TODO implement
+			handleUnlink((UnlinkEvent) anEvent);
 		} else {
 			throw new RuntimeException();
 		} 
 
 		EmulatorControl.getInstance().scheduleNext();
+	}
+	
+	private void handleRead(ReadEvent readEvent) {
+		String filePath = readEvent.getFilePath();
+		ReplicationGroup group = metadataServer.openPath(this, filePath);
+		
+		Machine primaryDataServerMachine =
+			group.getPrimary().getMachine();
+		
+		if(primaryDataServerMachine.isSleeping()) {
+			Time now = getScheduler().now();
+			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
+			primaryDataServerMachine.handleEvent(wakeUp);
+		}
+	}
+	
+	private void handleWrite(WriteEvent writeEvent) {
+		String filePath = writeEvent.getFilePath();
+		ReplicationGroup group = metadataServer.openPath(this, filePath);
+		group.setChanged(true);
+		
+		Machine primaryDataServerMachine =
+			group.getPrimary().getMachine();
+		
+		if(primaryDataServerMachine.isSleeping()) {
+			Time now = getScheduler().now();
+			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
+			primaryDataServerMachine.handleEvent(wakeUp);
+		}
+	}
+	
+	private void handleClose(CloseEvent closeEvent) {
+		String filePath = closeEvent.getFilePath();
+		
+		metadataServer.closePath(this, filePath);		
+	}
+	
+	private void handleUnlink(UnlinkEvent unlinkEvent) {
+		String filePath = unlinkEvent.getFilePath();
+		
+		metadataServer.deletePath(this, filePath);
 	}
 
 	/**
