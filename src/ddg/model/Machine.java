@@ -28,7 +28,7 @@ public class Machine extends EventHandler {
 	public static final double TRANSITION_POWER_IN_WATTS = 140;
 	public static final double ACTIVE_POWER_IN_WATTS = 140;
 	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
-	public static final long TRANSITION_DURATION_IN_MILLISECONDS = 2500;
+	public static final Time TRANSITION_DURATION = new Time(2500);
 	
 	private final Set<DataServer> deployedDataServers;
 	private final Set<DDGClient> clients;
