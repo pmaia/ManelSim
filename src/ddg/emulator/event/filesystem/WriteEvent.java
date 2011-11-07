@@ -23,7 +23,6 @@ import ddg.kernel.Time;
 import ddg.model.DDGClient;
 
 /**
- * TODO make doc
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */

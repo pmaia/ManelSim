@@ -5,7 +5,6 @@ package ddg.kernel;
 
 
 /**
- * TODO make doc
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */

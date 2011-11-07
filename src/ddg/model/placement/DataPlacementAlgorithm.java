@@ -19,7 +19,8 @@ import ddg.model.DDGClient;
 import ddg.model.data.ReplicationGroup;
 
 /**
- * TODO make doc
+ * Encapsulates the logic of {@link ReplicationGroup} creation, deciding where primary
+ * and secondaries replicas of a file are placed.
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */

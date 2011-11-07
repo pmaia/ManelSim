@@ -39,7 +39,6 @@ import ddg.model.placement.DataPlacementAlgorithm;
 import ddg.model.placement.RandomDataPlacementAlgorithm;
 
 /**
- * TODO make doc
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br

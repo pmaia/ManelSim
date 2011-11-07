@@ -20,7 +20,6 @@ import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
 
 /**
- * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */

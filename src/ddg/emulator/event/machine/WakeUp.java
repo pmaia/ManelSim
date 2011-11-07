@@ -20,7 +20,6 @@ import ddg.kernel.Time;
 import ddg.model.Machine;
 
 /**
- * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */

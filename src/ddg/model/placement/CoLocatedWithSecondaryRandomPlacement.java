@@ -27,7 +27,6 @@ import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 
 /**
- * TODO make doc
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */

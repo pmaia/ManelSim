@@ -4,13 +4,10 @@
 package ddg.kernel;
 
 /**
- * TODO make doc
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public final class Time implements Comparable<Time> {
-
-	// FIXME: CREATE A STATIC SUBCLASS TO MODEL AN INFINITY JETIME
 
 	private final long timeMilliSeconds;
 
