@@ -1,7 +1,14 @@
 package ddg.model;
 
+import static ddg.model.Machine.ACTIVE_POWER_IN_WATTS;
+import static ddg.model.Machine.STAND_BY_POWER_IN_WATTS;
+import static ddg.model.Machine.TRANSITION_DURATION;
+import static ddg.model.Machine.TRANSITION_POWER_IN_WATTS;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import ddg.kernel.Time;
 
 public class Aggregator {
 
@@ -67,31 +74,26 @@ public class Aggregator {
 		summary.append(String.format("\nTotal transitions:\t%d", totalTransitions));
 		
 		//summarize energy consumption
-//		summary.append("\n\n============================================ \nEnergy consumption summary: \n");
-//		double activeConsumptionWh = toHours(totalActiveDurationMillis) * ACTIVE_POWER_IN_WATTS;
-//		double inactiveConsumptionWh = toHours(totalInactiveDurationMillis) * STAND_BY_POWER_IN_WATTS;
-//		double transitionConsumptionWh = 
-//			totalTransitions * toHours(TRANSITION_DURATION_IN_MILLISECONDS) * TRANSITION_POWER_IN_WATTS;
-//		
-//		double energyConsumptionkWh = (activeConsumptionWh + inactiveConsumptionWh + transitionConsumptionWh) / 1000; 
-//		
-//		summary.append(String.format("\nEnergy consumption without opportunistic distributed file system:\t%f kWh",
-//				energyConsumptionkWh));
-//		
-//		double perturbationConsumptionkWh = 
-//			totalPerturbationCount * toHours(TRANSITION_DURATION_IN_MILLISECONDS) * TRANSITION_POWER_IN_WATTS;
-//		perturbationConsumptionkWh += (toHours(totalPerturbationDuration) * ACTIVE_POWER_IN_WATTS);
-//		
-//		double energyConsumptionDOFSkWh = perturbationConsumptionkWh + energyConsumptionkWh;
-//		
-//		summary.append(String.format("\nEnergy consumption with opportunistic distributed file system:\t%f kWh",
-//				energyConsumptionDOFSkWh));
-
+		summary.append("\n\n============================================ \nEnergy consumption summary: \n");
+		double activeConsumptionWh = toHours(totalActiveDurationMillis) * ACTIVE_POWER_IN_WATTS;
+		double inactiveConsumptionWh = toHours(totalInactiveDurationMillis) * STAND_BY_POWER_IN_WATTS;
+		double transitionConsumptionWh = 
+			totalTransitions * toHours(TRANSITION_DURATION) * TRANSITION_POWER_IN_WATTS;
+		
+		double energyConsumptionkWh = (activeConsumptionWh + inactiveConsumptionWh + transitionConsumptionWh) / 1000; 
+		
+		summary.append(String.format("\nEnergy consumption without opportunistic distributed file system:\t%f kWh",
+				energyConsumptionkWh));
+		
 		return summary.toString();
 	}
 	
 	private double toHours(long timeInMillis) {
 		return ((timeInMillis / 1000) / 60) / 60;
+	}
+	
+	private double toHours(Time time) {
+		return toHours(time.asMilliseconds());
 	}
 	
 }
