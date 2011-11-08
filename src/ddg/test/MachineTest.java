@@ -153,4 +153,14 @@ public class MachineTest {
 		long expectedSleepingDuration = timeBeforeSleep * 1000;
 		assertEquals(expectedSleepingDuration, machineAvailability.getSleepingDurationTotal());
 	}
+	
+	@Test
+	public void testEquals() {
+		Machine machine1 = new Machine(scheduler, "id1", timeBeforeSleep);
+		Machine machine2 = new Machine(scheduler, "id2", timeBeforeSleep);
+		
+		assertFalse(machine1.equals(machine2));
+		assertTrue(machine1.equals(machine1));
+		assertTrue(machine1.hashCode() != machine2.hashCode());
+	}
 }

@@ -58,8 +58,7 @@ public class DDGClient extends EventHandler {
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		if(primaryDataServerMachine.isSleeping()) { 
-			//FIXME checar estado invalido: client machine is the same as server's but server is sleeping
+		if(primaryDataServerMachine.isSleeping() && !getMachine().equals(primaryDataServerMachine)) { 
 			Time now = getScheduler().now();
 			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
 			primaryDataServerMachine.handleEvent(wakeUp);
@@ -74,8 +73,7 @@ public class DDGClient extends EventHandler {
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		if(primaryDataServerMachine.isSleeping()) {
-			//FIXME checar estado invalido: client machine is the same as server's but server is sleeping
+		if(primaryDataServerMachine.isSleeping() && !getMachine().equals(primaryDataServerMachine)) {
 			Time now = getScheduler().now();
 			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
 			primaryDataServerMachine.handleEvent(wakeUp);

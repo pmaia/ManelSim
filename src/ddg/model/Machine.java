@@ -49,8 +49,7 @@ public class Machine extends EventHandler {
 	 * 
 	 * @param scheduler
 	 * @param id
-	 * @param sleeping
-	 * @param timeBeforeSleep the amount of time in seconds this machine should remain idle before sleep
+	 * @param timeBeforeSleep
 	 */
 	public Machine(EventScheduler scheduler, String id, long timeBeforeSleep) {
 		super(scheduler);
