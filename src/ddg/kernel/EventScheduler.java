@@ -4,6 +4,7 @@
 package ddg.kernel;
 
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Vector;
 
@@ -15,7 +16,7 @@ import java.util.Vector;
 public final class EventScheduler {
 
 	private Time now = new Time(0L);
-	private Vector<Event> eventList = new Vector<Event>();
+	private PriorityQueue<Event> eventsQueue = new PriorityQueue<Event>();
 	private Vector<EventHandler> handlerList;
 	private Set<EventSchedulerObserver> observers = new HashSet<EventSchedulerObserver>();
 	private Boolean isActive;
@@ -33,8 +34,6 @@ public final class EventScheduler {
 	 */
 	public EventScheduler(Time emulationEnd) {
 
-		eventList.setSize(10000);
-		eventList.clear();
 		handlerList = new Vector<EventHandler>();
 		handlerList.setSize(100);
 		handlerList.clear();
@@ -55,31 +54,7 @@ public final class EventScheduler {
 					+ "). Event is outdated and will not be processed.");
 		}
 
-		int queueSize = eventList.size();
-
-		if (queueSize == 0) {
-			eventList.addElement(aNewEvent);
-		} else if (eventList.lastElement().getScheduledTime()
-				.isEarlierThan(anEventTime)) {
-			eventList.addElement(aNewEvent);
-		} else {
-
-			int queuePos;
-
-			for (queuePos = queueSize - 1; ((queuePos > 0) & anEventTime
-					.isEarlierThan(eventList.elementAt(queuePos)
-							.getScheduledTime())); queuePos--) {
-				/* empty */
-			}
-
-			if (++queuePos == 1
-					& anEventTime.isEarlierThan(eventList.elementAt(0)
-							.getScheduledTime())) {
-				queuePos--;
-			}
-
-			eventList.insertElementAt(aNewEvent, queuePos);
-		}
+		eventsQueue.add(aNewEvent);
 	}
 
 	/**
@@ -90,7 +65,7 @@ public final class EventScheduler {
 		if (anObsoleteEvent == null) {
 			throw new NullPointerException();
 		}
-		eventList.remove(anObsoleteEvent);
+		eventsQueue.remove(anObsoleteEvent);
 	}
 
 	/**
@@ -119,23 +94,9 @@ public final class EventScheduler {
      */
 	public void start() {
 
-		if (!eventList.isEmpty()) {
+		if (!eventsQueue.isEmpty()) {
 			schedule();
 		}
-	}
-
-	/**
-	 * @return
-	 */
-	private Event peek() {
-
-		if (!eventList.isEmpty()) {
-			Event aNextEvent = eventList.elementAt(0);
-			eventList.removeElementAt(0);
-			return aNextEvent;
-		}
-
-		return null;
 	}
 
 	/**
@@ -145,10 +106,10 @@ public final class EventScheduler {
 
 		isActive = Boolean.valueOf(true);
 
-		while (!eventList.isEmpty() & isActive.booleanValue()
+		while (!eventsQueue.isEmpty() & isActive.booleanValue()
 				& isEarlierThanEmulationEnd(now())) {
 
-			Event aNextEvent = peek();
+			Event aNextEvent = eventsQueue.peek();
 
 			if (aNextEvent != null) {
 

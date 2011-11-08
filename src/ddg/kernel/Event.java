@@ -8,7 +8,7 @@ package ddg.kernel;
  * 
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
-public abstract class Event {
+public abstract class Event implements Comparable<Event> {
 
 	private static int eventId = 0;
 
@@ -16,7 +16,7 @@ public abstract class Event {
 	private final String name;
 
 	private Integer theTargetHandlerId;
-	private Time theScheduledTime;
+	private Time scheduledTime;
 
 	/**
 	 * @param aName
@@ -29,7 +29,7 @@ public abstract class Event {
 
 		name = aName;
 		theTargetHandlerId = aHandler.getHandlerId();
-		theScheduledTime = aScheduledTime;
+		scheduledTime = aScheduledTime;
 	}
 
 	/**
@@ -50,7 +50,7 @@ public abstract class Event {
 	 * @return
 	 */
 	public Time getScheduledTime() {
-		return theScheduledTime;
+		return scheduledTime;
 	}
 
 	/**
@@ -65,5 +65,10 @@ public abstract class Event {
 	 */
 	public void setTheTargetHandlerId(Integer theTargetHandlerId) {
 		this.theTargetHandlerId = theTargetHandlerId;
+	}
+	
+	@Override
+	public int compareTo(Event o) {
+		return this.scheduledTime.compareTo(o.scheduledTime);
 	}
 }
