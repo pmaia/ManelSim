@@ -109,7 +109,7 @@ public final class EventScheduler {
 		while (!eventsQueue.isEmpty() & isActive.booleanValue()
 				& isEarlierThanEmulationEnd(now())) {
 
-			Event aNextEvent = eventsQueue.peek();
+			Event aNextEvent = eventsQueue.poll();
 
 			if (aNextEvent != null) {
 
