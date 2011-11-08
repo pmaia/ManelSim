@@ -18,15 +18,15 @@ package ddg.emulator;
 import ddg.kernel.Event;
 
 /**
- * An {@link EventParser} that aggregates a bunch of {@link EventParser}s and delivery their events in order.  
+ * An {@link EventSource} that aggregates a bunch of {@link EventSource}s and delivery their events in order.  
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class MultipleEventParser implements EventParser {
+public class MultipleEventSource implements EventSource {
 	
 	private final PushBackEventParser [] parsers;
 
-	public MultipleEventParser(EventParser[] parsers) {
+	public MultipleEventSource(EventSource[] parsers) {
 		this.parsers = new PushBackEventParser[parsers.length];
 		
 		for(int i = 0; i < parsers.length; i++) {
@@ -71,14 +71,14 @@ public class MultipleEventParser implements EventParser {
 	
 	/**
 	 * 
-	 *	Adds the ability to "push back" an event to an {@link EventParser}
+	 *	Adds the ability to "push back" an event to an {@link EventSource}
 	 */
-	private static class PushBackEventParser implements EventParser {
+	private static class PushBackEventParser implements EventSource {
 		
-		private final EventParser decoratedEventParser;
+		private final EventSource decoratedEventParser;
 		private Event 	pushedBackEvent;
 		
-		public PushBackEventParser(EventParser parser) {
+		public PushBackEventParser(EventSource parser) {
 			this.decoratedEventParser = parser;
 		}
 

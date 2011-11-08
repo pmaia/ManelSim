@@ -17,7 +17,7 @@ import ddg.model.MetadataServer;
 public class EmulatorControl {
 
 	private final EventScheduler theUniqueEventScheduler;
-	private final EventParser eventInjector;
+	private final EventSource eventInjector;
 
 	// ugly but works
 	private static EmulatorControl singleInstace;
@@ -26,7 +26,7 @@ public class EmulatorControl {
 	private final BootStrapperEventHandler bootStrapperEventHandler;
 
 	public static EmulatorControl build(EventScheduler eventScheduler,
-			EventParser eventInjector, MetadataServer metadataServer) {
+			EventSource eventInjector, MetadataServer metadataServer) {
 
 		if (singleInstace != null)
 			throw new IllegalStateException();
@@ -55,7 +55,7 @@ public class EmulatorControl {
 	}
 
 	private EmulatorControl(EventScheduler eventScheduler,
-			EventParser injector, MetadataServer metadataServer) {
+			EventSource injector, MetadataServer metadataServer) {
 
 		this.theUniqueEventScheduler = eventScheduler;
 		this.eventInjector = injector;

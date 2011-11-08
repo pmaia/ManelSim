@@ -22,7 +22,7 @@ import ddg.kernel.Event;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public interface EventParser {
+public interface EventSource {
 
 	/**
 	 * @return

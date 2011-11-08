@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import ddg.emulator.EventParser;
+import ddg.emulator.EventSource;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.DDGClient;
@@ -32,7 +32,7 @@ import ddg.model.DDGClient;
  * @author thiago - thiago@lsd.ufcg.edu.br
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class FileSystemEventParser implements EventParser {
+public class FileSystemEventParser implements EventSource {
 
 	private final BufferedReader bufferedReader;
 

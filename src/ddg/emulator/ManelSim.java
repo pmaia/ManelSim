@@ -108,7 +108,7 @@ public class ManelSim {
 		Set<DDGClient> clients = 
 			createClients(scheduler, machines, metadataServer);
 
-		MultipleEventParser multipleEventParser = 
+		MultipleEventSource multipleEventParser = 
 			createMultipleEventParser(clients, machines, tracesDir);
 
 		EmulatorControl control = 
@@ -120,10 +120,10 @@ public class ManelSim {
 		System.out.println(Aggregator.getInstance().summarize());
 	}
 
-	private static MultipleEventParser createMultipleEventParser(
+	private static MultipleEventSource createMultipleEventParser(
 			Set<DDGClient> clients, Set<Machine> machines, File tracesDir) {
 
-		EventParser []  parsers = new EventParser[machines.size() + clients.size()];
+		EventSource []  parsers = new EventSource[machines.size() + clients.size()];
 
 		try {
 			int parserCount = 0;
@@ -142,7 +142,7 @@ public class ManelSim {
 			throw new IllegalStateException(e);
 		}
 
-		return new MultipleEventParser(parsers);
+		return new MultipleEventSource(parsers);
 	}
 
 	private static DataPlacementAlgorithm createPlacementPolice(String police, Set<DataServer> dataServers) {

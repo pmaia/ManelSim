@@ -25,8 +25,8 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
-import ddg.emulator.EventParser;
-import ddg.emulator.MultipleEventParser;
+import ddg.emulator.EventSource;
+import ddg.emulator.MultipleEventSource;
 import ddg.emulator.event.filesystem.FileSystemEventParser;
 import ddg.kernel.Event;
 import ddg.kernel.EventScheduler;
@@ -42,7 +42,7 @@ public class MultipleEventParserTest {
 	
 	@Test
 	public void eventOrderingTest() {
-		EventParser [] parsers = new EventParser[3];
+		EventSource [] parsers = new EventSource[3];
 		
 		InputStream trace1 = new FakeFileSystemTraceStream(0);
 		InputStream trace2 = new FakeFileSystemTraceStream(60);
@@ -62,7 +62,7 @@ public class MultipleEventParserTest {
 		parsers[1] = new FileSystemEventParser(trace2, client2);
 		parsers[2] = new FileSystemEventParser(trace3, client3);
 		
-		EventParser multipleSourceParser = new MultipleEventParser(parsers);
+		EventSource multipleSourceParser = new MultipleEventSource(parsers);
 		
 		Event currentEvent = multipleSourceParser.getNextEvent();
 		Event nextEvent = null;
@@ -74,7 +74,7 @@ public class MultipleEventParserTest {
 	
 	@Test
 	public void eventsDeliveredCountTest() {
-		EventParser [] parsers = new EventParser[3];
+		EventSource [] parsers = new EventSource[3];
 		
 		InputStream trace1 = new FakeFileSystemTraceStream(50);
 		InputStream trace2 = new FakeFileSystemTraceStream(1000);
@@ -94,7 +94,7 @@ public class MultipleEventParserTest {
 		parsers[1] = new FileSystemEventParser(trace2, client2);
 		parsers[2] = new FileSystemEventParser(trace3, client3);
 		
-		EventParser multipleSourceParser = new MultipleEventParser(parsers);
+		EventSource multipleSourceParser = new MultipleEventSource(parsers);
 		
 		int eventCount = 0;
 		while(multipleSourceParser.getNextEvent() != null) {

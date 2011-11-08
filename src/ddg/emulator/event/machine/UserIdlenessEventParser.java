@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import ddg.emulator.EventParser;
+import ddg.emulator.EventSource;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.model.Machine;
@@ -39,7 +39,7 @@ import ddg.model.Machine;
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserIdlenessEventParser implements EventParser {
+public class UserIdlenessEventParser implements EventSource {
 	
 	private final Machine machine;
 	private final BufferedReader eventReader;
