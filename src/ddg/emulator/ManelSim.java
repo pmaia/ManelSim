@@ -108,13 +108,15 @@ public class ManelSim {
 		Set<DDGClient> clients = 
 			createClients(scheduler, machines, metadataServer);
 
-		MultipleEventSource multipleEventParser = 
+		MultipleEventSource multipleEventSource = 
 			createMultipleEventParser(clients, machines, tracesDir);
 
-		EmulatorControl control = 
-			EmulatorControl.build(scheduler, multipleEventParser, metadataServer);
-
-		control.scheduleNext();
+		EventInjector eventInjector = 
+			new EventInjector(scheduler, multipleEventSource);
+		
+		scheduler.registerObserver(eventInjector);
+		
+		eventInjector.injectNext();
 		scheduler.start();
 
 		System.out.println(Aggregator.getInstance().summarize());

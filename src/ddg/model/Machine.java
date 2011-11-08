@@ -3,7 +3,6 @@ package ddg.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import ddg.emulator.EmulatorControl;
 import ddg.emulator.event.machine.Sleep;
 import ddg.emulator.event.machine.UserIdlenessStart;
 import ddg.emulator.event.machine.WakeUp;
@@ -165,7 +164,6 @@ public class Machine extends EventHandler {
 			throw new IllegalArgumentException();
 		}
 		
-		EmulatorControl.getInstance().scheduleNext();
 	}
 	
 	private void handleWakeUp(WakeUp event) {

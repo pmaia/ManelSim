@@ -3,6 +3,8 @@
  */
 package ddg.kernel;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -15,6 +17,7 @@ public final class EventScheduler {
 	private Time now = new Time(0L);
 	private Vector<Event> eventList = new Vector<Event>();
 	private Vector<EventHandler> handlerList;
+	private Set<EventSchedulerObserver> observers = new HashSet<EventSchedulerObserver>();
 	private Boolean isActive;
 	private Time theEmulationEnd;
 
@@ -161,6 +164,7 @@ public final class EventScheduler {
 				if (isEarlierThanEmulationEnd(anEventTime)) {
 					now = anEventTime;
 					processEvent(aNextEvent);
+					notifyEventProcessed();
 				} else {
 					now = theEmulationEnd;
 				}
@@ -168,6 +172,12 @@ public final class EventScheduler {
 		}
 
 		isActive = Boolean.valueOf(false);
+	}
+
+	private void notifyEventProcessed() {
+		for(EventSchedulerObserver observer : observers) {
+			observer.eventProcessed();
+		}
 	}
 
 	private boolean isEarlierThanEmulationEnd(Time time) {
@@ -197,5 +207,9 @@ public final class EventScheduler {
 	 */
 	public Time now() {
 		return now;
+	}
+
+	public void registerObserver(EventSchedulerObserver eventInjector) {
+		observers.add(eventInjector);
 	}
 }

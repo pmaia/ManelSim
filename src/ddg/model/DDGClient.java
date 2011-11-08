@@ -1,6 +1,5 @@
 package ddg.model;
 
-import ddg.emulator.EmulatorControl;
 import ddg.emulator.event.filesystem.CloseEvent;
 import ddg.emulator.event.filesystem.ReadEvent;
 import ddg.emulator.event.filesystem.UnlinkEvent;
@@ -50,7 +49,6 @@ public class DDGClient extends EventHandler {
 			throw new RuntimeException("Unknown event: " + anEvent);
 		} 
 
-		EmulatorControl.getInstance().scheduleNext();
 	}
 	
 	private void handleRead(ReadEvent readEvent) {

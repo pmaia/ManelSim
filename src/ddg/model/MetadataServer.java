@@ -3,7 +3,6 @@ package ddg.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import ddg.emulator.EmulatorControl;
 import ddg.emulator.event.filesystem.DeleteReplicationGroup;
 import ddg.emulator.event.filesystem.UpdateReplicationGroup;
 import ddg.emulator.event.machine.WakeUp;
@@ -117,7 +116,6 @@ public class MetadataServer extends EventHandler {
 			throw new RuntimeException("Unknown event: " + anEvent);
 		} 
 
-		EmulatorControl.getInstance().scheduleNext();
 	}
 
 	private void handleUpdateReplicationGroup(UpdateReplicationGroup anEvent) {
