@@ -13,6 +13,9 @@ for line in sys.stdin:
 	timestamp = int(tokens[0])
 	inactivity_time = int(tokens[1]) / 1000
 
+	if (timestamp - last_timestamp_read) != 1:
+		
+
 	if inactivity_time < last_inactivity_time_read:
 		print str(last_timestamp_read - last_inactivity_time_read) + "\t" + str(last_inactivity_time_read)
 
