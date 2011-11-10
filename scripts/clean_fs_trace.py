@@ -162,25 +162,30 @@ def clean_unlink(tokens):
 
 ### Main ###
 
+very_bad_lines_count = 0
+
 for line in sys.stdin:
 	tokens = line.split()
 
-	clean_line = None
-	if tokens[4] == 'sys_open':
-		handle_sys_open(tokens)
-	elif tokens[4] == 'do_filp_open':
-		handle_do_filp_open(tokens)
-	elif tokens[4] == 'sys_close':
-		clean_line = clean_close(tokens)
-	elif tokens[4] == 'sys_write':
-		clean_line = clean_write(tokens)
-	elif tokens[4] == 'sys_read':
-		clean_line = clean_read(tokens)
-	elif tokens[4] == 'sys_unlink':
-		clean_line = clean_unlink(tokens)
+	try:
+		clean_line = None
+		if tokens[4] == 'sys_open':
+			handle_sys_open(tokens)
+		elif tokens[4] == 'do_filp_open':
+			handle_do_filp_open(tokens)
+		elif tokens[4] == 'sys_close':
+			clean_line = clean_close(tokens)
+		elif tokens[4] == 'sys_write':
+			clean_line = clean_write(tokens)
+		elif tokens[4] == 'sys_read':
+			clean_line = clean_read(tokens)
+		elif tokens[4] == 'sys_unlink':
+			clean_line = clean_unlink(tokens)
 
-	if clean_line != None:
-		print clean_line
+		if clean_line != None:
+			print clean_line
+	except:
+		very_bad_lines_count = very_bad_lines_count + 1
 
 print '# number of bad formatted reads, writes, opens, closes and unlinks'
 print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
@@ -189,5 +194,6 @@ print '# opens:\t' + str(bad_format_open)
 print '# do filp opens:\t' + str(bad_format_do_filp_open)
 print '# closes:\t' + str(bad_format_close)
 print '# unlinks:\t' + str(bad_format_unlink)
+print '# very bad lines: \t' + str(very_bad_lines_count)
 
 ### End ###
