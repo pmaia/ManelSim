@@ -2,4 +2,6 @@
 
 # 1. sort the events in time ascending order
 
-sort -n -k 6,6.17
+TEMP_DIR=$1
+
+sort -T $TEMP_DIR -n -k 6,6.17
