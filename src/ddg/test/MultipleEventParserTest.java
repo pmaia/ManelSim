@@ -58,9 +58,9 @@ public class MultipleEventParserTest {
 		DDGClient client2 = new DDGClient(scheduler, machine2, null);
 		DDGClient client3 = new DDGClient(scheduler, machine3, null);
 		
-		parsers[0] = new FileSystemEventParser(trace1, client1);
-		parsers[1] = new FileSystemEventParser(trace2, client2);
-		parsers[2] = new FileSystemEventParser(trace3, client3);
+		parsers[0] = new FileSystemEventParser(client1, trace1);
+		parsers[1] = new FileSystemEventParser(client2, trace2);
+		parsers[2] = new FileSystemEventParser(client3, trace3);
 		
 		EventSource multipleSourceParser = new MultipleEventSource(parsers);
 		
@@ -90,9 +90,9 @@ public class MultipleEventParserTest {
 		DDGClient client2 = new DDGClient(scheduler, machine2, null);
 		DDGClient client3 = new DDGClient(scheduler, machine3, null);
 		
-		parsers[0] = new FileSystemEventParser(trace1, client1);
-		parsers[1] = new FileSystemEventParser(trace2, client2);
-		parsers[2] = new FileSystemEventParser(trace3, client3);
+		parsers[0] = new FileSystemEventParser(client1, trace1);
+		parsers[1] = new FileSystemEventParser(client2, trace2);
+		parsers[2] = new FileSystemEventParser(client3, trace3);
 		
 		EventSource multipleSourceParser = new MultipleEventSource(parsers);
 		

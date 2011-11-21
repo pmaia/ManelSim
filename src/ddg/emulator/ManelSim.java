@@ -138,7 +138,7 @@ public class ManelSim {
 			for(DDGClient client : clients) {
 				traceStream = 
 					new FileInputStream(new File(tracesDir, "fs-" + client.getMachine().getId()));
-				parsers[parserCount++] = new FileSystemEventParser(traceStream, client);
+				parsers[parserCount++] = new FileSystemEventParser(client, traceStream);
 			}
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException(e);

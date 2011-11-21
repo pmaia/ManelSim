@@ -42,7 +42,7 @@ public class FileSystemEventParser implements EventSource {
 	 * @param traceStream
 	 * @throws IOException
 	 */
-	public FileSystemEventParser(InputStream traceStream, DDGClient client) {
+	public FileSystemEventParser(DDGClient client, InputStream traceStream) {
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.client = client;
 	}

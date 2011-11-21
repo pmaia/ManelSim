@@ -51,7 +51,7 @@ public final class EventScheduler {
 		if (anEventTime.isEarlierThan(now())) {
 			throw new RuntimeException("ERROR: emulation time(" + now()
 					+ ") already ahead of event time(" + anEventTime
-					+ "). Event is outdated and will not be processed.");
+					+ "). Event is outdated and will not be processed. Event: " + aNewEvent);
 		}
 
 		eventsQueue.add(aNewEvent);
