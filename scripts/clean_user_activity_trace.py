@@ -1,25 +1,27 @@
 #!/usr/bin/python
 
-# 1. converts logged inactivity periods from milliseconds to seconds
-# 2. keeps only the line that records the maximum inactivity time per inactivity period 
-# 3. the timestamp now refers to the moment the inactivity period started 
-
 import sys
 
-last_inactivity_time_read=-1
-last_timestamp_read=-1
+last_timestamp=-1
+line_number=0
+clean=True
+
 for line in sys.stdin:
+	line_number = line_number + 1
 	tokens = line.split()
 	timestamp = int(tokens[0])
 	inactivity_time = int(tokens[1]) / 1000
 
-	if (timestamp - last_timestamp_read) != 1:
+	if timestamp < last_timestamp:
+		print "this trace remains unsorted"
+		print line
+		print str(line_number)
+		clean=False
+		break
+
+	last_timestamp = timestamp
 		
-
-	if inactivity_time < last_inactivity_time_read:
-		print str(last_timestamp_read - last_inactivity_time_read) + "\t" + str(last_inactivity_time_read)
-
-	last_inactivity_time_read = inactivity_time
-	last_timestamp_read = timestamp
-
-print str(last_timestamp_read - last_inactivity_time_read) + "\t" + str(last_inactivity_time_read)
+if clean:
+	print "this trace is Ok"
+else:
+	print "this trace is not Ok"
