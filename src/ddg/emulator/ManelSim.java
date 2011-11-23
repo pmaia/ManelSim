@@ -76,6 +76,12 @@ public class ManelSim {
 	 * [5] time before delete replicas' data (secs)
 	 */
 	public static void main(String[] args) throws IOException {
+		
+		if(args.length != 6) {
+			System.out.println("Usage: ManelSim <traces dir> <data placement policement>" +
+					" <time before sleep> <replication level> <time before update replicas>" +
+					" <time before delete replicas>");
+		}
 
 		System.out.println(Arrays.toString(args));
 

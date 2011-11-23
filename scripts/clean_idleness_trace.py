@@ -14,12 +14,27 @@ for line in sys.stdin:
 	
 	time_between_logs = timestamp - previous_timestamp
 
-	#there was a cron job that should initialize the idleness tracker every 5 minutes in case it was not still running, so
-	if time_between_logs > 6 * 60 :
-		print "shutdown\t" + str(previous_timestamp) + "\t" + str(time_between_logs - idleness_time)
-	elif idleness_time < previous_idleness_time:
-		print "idleness\t" + str(previous_timestamp - previous_idleness_time) + "\t" + str(previous_idleness_time)
+	if time_between_logs > 1:  #the tracker for some reason didn't log during some seconds. 
+	#we need to decide if the machine was sleeping (shutdown) or just idle during this time. 
+	#we consider just these two states because they are the pessimistic scenarios for the hypothesis we think is true
+		if time_between_logs < 6 * 60:
+		#there was a cron job that should initialize the idleness tracker every 5 minutes in case it was not still running.
+		#because of that, we think it is reasonable to consider that in case of the gap duration is less than 6 minutes, 
+		#the machine was on but the tracker was not or it was on but restarting. So, lets adjust things to looks like a normal idleness...
+			previous_timestamp = timestamp - 1
+			previous_idleness_time = previous_idleness_time + time_between_logs - 1
+		else:
+			if idleness_time - previous_idleness_times <= time_between_logs:
+				print "shutdown\t" + str(previous_timestamp + previous_idleness_time) + "\t" + str(time_between_logs - idleness_time)
+				previous_timestamp = timestamp
+				previous_idleness_time = idleness_time
+				continue
+#			else:
+#				do nothing, it is a continuation of a previous idleness period (I'm not sure if this is true)
 	
+	if idleness_time < previous_idleness_time:
+		print "idleness\t" + str(previous_timestamp - previous_idleness_time) + "\t" + str(previous_idleness_time + time_between_logs)
+
 	previous_timestamp = timestamp
 	previous_idleness_time = idleness_time
 
