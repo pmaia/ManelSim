@@ -16,7 +16,7 @@ for line in sys.stdin:
 
 	#there was a cron job that should initialize the idleness tracker every 5 minutes in case it was not still running, so
 	if time_between_logs > 6 * 60 :
-		print "shutdown\t" + str(previous_timestamp) + "\t" + str(timestamp - idleness_time)
+		print "shutdown\t" + str(previous_timestamp) + "\t" + str(time_between_logs - idleness_time)
 	elif idleness_time < previous_idleness_time:
 		print "idleness\t" + str(previous_timestamp - previous_idleness_time) + "\t" + str(previous_idleness_time)
 	
