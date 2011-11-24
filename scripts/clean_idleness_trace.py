@@ -32,7 +32,7 @@ for line in sys.stdin:
 			continue
 	
 	if idleness_time < previous_idleness_time:
-		print "idleness\t" + str(previous_timestamp - previous_idleness_time) + "\t" + str(previous_idleness_time + time_between_logs)
+		print "idleness\t" + str(previous_timestamp - previous_idleness_time) + "\t" + str(previous_idleness_time)
 
 	previous_timestamp = timestamp
 	previous_idleness_time = idleness_time
