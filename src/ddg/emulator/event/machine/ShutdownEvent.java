@@ -16,38 +16,28 @@
 package ddg.emulator.event.machine;
 
 import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
-import ddg.model.Machine;
 
 /**
- * An {@link Event} representing the start of an idleness period.
+ * An {@link Event} representing a shutdown period.
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserIdlenessStart extends Event {
+public class ShutdownEvent extends Event {
 	
-	public static final String EVENT_NAME = "user-idleness-start";
+	public static final String EVENT_NAME = "machine-shutdown";
 	
-	private final long userIdlenessDuration; 
+	private final Time duration;
 
-	public UserIdlenessStart(Machine aHandler, Time aScheduledTime, 
-			long userIdlenessDuration) {
-		
+	public ShutdownEvent(EventHandler aHandler, Time aScheduledTime, Time duration) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
-		this.userIdlenessDuration = userIdlenessDuration;
+		
+		this.duration = duration;
 	}
 
-	/**
-	 * 
-	 * @return the idleness duration in seconds
-	 */
-	public long getIdlenessDuration() {
-		return userIdlenessDuration;
+	public Time getDuration() {
+		return duration;
 	}
 	
-	@Override
-	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime();
-	}
-
 }

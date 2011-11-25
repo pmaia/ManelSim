@@ -3,8 +3,8 @@ package ddg.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import ddg.emulator.event.machine.Sleep;
-import ddg.emulator.event.machine.UserIdlenessStart;
+import ddg.emulator.event.machine.SleepEvent;
+import ddg.emulator.event.machine.IdlenessEvent;
 import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
@@ -153,12 +153,12 @@ public class Machine extends EventHandler {
 	
 	@Override
 	public void handleEvent(Event event) {
-		if(event instanceof UserIdlenessStart) {
-			handleUserIdlenessStart((UserIdlenessStart) event);
+		if(event instanceof IdlenessEvent) {
+			handleUserIdlenessStart((IdlenessEvent) event);
 		} else if(event instanceof WakeUp) {
 			handleWakeUp((WakeUp) event);
-		} else if(event instanceof Sleep) {
-			handleSleep((Sleep) event);
+		} else if(event instanceof SleepEvent) {
+			handleSleep((SleepEvent) event);
 		} else {
 			throw new IllegalArgumentException();
 		}
@@ -171,7 +171,7 @@ public class Machine extends EventHandler {
 		if(event.isUserIdle()) {
 			if(now.plus(timeBeforeSleep).isEarlierThan(idlenessEnd)) {
 				Time bedTime = now.plus(timeBeforeSleep);
-				send(new Sleep(this, bedTime));
+				send(new SleepEvent(this, bedTime));
 			}
 		} else {
 			this.idlenessEnd = null;
@@ -185,13 +185,13 @@ public class Machine extends EventHandler {
 		}
 	}
 	
-	private void handleUserIdlenessStart(UserIdlenessStart event) {
+	private void handleUserIdlenessStart(IdlenessEvent event) {
 		Time idlenessDuration = new Time(event.getIdlenessDuration() * 1000);
 		Time now = getScheduler().now();
 		
 		if(!idlenessDuration.isEarlierThan(timeBeforeSleep)) {
 			Time bedTime = now.plus(timeBeforeSleep);
-			send(new Sleep(this, bedTime));
+			send(new SleepEvent(this, bedTime));
 			Time wakeUpTime = now.plus(idlenessDuration);
 			send(new WakeUp(this, wakeUpTime, false));
 		}
@@ -199,7 +199,7 @@ public class Machine extends EventHandler {
 		this.idlenessEnd = now.plus(idlenessDuration);
 	}
 	
-	private void handleSleep(Sleep event) {
+	private void handleSleep(SleepEvent event) {
 		Time now = getScheduler().now();
 		
 		if(!this.sleeping) {

@@ -27,42 +27,52 @@ import ddg.model.Machine;
 
 /**
  * 
- * A parser for the trace of user activity.
+ * A parser for the trace of machine activity.
  * 
- * This parser expects that inactivity is logged in the format below:
+ * This parser expects that activity is logged in the format below:
  * <br><br>
- * &lt;timestamp&gt;\t&lt;inactivity_time&gt;
+ * &lt;idleness|shutdown&gt;\t&lt;start_timestamp&gt;\t&lt;duration&gt;
  * <br><br>
- * where &lt;timestamp&gt; are the milliseconds since epoch in which the user inactivity 
- * started and &lt;inactivity_time&gt; is the time in seconds during which the user remained 
- * inactive. 
+ * where &lt;start_timestamp&gt; are the seconds since epoch in which the event 
+ * started and &lt;duration&gt; is the time in seconds during which the event lasted.
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserIdlenessEventParser implements EventSource {
+public class MachineActivityEventParser implements EventSource {
 	
 	private final Machine machine;
 	private final BufferedReader eventReader;
 	
-	public UserIdlenessEventParser(Machine machine, InputStream eventStream) {
+	public MachineActivityEventParser(Machine machine, InputStream eventStream) {
 		this.machine = machine;
 		this.eventReader = new BufferedReader(new InputStreamReader(eventStream));
 	}
 
 	@Override
 	public Event getNextEvent() {
-		UserIdlenessStart event = null;
+		Event event = null;
 		
 		try {
 			String traceLine = eventReader.readLine();
 			
 			if(traceLine != null) {
 				String [] tokens = traceLine.split("\\s");
-
-				Time aScheduledTime = new Time(Long.parseLong(tokens[0]));
-				long inactivityTime = Long.parseLong(tokens[1]);
 				
-				event = new UserIdlenessStart(machine, aScheduledTime, inactivityTime);
+				if(tokens.length != 3) {
+					throw new RuntimeException("Bad formatted line: " + traceLine);
+				}
+				
+				String eventType = tokens[0];
+				Time aScheduledTime = new Time(Long.parseLong(tokens[1]));
+				long duration = Long.parseLong(tokens[2]);
+				
+				if(eventType.equals("idleness")) {
+					event = new IdlenessEvent(machine, aScheduledTime, duration);
+				} else if(eventType.equals("shutdown")){
+					event = new ShutdownEvent(machine, aScheduledTime, new Time(duration));
+				} else {
+					throw new RuntimeException(eventType + " is not recognized by this parser as a valid event type.");
+				}
 			}
 			
 		} catch (IOException e) {

@@ -20,15 +20,29 @@ import ddg.kernel.Time;
 import ddg.model.Machine;
 
 /**
+ * An {@link Event} representing an idleness period.
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class Sleep extends Event {
+public class IdlenessEvent extends Event {
 	
-	public static final String EVENT_NAME = "sleep";
+	public static final String EVENT_NAME = "user-idleness-start";
+	
+	private final long userIdlenessDuration; 
 
-	public Sleep(Machine aHandler, Time aScheduledTime) {
+	public IdlenessEvent(Machine aHandler, Time aScheduledTime, 
+			long userIdlenessDuration) {
+		
 		super(EVENT_NAME, aHandler, aScheduledTime);
+		this.userIdlenessDuration = userIdlenessDuration;
+	}
+
+	/**
+	 * 
+	 * @return the idleness duration in seconds
+	 */
+	public long getIdlenessDuration() {
+		return userIdlenessDuration;
 	}
 	
 	@Override

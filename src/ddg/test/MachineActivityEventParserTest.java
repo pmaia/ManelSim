@@ -19,17 +19,17 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ddg.emulator.event.machine.UserIdlenessEventParser;
+import ddg.emulator.event.machine.MachineActivityEventParser;
 import ddg.kernel.EventScheduler;
 import ddg.model.Machine;
 
 
 /**
- * A suite of tests to the UserIdlenessEventParser class
+ * A suite of tests to the {@link MachineActivityEventParser} class
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserIdlenessEventParserTest {
+public class MachineActivityEventParserTest {
 	
 	@Test
 	public void eventCountTest() {
@@ -40,7 +40,7 @@ public class UserIdlenessEventParserTest {
 		EventScheduler scheduler = new EventScheduler();
 		Machine machine = new Machine(scheduler, "machine", 30 * 60);
 		
-		UserIdlenessEventParser eventParser = new UserIdlenessEventParser(machine, fakeEventStream);
+		MachineActivityEventParser eventParser = new MachineActivityEventParser(machine, fakeEventStream);
 		
 		int eventCount = 0;
 		while(eventParser.getNextEvent() != null) {

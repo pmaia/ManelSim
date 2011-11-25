@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import ddg.emulator.event.filesystem.FileSystemEventParser;
-import ddg.emulator.event.machine.UserIdlenessEventParser;
+import ddg.emulator.event.machine.MachineActivityEventParser;
 import ddg.kernel.EventScheduler;
 import ddg.model.Aggregator;
 import ddg.model.DDGClient;
@@ -139,7 +139,7 @@ public class ManelSim {
 			for(Machine machine : machines) {
 				traceStream = 
 					new FileInputStream(new File(tracesDir, "idleness-" + machine.getId()));
-				parsers[parserCount++] = new UserIdlenessEventParser(machine, traceStream);
+				parsers[parserCount++] = new MachineActivityEventParser(machine, traceStream);
 			}
 			for(DDGClient client : clients) {
 				traceStream = 
