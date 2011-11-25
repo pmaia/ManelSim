@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import ddg.emulator.EventSource;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
 import ddg.model.DDGClient;
 
 /**
@@ -135,10 +136,10 @@ public class FileSystemEventParser implements EventSource {
 	}
 	
 	private Time parseTime(String traceTimestamp) {
-		long timeInMilli = 
-				Long.parseLong(traceTimestamp.split("-")[0]) / 1000;
+		long timeInMicro = 
+				Long.parseLong(traceTimestamp.split("-")[0]);
 		
-		return new Time(timeInMilli);
+		return new Time(timeInMicro, Unit.MICROSECONDS);
 	}
 
 }

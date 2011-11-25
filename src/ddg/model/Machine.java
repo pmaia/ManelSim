@@ -3,13 +3,14 @@ package ddg.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import ddg.emulator.event.machine.SleepEvent;
 import ddg.emulator.event.machine.IdlenessEvent;
+import ddg.emulator.event.machine.SleepEvent;
 import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
 import ddg.model.data.DataServer;
 
 /**
@@ -27,7 +28,7 @@ public class Machine extends EventHandler {
 	public static final double TRANSITION_POWER_IN_WATTS = 140;
 	public static final double ACTIVE_POWER_IN_WATTS = 140;
 	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
-	public static final Time TRANSITION_DURATION = new Time(2500);
+	public static final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
 	
 	private final Set<DataServer> deployedDataServers;
 	private final Set<DDGClient> clients;
@@ -57,7 +58,7 @@ public class Machine extends EventHandler {
 		this.id = id;
 		this.deployedDataServers = new HashSet<DataServer>();
 		this.clients = new HashSet<DDGClient>();
-		this.timeBeforeSleep = new Time(timeBeforeSleep * 1000);
+		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
 		this.lastStateTransition = scheduler.now();
 	}
 	
@@ -186,7 +187,7 @@ public class Machine extends EventHandler {
 	}
 	
 	private void handleUserIdlenessStart(IdlenessEvent event) {
-		Time idlenessDuration = new Time(event.getIdlenessDuration() * 1000);
+		Time idlenessDuration = new Time(event.getIdlenessDuration(), Unit.SECONDS);
 		Time now = getScheduler().now();
 		
 		if(!idlenessDuration.isEarlierThan(timeBeforeSleep)) {

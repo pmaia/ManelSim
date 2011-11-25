@@ -10,12 +10,17 @@ package ddg.kernel;
 public final class Time implements Comparable<Time> {
 
 	private final long timeMilliSeconds;
+	
+	public enum Unit {SECONDS, MILLISECONDS, MICROSECONDS}
 
-	/**
-	 * @param aTime
-	 */
-	public Time(long timeMilliSeconds) {
-		this.timeMilliSeconds = timeMilliSeconds;
+	public Time(long time, Unit unit) {
+		switch(unit) {
+		case SECONDS: this.timeMilliSeconds = time * 1000; break;
+		case MILLISECONDS: this.timeMilliSeconds = time; break;
+		case MICROSECONDS: this.timeMilliSeconds = time / 1000; break;
+		default:
+			throw new IllegalArgumentException("Impossible argument exception");
+		}
 	}
 
 	/**
@@ -23,11 +28,11 @@ public final class Time implements Comparable<Time> {
 	 * @return
 	 */
 	public Time plus(Time otherETime) {
-		return new Time(timeMilliSeconds + otherETime.timeMilliSeconds);
+		return new Time(timeMilliSeconds + otherETime.timeMilliSeconds, Unit.MILLISECONDS);
 	}
 	
 	public Time minus(Time otherETime) {
-		return new Time(timeMilliSeconds - otherETime.timeMilliSeconds);
+		return new Time(timeMilliSeconds - otherETime.timeMilliSeconds, Unit.MILLISECONDS);
 	}
 	
 	public long asMilliseconds() {

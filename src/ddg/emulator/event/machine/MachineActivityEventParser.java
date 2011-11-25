@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import ddg.emulator.EventSource;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
 import ddg.model.Machine;
 
 /**
@@ -63,13 +64,13 @@ public class MachineActivityEventParser implements EventSource {
 				}
 				
 				String eventType = tokens[0];
-				Time aScheduledTime = new Time(Long.parseLong(tokens[1]));
+				Time aScheduledTime = new Time(Long.parseLong(tokens[1]), Unit.SECONDS);
 				long duration = Long.parseLong(tokens[2]);
 				
 				if(eventType.equals("idleness")) {
 					event = new IdlenessEvent(machine, aScheduledTime, duration);
 				} else if(eventType.equals("shutdown")){
-					event = new ShutdownEvent(machine, aScheduledTime, new Time(duration));
+					event = new ShutdownEvent(machine, aScheduledTime, new Time(duration, Unit.SECONDS));
 				} else {
 					throw new RuntimeException(eventType + " is not recognized by this parser as a valid event type.");
 				}

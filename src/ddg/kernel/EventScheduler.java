@@ -8,6 +8,8 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Vector;
 
+import ddg.kernel.Time.Unit;
+
 /**
  * TODO make doc
  * 
@@ -15,7 +17,7 @@ import java.util.Vector;
  */
 public final class EventScheduler {
 
-	private Time now = new Time(0L);
+	private Time now = new Time(0L, Unit.MILLISECONDS);
 	private PriorityQueue<Event> eventsQueue = new PriorityQueue<Event>();
 	private Vector<EventHandler> handlerList;
 	private Set<EventSchedulerObserver> observers = new HashSet<EventSchedulerObserver>();

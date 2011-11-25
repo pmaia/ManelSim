@@ -27,6 +27,7 @@ import ddg.emulator.event.machine.IdlenessEvent;
 import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
 import ddg.model.Aggregator;
 import ddg.model.Machine;
 import ddg.model.MachineAvailability;
@@ -53,14 +54,14 @@ public class MachineTest {
 
 	@Test
 	public void handleUserIdlenessStartTest() {
-		IdlenessEvent idlenessEvent = new IdlenessEvent(machine, new Time(0L), 10);
+		IdlenessEvent idlenessEvent = new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), 10);
 		
 		scheduler.schedule(idlenessEvent);
 		scheduler.start();
 		assertFalse(machine.isSleeping());
 		assertEquals(0, scheduler.now().asMilliseconds());
 		
-		idlenessEvent = new IdlenessEvent(machine, new Time(0L), timeBeforeSleep + 10);
+		idlenessEvent = new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), timeBeforeSleep + 10);
 		scheduler.schedule(idlenessEvent);
 		scheduler.start();
 		assertFalse(machine.isSleeping()); // because a WakeUp event is automatically scheduled
@@ -76,7 +77,7 @@ public class MachineTest {
 	
 	@Test
 	public void handleSleepTest() {
-		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L));
+		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
 		
 		scheduler.schedule(sleepEvent);
 		scheduler.start();
@@ -93,8 +94,8 @@ public class MachineTest {
 	
 	@Test
 	public void handleSleepTest2() {
-		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L));
-		SleepEvent sleepEvent2 = new SleepEvent(machine, new Time(10L));
+		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
+		SleepEvent sleepEvent2 = new SleepEvent(machine, new Time(10L, Unit.MILLISECONDS));
 		
 		scheduler.schedule(sleepEvent);
 		scheduler.schedule(sleepEvent2);
@@ -112,8 +113,8 @@ public class MachineTest {
 	
 	@Test
 	public void handleWakeUpTest() {
-		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L));
-		WakeUp wakeUpEvent = new WakeUp(machine, new Time(10L), false);
+		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
+		WakeUp wakeUpEvent = new WakeUp(machine, new Time(10L, Unit.MILLISECONDS), false);
 		
 		scheduler.schedule(sleepEvent);
 		scheduler.schedule(wakeUpEvent);
@@ -132,9 +133,9 @@ public class MachineTest {
 	@Test
 	public void handleWakeUpTest2() {
 		IdlenessEvent userIdlenessStart = 
-			new IdlenessEvent(machine, new Time(0L), timeBeforeSleep * 3);
+			new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), timeBeforeSleep * 3);
 		WakeUp wakeUpEvent = 
-			new WakeUp(machine, new Time((timeBeforeSleep + 10) * 1000), true);
+			new WakeUp(machine, new Time((timeBeforeSleep + 10) * 1000, Unit.MILLISECONDS), true);
 		
 		scheduler.schedule(userIdlenessStart);
 		scheduler.schedule(wakeUpEvent);

@@ -10,6 +10,7 @@ import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
 import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 import ddg.model.placement.DataPlacementAlgorithm;
@@ -54,8 +55,8 @@ public class MetadataServer extends EventHandler {
 		this.openFiles = new HashMap<String, ReplicationGroup>();
 		this.toDelete = new HashMap<String, ReplicationGroup>();
 		this.replicationLevel = replicationLevel;
-		this.timeBeforeDeleteData = new Time(timeBeforeDeleteData * 1000);
-		this.timeBeforeUpdateReplicas = new Time(timeBeforeUpdateReplicas * 1000);
+		this.timeBeforeDeleteData = new Time(timeBeforeDeleteData, Unit.SECONDS);
+		this.timeBeforeUpdateReplicas = new Time(timeBeforeUpdateReplicas, Unit.SECONDS);
 	}
 
 	public ReplicationGroup openPath(DDGClient client, String filePath) {
