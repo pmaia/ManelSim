@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ddg.emulator.event.machine.IdlenessEvent;
+import ddg.emulator.event.machine.ShutdownEvent;
 import ddg.emulator.event.machine.SleepEvent;
 import ddg.emulator.event.machine.WakeUp;
 import ddg.kernel.Event;
@@ -27,6 +28,7 @@ public class Machine extends EventHandler {
 	 */
 	public static final double TRANSITION_POWER_IN_WATTS = 140;
 	public static final double ACTIVE_POWER_IN_WATTS = 140;
+	public static final double IDLE_POWER_IN_WATTS = 0;
 	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
 	public static final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
 	
@@ -160,12 +162,18 @@ public class Machine extends EventHandler {
 			handleWakeUp((WakeUp) event);
 		} else if(event instanceof SleepEvent) {
 			handleSleep((SleepEvent) event);
+		} else if(event instanceof ShutdownEvent) {
+			handleShutdown((ShutdownEvent) event);
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException(event.toString());
 		}
 		
 	}
 	
+	private void handleShutdown(ShutdownEvent event) {
+		//TODO implement!!!
+	}
+
 	private void handleWakeUp(WakeUp event) {
 		Time now = getScheduler().now();
 		

@@ -81,6 +81,7 @@ public class ManelSim {
 			System.out.println("Usage: ManelSim <traces dir> <data placement policement>" +
 					" <time before sleep> <replication level> <time before update replicas>" +
 					" <time before delete replicas>");
+			System.exit(1);
 		}
 
 		System.out.println(Arrays.toString(args));
