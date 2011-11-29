@@ -5,7 +5,7 @@ import java.util.Map;
 
 import ddg.emulator.event.filesystem.DeleteReplicationGroup;
 import ddg.emulator.event.filesystem.UpdateReplicationGroup;
-import ddg.emulator.event.machine.WakeUp;
+import ddg.emulator.event.machine.WakeUpEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
@@ -146,7 +146,7 @@ public class MetadataServer extends EventHandler {
 
 	private void wakeUpIfSleeping(Machine machine) {
 		if(machine.isSleeping()) {
-			machine.handleEvent(new WakeUp(machine, getScheduler().now(), true));
+			machine.handleEvent(new WakeUpEvent(machine, getScheduler().now(), true));
 		}
 	}
 }

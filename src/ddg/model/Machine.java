@@ -6,7 +6,7 @@ import java.util.Set;
 import ddg.emulator.event.machine.IdlenessEvent;
 import ddg.emulator.event.machine.ShutdownEvent;
 import ddg.emulator.event.machine.SleepEvent;
-import ddg.emulator.event.machine.WakeUp;
+import ddg.emulator.event.machine.WakeUpEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
@@ -21,6 +21,8 @@ import ddg.model.data.DataServer;
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
 public class Machine extends EventHandler {
+	
+	private enum State { ACTIVE, IDLE, SLEEPING, SHUTDOWN };
 
 	/*
 	 * The source of the values below is Lesandro's work: 
@@ -28,25 +30,23 @@ public class Machine extends EventHandler {
 	 */
 	public static final double TRANSITION_POWER_IN_WATTS = 140;
 	public static final double ACTIVE_POWER_IN_WATTS = 140;
-	public static final double IDLE_POWER_IN_WATTS = 0;
+	public static final double IDLE_POWER_IN_WATTS = 0; //FIXME need to discover the right value
 	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
 	public static final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
 	
 	private final Set<DataServer> deployedDataServers;
 	private final Set<DDGClient> clients;
 	
-	private boolean sleeping;
-	private Time lastStateTransition;
-	/**
-	 * The time in the simulation in which the idleness period ends
-	 */
-	private Time idlenessEnd;
 	/**
 	 * The amount of time this machine must wait idle before sleep
 	 */
 	private final Time timeBeforeSleep;
 	
 	private final String id;
+	
+	private State currentState;
+	private Time currentStateStartTime;
+	private Time currentStateEndTime;
 
 	/**
 	 * 
@@ -61,13 +61,12 @@ public class Machine extends EventHandler {
 		this.deployedDataServers = new HashSet<DataServer>();
 		this.clients = new HashSet<DDGClient>();
 		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
-		this.lastStateTransition = scheduler.now();
+
+		this.currentState = State.SHUTDOWN;
+		this.currentStateStartTime = scheduler.now();
+		this.currentStateEndTime = null;
 	}
 	
-	public boolean isSleeping() {
-		return sleeping;
-	}
-
 	/**
 	 * @return the id
 	 */
@@ -158,8 +157,8 @@ public class Machine extends EventHandler {
 	public void handleEvent(Event event) {
 		if(event instanceof IdlenessEvent) {
 			handleUserIdlenessStart((IdlenessEvent) event);
-		} else if(event instanceof WakeUp) {
-			handleWakeUp((WakeUp) event);
+		} else if(event instanceof WakeUpEvent) {
+			handleWakeUp((WakeUpEvent) event);
 		} else if(event instanceof SleepEvent) {
 			handleSleep((SleepEvent) event);
 		} else if(event instanceof ShutdownEvent) {
@@ -171,27 +170,54 @@ public class Machine extends EventHandler {
 	}
 	
 	private void handleShutdown(ShutdownEvent event) {
-		//TODO implement!!!
+		
+		Aggregator aggregator = Aggregator.getInstance();
+		Time now = getScheduler().now();
+		double currentStateDuration = now.minus(currentStateStartTime).asMilliseconds();
+		
+		switch(currentState) {
+		case ACTIVE: 
+			aggregator.aggregateActiveDuration(getId(), currentStateDuration); break;
+		case IDLE: 
+			aggregator.aggregateIdleDuration(getId(), currentStateDuration); break;
+		case SLEEPING: 
+			aggregator.aggregateSleepingDuration(getId(), currentStateDuration); break;
+		case SHUTDOWN: 
+			throw new IllegalStateException("This machine is already turned off");
+		}
+		
+		send(new WakeUpEvent(this, now.plus(event.getDuration()), true));
+		
+		currentState = State.SHUTDOWN;
+		currentStateStartTime = now;
+		currentStateEndTime = now.plus(event.getDuration());
 	}
 
-	private void handleWakeUp(WakeUp event) {
+	private void handleWakeUp(WakeUpEvent wakeUp) {
+		Aggregator aggregator = Aggregator.getInstance();
 		Time now = getScheduler().now();
 		
-		if(event.isUserIdle()) {
-			if(now.plus(timeBeforeSleep).isEarlierThan(idlenessEnd)) {
-				Time bedTime = now.plus(timeBeforeSleep);
-				send(new SleepEvent(this, bedTime));
-			}
-		} else {
-			this.idlenessEnd = null;
+		double currentStateDuration = now.minus(currentStateStartTime).asMilliseconds();
+		
+		switch(currentState) {
+		case ACTIVE: 
+			throw new IllegalStateException("This machine is already active");
+		case IDLE: 
+			aggregator.aggregateIdleDuration(getId(), currentStateDuration); break;
+		case SLEEPING: 
+			aggregator.aggregateSleepingDuration(getId(), currentStateDuration); break;
+		case SHUTDOWN: 
+			aggregator.aggregateShutdownDuration(getId(), currentStateDuration); break;
 		}
 		
-		if(this.sleeping) {
-			Aggregator.getInstance().
-				aggregateSleepingDuration(getId(), now.minus(lastStateTransition).asMilliseconds());
-			this.sleeping = false;
-			this.lastStateTransition = now;
+		if(wakeUp.wasCausedByTheOpportunisticFS() && now.plus(timeBeforeSleep).isEarlierThan(currentStateEndTime)) {
+			Time bedTime = now.plus(timeBeforeSleep);
+			send(new SleepEvent(this, bedTime));
 		}
+		
+		currentState = State.ACTIVE;
+		currentStateStartTime = now;
+		currentStateEndTime = now.plus(wakeUp.getDuration());
 	}
 	
 	private void handleUserIdlenessStart(IdlenessEvent event) {
@@ -202,10 +228,10 @@ public class Machine extends EventHandler {
 			Time bedTime = now.plus(timeBeforeSleep);
 			send(new SleepEvent(this, bedTime));
 			Time wakeUpTime = now.plus(idlenessDuration);
-			send(new WakeUp(this, wakeUpTime, false));
+			send(new WakeUpEvent(this, wakeUpTime, false));
 		}
 		
-		this.idlenessEnd = now.plus(idlenessDuration);
+		this.backToActivityTime = now.plus(idlenessDuration);
 	}
 	
 	private void handleSleep(SleepEvent event) {
@@ -213,9 +239,9 @@ public class Machine extends EventHandler {
 		
 		if(!this.sleeping) {
 			Aggregator.getInstance().
-				aggregateActiveDuration(getId(), now.minus(lastStateTransition).asMilliseconds());
+				aggregateActiveDuration(getId(), now.minus(currentStateStartTime).asMilliseconds());
 			this.sleeping = true;
-			this.lastStateTransition = now;
+			this.currentStateStartTime = now;
 		}
 	}
 }

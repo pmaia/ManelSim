@@ -32,6 +32,7 @@ public class ReadEvent extends Event {
 
 	private final long length;
 	private final String filePath;
+	private final Time duration;
 
 	/**
 	 * 
@@ -40,11 +41,12 @@ public class ReadEvent extends Event {
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public ReadEvent(DDGClient handler, Time scheduledTime, String filePath, long length) {
+	public ReadEvent(DDGClient handler, Time scheduledTime, Time duration, String filePath, long length) {
 		super(EVENT_NAME, handler, scheduledTime);
 		
 		this.filePath = filePath;
 		this.length = length;
+		this.duration = duration;
 	}
 
 	/**
@@ -59,6 +61,10 @@ public class ReadEvent extends Event {
 	 */
 	public long getLength() {
 		return length;
+	}
+	
+	public Time getDuration() {
+		return duration;
 	}
 	
 	@Override

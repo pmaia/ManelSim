@@ -16,34 +16,47 @@
 package ddg.model;
 
 /**
- * TODO make doc
+ * Stores the total times in which a machine remained active, idle, sleeping or turned off. 
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class MachineAvailability {
-	private long activeDurationTotal = 0;
-	private long inactiveDurationTotal = 0;
-	private long transitionsCount = 0;
 	
-	public void addActiveDuration(long activeIncrement) {
-		transitionsCount++;
-		activeDurationTotal += activeIncrement;
+	private double totalActiveDuration = 0;
+	private double totalIdleDuration = 0;
+	private double totalSleepingDuration = 0;
+	private double totalShutdownDuration = 0;
+	
+	public void addActiveDuration(double increment) {
+		totalActiveDuration += increment;
 	}
 	
-	public void addSleepingDuration(long inactiveIncrement) {
-		transitionsCount++;
-		inactiveDurationTotal += inactiveIncrement;
+	public void addIdleDuration(double increment) {
+		totalIdleDuration += increment;
 	}
 	
-	public long getActiveDurationTotal() {
-		return activeDurationTotal;
+	public void addSleepingDuration(double increment) {
+		totalSleepingDuration += increment;
 	}
 	
-	public long getSleepingDurationTotal() {
-		return inactiveDurationTotal;
+	public void addShutdownDuration(double increment) {
+		totalShutdownDuration += increment;
 	}
 	
-	public long getTransitionsCount() {
-		return transitionsCount;
+	public double getTotalActiveDuration() {
+		return totalActiveDuration;
 	}
+	
+	public double getTotalIdleDuration() {
+		return totalIdleDuration;
+	}
+	
+	public double getTotalSleepingDuration() {
+		return totalSleepingDuration;
+	}
+	
+	public double getTotalShutdownDuration() {
+		return totalShutdownDuration;
+	}
+	
 }

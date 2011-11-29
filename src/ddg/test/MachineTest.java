@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import ddg.emulator.event.machine.SleepEvent;
 import ddg.emulator.event.machine.IdlenessEvent;
-import ddg.emulator.event.machine.WakeUp;
+import ddg.emulator.event.machine.WakeUpEvent;
 import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.kernel.Time.Unit;
@@ -70,8 +70,8 @@ public class MachineTest {
 		MachineAvailability machineAvailability = 
 			Aggregator.getInstance().getMachineAvailability(machineId);
 		
-		assertEquals(timeBeforeSleep * 1000, machineAvailability.getActiveDurationTotal());
-		assertEquals(10 * 1000, machineAvailability.getSleepingDurationTotal());
+		assertEquals(timeBeforeSleep * 1000, machineAvailability.getTotalActiveDuration());
+		assertEquals(10 * 1000, machineAvailability.getTotalSleepingDuration());
 		assertEquals(2, machineAvailability.getTransitionsCount());
 	}
 	
@@ -87,8 +87,8 @@ public class MachineTest {
 		MachineAvailability machineAvailability = 
 			Aggregator.getInstance().getMachineAvailability(machineId);
 		
-		assertEquals(0, machineAvailability.getActiveDurationTotal());
-		assertEquals(0, machineAvailability.getSleepingDurationTotal());
+		assertEquals(0, machineAvailability.getTotalActiveDuration());
+		assertEquals(0, machineAvailability.getTotalSleepingDuration());
 		assertEquals(1, machineAvailability.getTransitionsCount());
 	}
 	
@@ -106,15 +106,15 @@ public class MachineTest {
 		MachineAvailability machineAvailability = 
 			Aggregator.getInstance().getMachineAvailability(machineId);
 		
-		assertEquals(0, machineAvailability.getActiveDurationTotal()); //machine is sleeping since time 0
-		assertEquals(0, machineAvailability.getSleepingDurationTotal()); //because there is no event after the first sleep to advance the time
+		assertEquals(0, machineAvailability.getTotalActiveDuration()); //machine is sleeping since time 0
+		assertEquals(0, machineAvailability.getTotalSleepingDuration()); //because there is no event after the first sleep to advance the time
 		assertEquals(1, machineAvailability.getTransitionsCount());
 	}
 	
 	@Test
 	public void handleWakeUpTest() {
 		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
-		WakeUp wakeUpEvent = new WakeUp(machine, new Time(10L, Unit.MILLISECONDS), false);
+		WakeUpEvent wakeUpEvent = new WakeUpEvent(machine, new Time(10L, Unit.MILLISECONDS), false);
 		
 		scheduler.schedule(sleepEvent);
 		scheduler.schedule(wakeUpEvent);
@@ -125,8 +125,8 @@ public class MachineTest {
 		MachineAvailability machineAvailability = 
 			Aggregator.getInstance().getMachineAvailability(machineId);
 		
-		assertEquals(0, machineAvailability.getActiveDurationTotal());
-		assertEquals(10, machineAvailability.getSleepingDurationTotal());
+		assertEquals(0, machineAvailability.getTotalActiveDuration());
+		assertEquals(10, machineAvailability.getTotalSleepingDuration());
 		assertEquals(2, machineAvailability.getTransitionsCount());
 	}
 	
@@ -134,8 +134,8 @@ public class MachineTest {
 	public void handleWakeUpTest2() {
 		IdlenessEvent userIdlenessStart = 
 			new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), timeBeforeSleep * 3);
-		WakeUp wakeUpEvent = 
-			new WakeUp(machine, new Time((timeBeforeSleep + 10) * 1000, Unit.MILLISECONDS), true);
+		WakeUpEvent wakeUpEvent = 
+			new WakeUpEvent(machine, new Time((timeBeforeSleep + 10) * 1000, Unit.MILLISECONDS), true);
 		
 		scheduler.schedule(userIdlenessStart);
 		scheduler.schedule(wakeUpEvent);
@@ -149,10 +149,10 @@ public class MachineTest {
 		assertEquals(4, machineAvailability.getTransitionsCount());
 		
 		long expectedActiveDuration = 2 * timeBeforeSleep * 1000;
-		assertEquals(expectedActiveDuration, machineAvailability.getActiveDurationTotal());
+		assertEquals(expectedActiveDuration, machineAvailability.getTotalActiveDuration());
 		
 		long expectedSleepingDuration = timeBeforeSleep * 1000;
-		assertEquals(expectedSleepingDuration, machineAvailability.getSleepingDurationTotal());
+		assertEquals(expectedSleepingDuration, machineAvailability.getTotalSleepingDuration());
 	}
 	
 	@Test

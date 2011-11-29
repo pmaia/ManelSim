@@ -100,7 +100,7 @@ public class FileSystemEventParser implements EventSource {
 	private UnlinkEvent parseUnlinkEvent(StringTokenizer tokenizer) {
 		// unlink  begin-elapsed   fullpath
 		
-		Time time = parseTime(tokenizer.nextToken());
+		Time time = parseTime(tokenizer.nextToken())[0];
 		String targetPath = tokenizer.nextToken();
 		
 		return new UnlinkEvent(client, time, targetPath);
@@ -109,7 +109,7 @@ public class FileSystemEventParser implements EventSource {
 	private CloseEvent parseCloseEvent(StringTokenizer tokenizer) {
 		// close   begin-elapsed   fullpath
 
-		Time time = parseTime(tokenizer.nextToken());
+		Time time = parseTime(tokenizer.nextToken())[0];
 		String targetPath = tokenizer.nextToken();
 
 		return new CloseEvent(client, time, targetPath);
@@ -118,28 +118,35 @@ public class FileSystemEventParser implements EventSource {
 	private ReadEvent parseReadEvent(StringTokenizer tokenizer) {
 		// read    begin-elapsed   fullpath        length
 		
-		Time time = parseTime(tokenizer.nextToken());
+		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
 		String filePath = tokenizer.nextToken();
 		long length = Long.parseLong(tokenizer.nextToken());
 
-		return new ReadEvent(client, time, filePath, length);
+		return new ReadEvent(client, timestampAndDuration[0], timestampAndDuration[1], filePath, length);
 	}
 
 	private Event parseWriteEvent(StringTokenizer tokenizer) {
 		// write   begin-elapsed   fullpath        length
 		
-		Time time = parseTime(tokenizer.nextToken());
+		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
 		String filePath = tokenizer.nextToken();
 		long length = Long.parseLong(tokenizer.nextToken());
 
-		return new WriteEvent(client, time, length, filePath); 
+		return new WriteEvent(client, timestampAndDuration[0], length, 
+				timestampAndDuration[2], filePath); 
 	}
 	
-	private Time parseTime(String traceTimestamp) {
-		long timeInMicro = 
-				Long.parseLong(traceTimestamp.split("-")[0]);
+	private Time [] parseTime(String traceTimestamp) {
+		Time [] parsedTimes = new Time[2];
 		
-		return new Time(timeInMicro, Unit.MICROSECONDS);
+		String [] timestampAndDuration = traceTimestamp.split("-");
+		
+		parsedTimes[0] = 
+				new Time(Long.parseLong(timestampAndDuration[0]), Unit.MICROSECONDS);
+		parsedTimes[1] =
+				new Time(Long.parseLong(timestampAndDuration[1]), Unit.MICROSECONDS);
+		
+		return parsedTimes; 
 	}
 
 }

@@ -4,7 +4,7 @@ import ddg.emulator.event.filesystem.CloseEvent;
 import ddg.emulator.event.filesystem.ReadEvent;
 import ddg.emulator.event.filesystem.UnlinkEvent;
 import ddg.emulator.event.filesystem.WriteEvent;
-import ddg.emulator.event.machine.WakeUp;
+import ddg.emulator.event.machine.WakeUpEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
@@ -60,7 +60,7 @@ public class DDGClient extends EventHandler {
 		
 		if(primaryDataServerMachine.isSleeping() && !getMachine().equals(primaryDataServerMachine)) { 
 			Time now = getScheduler().now();
-			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
+			WakeUpEvent wakeUp = new WakeUpEvent(primaryDataServerMachine, now, true);
 			primaryDataServerMachine.handleEvent(wakeUp);
 		}
 	}
@@ -75,7 +75,7 @@ public class DDGClient extends EventHandler {
 		
 		if(primaryDataServerMachine.isSleeping() && !getMachine().equals(primaryDataServerMachine)) {
 			Time now = getScheduler().now();
-			WakeUp wakeUp = new WakeUp(primaryDataServerMachine, now, true);
+			WakeUpEvent wakeUp = new WakeUpEvent(primaryDataServerMachine, now, true);
 			primaryDataServerMachine.handleEvent(wakeUp);
 		}
 	}

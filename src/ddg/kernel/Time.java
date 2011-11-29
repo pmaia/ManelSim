@@ -9,11 +9,11 @@ package ddg.kernel;
  */
 public final class Time implements Comparable<Time> {
 
-	private final long timeMilliSeconds;
+	private final double timeMilliSeconds;
 	
 	public enum Unit {SECONDS, MILLISECONDS, MICROSECONDS}
 
-	public Time(long time, Unit unit) {
+	public Time(double time, Unit unit) {
 		switch(unit) {
 		case SECONDS: this.timeMilliSeconds = time * 1000; break;
 		case MILLISECONDS: this.timeMilliSeconds = time; break;
@@ -35,7 +35,7 @@ public final class Time implements Comparable<Time> {
 		return new Time(timeMilliSeconds - otherETime.timeMilliSeconds, Unit.MILLISECONDS);
 	}
 	
-	public long asMilliseconds() {
+	public double asMilliseconds() {
 		return timeMilliSeconds;
 	}
 
@@ -53,7 +53,7 @@ public final class Time implements Comparable<Time> {
 	 */
 	@Override
 	public int compareTo(Time o) {
-		long diff = timeMilliSeconds - o.timeMilliSeconds;
+		double diff = timeMilliSeconds - o.timeMilliSeconds;
 		if (diff < 0) {
 			return -1;
 		} else if (diff > 0) {

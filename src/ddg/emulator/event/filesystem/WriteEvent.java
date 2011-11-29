@@ -32,23 +32,26 @@ public class WriteEvent extends Event {
 	
 	private final long length;
 	private final String filePath;
+	private final Time duration;
 
-	/**
-	 * 
-	 * @param size
-	 * @param filePath
-	 * @param handler
-	 * @param scheduledTime
-	 */
-	public WriteEvent(DDGClient handler, Time scheduledTime, long length, String filePath) {
+	public WriteEvent(DDGClient handler, Time scheduledTime, long length, Time duration, String filePath) {
 		super(EVENT_NAME, handler, scheduledTime);
 		
 		this.length = length;
+		this.duration = duration;
 		this.filePath = filePath;
 	}
 
 	public long getLength() {
 		return length;
+	}
+	
+	/**
+	 * 
+	 * @return the duration of this operation
+	 */
+	public Time getDuration() {
+		return duration;
 	}
 
 	public String getFilePath() {

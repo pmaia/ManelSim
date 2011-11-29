@@ -23,26 +23,30 @@ import ddg.model.Machine;
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class WakeUp extends Event {
+public class WakeUpEvent extends Event {
 	
 	public static final String EVENT_NAME = "wake-up";
 	
-	private final boolean userIdle;
+	private final boolean fsWakeUp;
 
 	/**
 	 * 
 	 * @param aHandler
 	 * @param aScheduledTime
-	 * @param userIdle false if the wake up was caused by user activity 
+	 * @param fsWakeUp true if the wake up was caused by the opportunistic file system 
 	 */
-	public WakeUp(Machine aHandler, Time aScheduledTime, boolean userIdle) {
+	public WakeUpEvent(Machine aHandler, Time aScheduledTime, boolean fsWakeUp) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 		
-		this.userIdle = userIdle;
+		this.fsWakeUp = fsWakeUp;
 	}
 	
-	public boolean isUserIdle() {
-		return this.userIdle;
+	/**
+	 * 
+	 * @return true if the wake up was caused by file system activity
+	 */
+	public boolean wasCausedByTheOpportunisticFS() {
+		return this.fsWakeUp;
 	}
 	
 	@Override
