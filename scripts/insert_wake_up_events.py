@@ -23,3 +23,4 @@ for line in sys.stdin:
 		activity_start = timestamp + duration
 		previous_line = line
 
+print previous_line.strip()
