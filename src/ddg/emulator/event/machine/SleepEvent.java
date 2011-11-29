@@ -26,9 +26,17 @@ import ddg.model.Machine;
 public class SleepEvent extends Event {
 	
 	public static final String EVENT_NAME = "sleep";
+	
+	private final Time duration;
 
-	public SleepEvent(Machine aHandler, Time aScheduledTime) {
+	public SleepEvent(Machine aHandler, Time aScheduledTime, Time duration) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
+		
+		this.duration = duration;
+	}
+	
+	public Time getDuration() {
+		return this.duration;
 	}
 	
 	@Override

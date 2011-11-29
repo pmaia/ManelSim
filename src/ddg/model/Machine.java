@@ -156,7 +156,7 @@ public class Machine extends EventHandler {
 	@Override
 	public void handleEvent(Event event) {
 		if(event instanceof IdlenessEvent) {
-			handleUserIdlenessStart((IdlenessEvent) event);
+			handleIdleness((IdlenessEvent) event);
 		} else if(event instanceof WakeUpEvent) {
 			handleWakeUp((WakeUpEvent) event);
 		} else if(event instanceof SleepEvent) {
@@ -186,8 +186,6 @@ public class Machine extends EventHandler {
 			throw new IllegalStateException("This machine is already turned off");
 		}
 		
-		send(new WakeUpEvent(this, now.plus(event.getDuration()), true));
-		
 		currentState = State.SHUTDOWN;
 		currentStateStartTime = now;
 		currentStateEndTime = now.plus(event.getDuration());
@@ -210,38 +208,66 @@ public class Machine extends EventHandler {
 			aggregator.aggregateShutdownDuration(getId(), currentStateDuration); break;
 		}
 		
-		if(wakeUp.wasCausedByTheOpportunisticFS() && now.plus(timeBeforeSleep).isEarlierThan(currentStateEndTime)) {
-			Time bedTime = now.plus(timeBeforeSleep);
-			send(new SleepEvent(this, bedTime));
+		Time activityEnd = now.plus(wakeUp.getDuration());
+		
+		if(wakeUp.wasCausedByTheOpportunisticFS() && activityEnd.isEarlierThan(currentStateEndTime)) {
+			send(new IdlenessEvent(this, activityEnd, currentStateEndTime.minus(activityEnd)));
 		}
 		
 		currentState = State.ACTIVE;
 		currentStateStartTime = now;
-		currentStateEndTime = now.plus(wakeUp.getDuration());
+		currentStateEndTime = activityEnd;
 	}
 	
-	private void handleUserIdlenessStart(IdlenessEvent event) {
-		Time idlenessDuration = new Time(event.getIdlenessDuration(), Unit.SECONDS);
+	private void handleIdleness(IdlenessEvent event) {
+		Aggregator aggregator = Aggregator.getInstance();
+		Time idlenessDuration = event.getIdlenessDuration();
 		Time now = getScheduler().now();
+		
+		double currentStateDuration = now.minus(currentStateStartTime).asMilliseconds();
+		
+		switch(currentState) {
+		case ACTIVE: 
+			aggregator.aggregateActiveDuration(getId(), currentStateDuration); break;
+		case IDLE: 
+			throw new IllegalStateException("This machine is already idle");
+		case SLEEPING: 
+			aggregator.aggregateSleepingDuration(getId(), currentStateDuration); break;
+		case SHUTDOWN: 
+			aggregator.aggregateShutdownDuration(getId(), currentStateDuration); break;
+		}
 		
 		if(!idlenessDuration.isEarlierThan(timeBeforeSleep)) {
 			Time bedTime = now.plus(timeBeforeSleep);
-			send(new SleepEvent(this, bedTime));
-			Time wakeUpTime = now.plus(idlenessDuration);
-			send(new WakeUpEvent(this, wakeUpTime, false));
+			Time duration = currentStateEndTime.minus(bedTime);
+			
+			send(new SleepEvent(this, bedTime, duration));
 		}
 		
-		this.backToActivityTime = now.plus(idlenessDuration);
+		currentState = State.IDLE;
+		currentStateStartTime = now;
+		currentStateEndTime = now.plus(idlenessDuration);
 	}
 	
 	private void handleSleep(SleepEvent event) {
+		Aggregator aggregator = Aggregator.getInstance();
 		Time now = getScheduler().now();
 		
-		if(!this.sleeping) {
-			Aggregator.getInstance().
-				aggregateActiveDuration(getId(), now.minus(currentStateStartTime).asMilliseconds());
-			this.sleeping = true;
-			this.currentStateStartTime = now;
+		double currentStateDuration = now.minus(currentStateStartTime).asMilliseconds();
+		
+		switch(currentState) {
+		case ACTIVE: 
+			aggregator.aggregateActiveDuration(getId(), currentStateDuration); break;
+		case IDLE: 
+			aggregator.aggregateIdleDuration(getId(), currentStateDuration); break;
+		case SLEEPING: 
+			throw new IllegalStateException("This machine is already sleeping");
+		case SHUTDOWN: 
+			aggregator.aggregateShutdownDuration(getId(), currentStateDuration); break;
 		}
+		
+		currentState = State.SLEEPING;
+		currentStateStartTime = now;
+		currentStateEndTime = now.plus(event.getDuration());
 	}
 }

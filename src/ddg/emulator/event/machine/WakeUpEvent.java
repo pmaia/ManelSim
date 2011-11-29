@@ -28,16 +28,20 @@ public class WakeUpEvent extends Event {
 	public static final String EVENT_NAME = "wake-up";
 	
 	private final boolean fsWakeUp;
+	
+	private final Time duration;
 
 	/**
 	 * 
 	 * @param aHandler
 	 * @param aScheduledTime
+	 * @param duration 
 	 * @param fsWakeUp true if the wake up was caused by the opportunistic file system 
 	 */
-	public WakeUpEvent(Machine aHandler, Time aScheduledTime, boolean fsWakeUp) {
+	public WakeUpEvent(Machine aHandler, Time aScheduledTime, Time duration, boolean fsWakeUp) {
 		super(EVENT_NAME, aHandler, aScheduledTime);
 		
+		this.duration = duration;
 		this.fsWakeUp = fsWakeUp;
 	}
 	
@@ -47,6 +51,10 @@ public class WakeUpEvent extends Event {
 	 */
 	public boolean wasCausedByTheOpportunisticFS() {
 		return this.fsWakeUp;
+	}
+	
+	public Time getDuration() {
+		return this.duration;
 	}
 	
 	@Override
