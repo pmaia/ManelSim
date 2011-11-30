@@ -3,9 +3,13 @@ package ddg.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import ddg.emulator.event.machine.FromShutdownEvent;
+import ddg.emulator.event.machine.FromSleepEvent;
 import ddg.emulator.event.machine.IdlenessEvent;
 import ddg.emulator.event.machine.ShutdownEvent;
 import ddg.emulator.event.machine.SleepEvent;
+import ddg.emulator.event.machine.ToShutdownEvent;
+import ddg.emulator.event.machine.ToSleepEvent;
 import ddg.emulator.event.machine.WakeUpEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
@@ -22,7 +26,15 @@ import ddg.model.data.DataServer;
  */
 public class Machine extends EventHandler {
 	
-	private enum State { ACTIVE, IDLE, SLEEPING, SHUTDOWN };
+	private enum State { 
+		ACTIVE, 
+		IDLE, 
+		SLEEPING, 
+		SHUTDOWN, 
+		TO_SLEEP,
+		FROM_SLEEP,
+		TO_SHUTDOWN,
+		FROM_SHUTDOWN };
 
 	/*
 	 * The source of the values below is Lesandro's work: 
@@ -31,7 +43,12 @@ public class Machine extends EventHandler {
 	public static final double TRANSITION_POWER_IN_WATTS = 140;
 	public static final double ACTIVE_POWER_IN_WATTS = 140;
 	public static final double IDLE_POWER_IN_WATTS = 0; //FIXME need to discover the right value
-	public static final double STAND_BY_POWER_IN_WATTS = 3.33;
+	public static final double SLEEP_POWER_IN_WATTS = 3.33;
+	public static final double TO_SLEEP_POWER = 0; //FIXME need to discover the right value
+	public static final double FROM_SLEEP_POWER = 0; //FIXME need to discover the right value
+	public static final double TO_SHUTDOWN_POWER = 0; //FIXME need to discover the right value
+	public static final double FROM_SHUTDOWN_POWER = 0; //FIXME need to discover the right value 
+	
 	public static final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
 	
 	private final Set<DataServer> deployedDataServers;
@@ -163,12 +180,32 @@ public class Machine extends EventHandler {
 			handleSleep((SleepEvent) event);
 		} else if(event instanceof ShutdownEvent) {
 			handleShutdown((ShutdownEvent) event);
+		} else if(event instanceof ToSleepEvent) {
+			handleToSleep((ToSleepEvent) event);
+		} else if(event instanceof FromSleepEvent) {
+			handleFromSleep((FromSleepEvent) event);
+		} else if(event instanceof ToShutdownEvent) {
+			handleToShutdown((ToShutdownEvent) event);
+		} else if(event instanceof FromShutdownEvent) {
+			handleFromShutdown((FromShutdownEvent) event);
 		} else {
 			throw new IllegalArgumentException(event.toString());
 		}
 		
 	}
 	
+	private void handleFromShutdown(FromShutdownEvent event) {
+	}
+
+	private void handleToShutdown(ToShutdownEvent event) {
+	}
+
+	private void handleFromSleep(FromSleepEvent event) {
+	}
+
+	private void handleToSleep(ToSleepEvent event) {
+	}
+
 	private void handleShutdown(ShutdownEvent event) {
 		
 		Aggregator aggregator = Aggregator.getInstance();
@@ -221,7 +258,7 @@ public class Machine extends EventHandler {
 	
 	private void handleIdleness(IdlenessEvent event) {
 		Aggregator aggregator = Aggregator.getInstance();
-		Time idlenessDuration = event.getIdlenessDuration();
+		Time idlenessDuration = event.getDuration();
 		Time now = getScheduler().now();
 		
 		double currentStateDuration = now.minus(currentStateStartTime).asMilliseconds();

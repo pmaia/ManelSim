@@ -28,16 +28,8 @@ public class ShutdownEvent extends Event {
 	
 	public static final String EVENT_NAME = "machine-shutdown";
 	
-	private final Time duration;
-
 	public ShutdownEvent(EventHandler aHandler, Time aScheduledTime, Time duration) {
-		super(EVENT_NAME, aHandler, aScheduledTime);
-		
-		this.duration = duration;
+		super(EVENT_NAME, aHandler, aScheduledTime, duration);
 	}
 
-	public Time getDuration() {
-		return duration;
-	}
-	
 }

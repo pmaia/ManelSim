@@ -16,43 +16,22 @@
 package ddg.emulator.event.machine;
 
 import ddg.kernel.Event;
+import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
-import ddg.model.Machine;
+import ddg.kernel.Time.Unit;
 
 /**
+ * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class WakeUpEvent extends Event {
+public class ToSleepEvent extends Event {
 	
-	public static final String EVENT_NAME = "wake-up";
-	
-	private final boolean fsWakeUp;
-	
-	/**
-	 * 
-	 * @param aHandler
-	 * @param aScheduledTime
-	 * @param duration 
-	 * @param fsWakeUp true if the wake up was caused by the opportunistic file system 
-	 */
-	public WakeUpEvent(Machine aHandler, Time aScheduledTime, Time duration, boolean fsWakeUp) {
-		super(EVENT_NAME, aHandler, aScheduledTime, duration);
-		
-		this.fsWakeUp = fsWakeUp;
-	}
-	
-	/**
-	 * 
-	 * @return true if the wake up was caused by file system activity
-	 */
-	public boolean wasCausedByTheOpportunisticFS() {
-		return this.fsWakeUp;
-	}
-	
-	@Override
-	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime();
+	private static final String EVENT_NAME = "go-sleep";
+	private static final Time TO_SLEEP_DURATION = new Time(0L, Unit.SECONDS); //FIXME what is the right value?
+
+	public ToSleepEvent(EventHandler aHandler, Time scheduledTime) {
+		super(EVENT_NAME, aHandler, scheduledTime, TO_SLEEP_DURATION);
 	}
 
 }

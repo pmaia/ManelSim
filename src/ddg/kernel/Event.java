@@ -15,21 +15,23 @@ public abstract class Event implements Comparable<Event> {
 	private final int myEventId;
 	private final String name;
 
-	private Integer theTargetHandlerId;
-	private Time scheduledTime;
+	private final Integer theTargetHandlerId;
+	private final Time scheduledTime;
+	private final Time duration;
 
 	/**
 	 * @param aName
 	 * @param aHandler
-	 * @param aScheduledTime
+	 * @param scheduledTime
 	 */
-	public Event(String aName, EventHandler aHandler, Time aScheduledTime) {
+	public Event(String aName, EventHandler aHandler, Time scheduledTime, Time duration) {
 
 		myEventId = eventId++;
 
 		name = aName;
 		theTargetHandlerId = aHandler.getHandlerId();
-		scheduledTime = aScheduledTime;
+		this.scheduledTime = scheduledTime;
+		this.duration = duration;
 	}
 
 	/**
@@ -52,6 +54,10 @@ public abstract class Event implements Comparable<Event> {
 	public Time getScheduledTime() {
 		return scheduledTime;
 	}
+	
+	public Time getDuration() {
+		return this.duration;
+	}
 
 	/**
 	 * @return
@@ -60,13 +66,6 @@ public abstract class Event implements Comparable<Event> {
 		return myEventId;
 	}
 
-	/**
-	 * @param theTargetHandlerId
-	 */
-	public void setTheTargetHandlerId(Integer theTargetHandlerId) {
-		this.theTargetHandlerId = theTargetHandlerId;
-	}
-	
 	@Override
 	public int compareTo(Event o) {
 		return this.scheduledTime.compareTo(o.scheduledTime);

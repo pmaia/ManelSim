@@ -16,7 +16,7 @@
 package ddg.model;
 
 /**
- * Stores the total times in which a machine remained active, idle, sleeping or turned off. 
+ * Stores the total times in which a machine remained active, idle, sleeping, turned off or in some intermediary state. 
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
@@ -26,6 +26,10 @@ public class MachineAvailability {
 	private double totalIdleDuration = 0;
 	private double totalSleepingDuration = 0;
 	private double totalShutdownDuration = 0;
+	private double totalToSleepDuration = 0;
+	private double totalFromSleepDuration = 0;
+	private double totalToShutdownDuration = 0;
+	private double totalFromShutdownDuration = 0;
 	
 	public void addActiveDuration(double increment) {
 		totalActiveDuration += increment;
@@ -43,6 +47,22 @@ public class MachineAvailability {
 		totalShutdownDuration += increment;
 	}
 	
+	public void addToSleepDuration(double increment) {
+		totalToSleepDuration += increment;
+	}
+
+	public void addFromSleepDuration(double increment) {
+		totalFromSleepDuration += increment;
+	}
+
+	public void addToShutdownDuration(double increment) {
+		totalToShutdownDuration += increment;
+	}
+
+	public void addFromShutdownDuration(double increment) {
+		totalFromShutdownDuration += increment;
+	}
+	
 	public double getTotalActiveDuration() {
 		return totalActiveDuration;
 	}
@@ -57,6 +77,22 @@ public class MachineAvailability {
 	
 	public double getTotalShutdownDuration() {
 		return totalShutdownDuration;
+	}
+	
+	public double getToSleepDuration() {
+		return totalToSleepDuration;
+	}
+
+	public double getFromSleepDuration() {
+		return totalFromSleepDuration;
+	}
+
+	public double getToShutdownDuration() {
+		return totalToShutdownDuration;
+	}
+
+	public double addFromShutdownDuration() {
+		return totalFromShutdownDuration;
 	}
 	
 }

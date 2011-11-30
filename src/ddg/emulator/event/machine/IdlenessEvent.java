@@ -28,23 +28,11 @@ public class IdlenessEvent extends Event {
 	
 	public static final String EVENT_NAME = "user-idleness-start";
 	
-	private final Time userIdlenessDuration; 
-
-	public IdlenessEvent(Machine aHandler, Time aScheduledTime, 
-			Time userIdlenessDuration) {
+	public IdlenessEvent(Machine aHandler, Time aScheduledTime, Time userIdlenessDuration) {
 		
-		super(EVENT_NAME, aHandler, aScheduledTime);
-		this.userIdlenessDuration = userIdlenessDuration;
+		super(EVENT_NAME, aHandler, aScheduledTime, userIdlenessDuration);
 	}
 
-	/**
-	 * 
-	 * @return the idleness duration in seconds
-	 */
-	public Time getIdlenessDuration() {
-		return userIdlenessDuration;
-	}
-	
 	@Override
 	public String toString() {
 		return EVENT_NAME + "\t" + getScheduledTime();

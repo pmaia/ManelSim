@@ -41,6 +41,22 @@ public class Aggregator {
 		getMachineAvailability(machine).addShutdownDuration(shutdownDuration);
 	}
 	
+	public void aggregateToSleepDuration(String machine, double toSleepDuration) {
+		getMachineAvailability(machine).addToSleepDuration(toSleepDuration);
+	}
+	
+	public void aggregateFromSleepDuration(String machine, double fromSleepDuration) {
+		getMachineAvailability(machine).addFromSleepDuration(fromSleepDuration);
+	}
+	
+	public void aggregateToShutdownDuration(String machine, double toShutdownDuration) {
+		getMachineAvailability(machine).addToShutdownDuration(toShutdownDuration);
+	}
+	
+	public void aggregateFromShutdownDuration(String machine, double fromShutdownDuration) {
+		getMachineAvailability(machine).addFromShutdownDuration(fromShutdownDuration);
+	}
+	
 	public MachineAvailability getMachineAvailability(String machine) {
 		MachineAvailability machineAvailability = availabilityTotalsPerMachine.get(machine);
 		if(machineAvailability == null) {
