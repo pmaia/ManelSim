@@ -177,7 +177,7 @@ public class Machine extends EventHandler {
 		
 		switch(currentState) {
 		case ACTIVE: 
-			aggregator.aggregateActiveDuration(getId(), currentStateDuration); break;
+			throw new IllegalStateException("There is no ACTIVE -> SHUTDOWN transitions.");
 		case IDLE: 
 			aggregator.aggregateIdleDuration(getId(), currentStateDuration); break;
 		case SLEEPING: 
@@ -257,13 +257,13 @@ public class Machine extends EventHandler {
 		
 		switch(currentState) {
 		case ACTIVE: 
-			aggregator.aggregateActiveDuration(getId(), currentStateDuration); break;
+			throw new IllegalStateException("There is no ACTIVE -> SLEEP transitions.");
 		case IDLE: 
 			aggregator.aggregateIdleDuration(getId(), currentStateDuration); break;
 		case SLEEPING: 
 			throw new IllegalStateException("This machine is already sleeping");
 		case SHUTDOWN: 
-			aggregator.aggregateShutdownDuration(getId(), currentStateDuration); break;
+			throw new IllegalStateException("There is no SHUTDOWN -> SLEEP transitions.");
 		}
 		
 		currentState = State.SLEEPING;
