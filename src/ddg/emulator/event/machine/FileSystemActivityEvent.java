@@ -16,22 +16,35 @@
 package ddg.emulator.event.machine;
 
 import ddg.kernel.Event;
-import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
-import ddg.kernel.Time.Unit;
+import ddg.model.Machine;
 
 /**
  * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class FromSleepEvent extends Event {
+public class FileSystemActivityEvent extends Event {
 	
-	private static final String EVENT_NAME = "wake-up-from-sleep";
-	private static final Time FROM_SLEEP_DURATION = new Time(0L, Unit.SECONDS); //FIXME what is the right value?
+	public static final String EVENT_NAME = "fs-activity";
 	
-	public FromSleepEvent(EventHandler aHandler, Time scheduledTime) {
-		super(EVENT_NAME, aHandler, scheduledTime, FROM_SLEEP_DURATION);
+	private final boolean localFSClient;
+	
+	/**
+	 * 
+	 * @param handler the {@link Machine} that will handle this event
+	 * @param scheduledTime
+	 * @param duration
+	 * @param localFSClient true if this event was started by a client deployed in <i>handler</i>
+	 */
+	public FileSystemActivityEvent(Machine handler, Time scheduledTime, Time duration, boolean localFSClient) {
+		super(EVENT_NAME, handler, scheduledTime, duration);
+		
+		this.localFSClient = localFSClient;
+	}
+
+	public boolean isFromLocalFSClient() {
+		return localFSClient;
 	}
 
 }

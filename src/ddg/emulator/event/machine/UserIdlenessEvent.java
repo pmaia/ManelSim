@@ -20,36 +20,19 @@ import ddg.kernel.Time;
 import ddg.model.Machine;
 
 /**
+ * An {@link Event} representing an idleness period.
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class WakeUpEvent extends Event {
+public class UserIdlenessEvent extends Event {
 	
-	public static final String EVENT_NAME = "wake-up";
+	public static final String EVENT_NAME = "user-idleness-start";
 	
-	private final boolean fsWakeUp;
-	
-	/**
-	 * 
-	 * @param aHandler
-	 * @param aScheduledTime
-	 * @param duration 
-	 * @param fsWakeUp true if the wake up was caused by the opportunistic file system 
-	 */
-	public WakeUpEvent(Machine aHandler, Time aScheduledTime, Time duration, boolean fsWakeUp) {
-		super(EVENT_NAME, aHandler, aScheduledTime, duration);
+	public UserIdlenessEvent(Machine aHandler, Time aScheduledTime, Time userIdlenessDuration) {
 		
-		this.fsWakeUp = fsWakeUp;
+		super(EVENT_NAME, aHandler, aScheduledTime, userIdlenessDuration);
 	}
-	
-	/**
-	 * 
-	 * @return true if the wake up was caused by file system activity
-	 */
-	public boolean wasCausedByTheOpportunisticFS() {
-		return this.fsWakeUp;
-	}
-	
+
 	@Override
 	public String toString() {
 		return EVENT_NAME + "\t" + getScheduledTime();

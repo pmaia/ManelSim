@@ -26,11 +26,10 @@ public class MachineAvailability {
 	private double totalIdleDuration = 0;
 	private double totalSleepingDuration = 0;
 	private double totalShutdownDuration = 0;
-	private double totalToSleepDuration = 0;
-	private double totalFromSleepDuration = 0;
-	private double totalToShutdownDuration = 0;
-	private double totalFromShutdownDuration = 0;
 	
+	private int shutdownCount = 0;
+	private int sleepCount = 0;
+
 	public void addActiveDuration(double increment) {
 		totalActiveDuration += increment;
 	}
@@ -41,26 +40,12 @@ public class MachineAvailability {
 	
 	public void addSleepingDuration(double increment) {
 		totalSleepingDuration += increment;
+		sleepCount++;
 	}
 	
 	public void addShutdownDuration(double increment) {
 		totalShutdownDuration += increment;
-	}
-	
-	public void addToSleepDuration(double increment) {
-		totalToSleepDuration += increment;
-	}
-
-	public void addFromSleepDuration(double increment) {
-		totalFromSleepDuration += increment;
-	}
-
-	public void addToShutdownDuration(double increment) {
-		totalToShutdownDuration += increment;
-	}
-
-	public void addFromShutdownDuration(double increment) {
-		totalFromShutdownDuration += increment;
+		shutdownCount++;
 	}
 	
 	public double getTotalActiveDuration() {
@@ -79,20 +64,12 @@ public class MachineAvailability {
 		return totalShutdownDuration;
 	}
 	
-	public double getToSleepDuration() {
-		return totalToSleepDuration;
+	public int getSleepCount() {
+		return sleepCount;
 	}
-
-	public double getFromSleepDuration() {
-		return totalFromSleepDuration;
-	}
-
-	public double getToShutdownDuration() {
-		return totalToShutdownDuration;
-	}
-
-	public double addFromShutdownDuration() {
-		return totalFromShutdownDuration;
+	
+	public int getShutdownCount() {
+		return shutdownCount;
 	}
 	
 }

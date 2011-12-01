@@ -8,6 +8,8 @@ package ddg.kernel;
  * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public final class Time implements Comparable<Time> {
+	
+	public static final Time END_OF_THE_WORLD = new Time(Long.MAX_VALUE, Unit.MILLISECONDS); 
 
 	private final double timeMilliSeconds;
 	
@@ -33,6 +35,10 @@ public final class Time implements Comparable<Time> {
 	
 	public Time minus(Time otherETime) {
 		return new Time(timeMilliSeconds - otherETime.timeMilliSeconds, Unit.MILLISECONDS);
+	}
+	
+	public Time times(int multiplier) {
+		return new Time(timeMilliSeconds * multiplier, Unit.MILLISECONDS);
 	}
 	
 	public double asMilliseconds() {

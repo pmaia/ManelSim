@@ -68,11 +68,11 @@ public class MachineActivityEventParser implements EventSource {
 				Time duration = new Time(Long.parseLong(tokens[2]), Unit.SECONDS);
 				
 				if(eventType.equals("idleness")) {
-					event = new IdlenessEvent(machine, aScheduledTime, duration);
+					event = new UserIdlenessEvent(machine, aScheduledTime, duration);
 				} else if(eventType.equals("shutdown")) {
 					event = new ShutdownEvent(machine, aScheduledTime, duration);
 				} else if(eventType.equals("activity")) {
-					event = new WakeUpEvent(machine, aScheduledTime, duration, false);
+					event = new UserActivityEvent(machine, aScheduledTime, duration, false);
 				} else {
 					throw new RuntimeException(eventType + " is not recognized by this parser as a valid event type.");
 				}
