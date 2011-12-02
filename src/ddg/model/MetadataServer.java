@@ -3,12 +3,12 @@ package ddg.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import ddg.emulator.EventsGeneratedBySimulationQueue;
 import ddg.emulator.event.filesystem.DeleteReplicationGroup;
 import ddg.emulator.event.filesystem.UpdateReplicationGroup;
 import ddg.emulator.event.machine.FileSystemActivityEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
-import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.kernel.Time.Unit;
 import ddg.model.data.DataServer;
@@ -35,11 +35,11 @@ public class MetadataServer extends EventHandler {
 	 * @param timeBeforeDeleteData in seconds
 	 * @param timeBeforeUpdateReplicas in seconds
 	 */
-	public MetadataServer(EventScheduler scheduler, 
+	public MetadataServer(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue, 
 			DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
 			long timeBeforeDeleteData, long timeBeforeUpdateReplicas) {
 		
-		super(scheduler);
+		super(eventsGeneratedBySimulationQueue);
 
 		if (dataPlacementAlgorithm == null)
 			throw new IllegalArgumentException();
@@ -71,7 +71,7 @@ public class MetadataServer extends EventHandler {
 		return replicationGroup;
 	}
 	
-	public void closePath(FileSystemClient client, String filePath) {
+	public void closePath(FileSystemClient client, String filePath, Time now) {
 		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
 		Time noTime = new Time(0, Unit.SECONDS);
@@ -79,17 +79,17 @@ public class MetadataServer extends EventHandler {
 		boolean hasChanged = !noTime.equals(replicationGroup.getTotalChangesDuration());
 		
 		if(replicationGroup != null && hasChanged) {
-			Time time = getScheduler().now().plus(timeBeforeUpdateReplicas);
+			Time time = now.plus(timeBeforeUpdateReplicas);
 			send(new UpdateReplicationGroup(this, time, replicationGroup.getTotalChangesDuration(), filePath));
 		}
 	}
 	
-	public void deletePath(FileSystemClient client, String filePath) {
+	public void deletePath(FileSystemClient client, String filePath, Time now) {
 		ReplicationGroup replicationGroup = files.remove(filePath);
 		
 		if(replicationGroup != null) {
 			toDelete.put(filePath, replicationGroup);
-			Time time = getScheduler().now().plus(timeBeforeDeleteData);
+			Time time = now.plus(timeBeforeDeleteData);
 			send(new DeleteReplicationGroup(this, time, filePath));
 		}
 		
@@ -123,8 +123,7 @@ public class MetadataServer extends EventHandler {
 
 	}
 	
-	private void sendFSActivity(Machine machine, Time duration) {
-		Time now = getScheduler().now();
+	private void sendFSActivity(Machine machine, Time now, Time duration) {
 		FileSystemActivityEvent fsActivity = 
 			new FileSystemActivityEvent(machine, now, duration, false);
 		
@@ -140,8 +139,8 @@ public class MetadataServer extends EventHandler {
 			
 			Machine primaryMachine = replicationGroup.getPrimary().getMachine();
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
-				sendFSActivity(primaryMachine, duration);
-				sendFSActivity(dataServer.getMachine(), duration);
+				sendFSActivity(primaryMachine, anEvent.getScheduledTime(), duration);
+				sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration);
 			}
 		}
 	}
@@ -153,9 +152,9 @@ public class MetadataServer extends EventHandler {
 		if(replicationGroup != null) {
 			Time duration = new Time(0, Unit.SECONDS);
 			
-			sendFSActivity(replicationGroup.getPrimary().getMachine(), duration);
+			sendFSActivity(replicationGroup.getPrimary().getMachine(), anEvent.getScheduledTime(), duration);
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
-				sendFSActivity(dataServer.getMachine(), duration);
+				sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration);
 			}
 		}
 	}

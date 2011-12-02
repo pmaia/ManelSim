@@ -1,6 +1,5 @@
 package ddg.model.data;
 
-import ddg.kernel.EventScheduler;
 import ddg.model.Machine;
 
 public class DataServer {
@@ -8,7 +7,7 @@ public class DataServer {
 	private final String id;
 	private final Machine machine;
 
-	public DataServer(EventScheduler scheduler, Machine machine) {
+	public DataServer(Machine machine) {
 		this.machine = machine;
 		this.id = "ds" + machine.deploy(this) + machine;
 	}

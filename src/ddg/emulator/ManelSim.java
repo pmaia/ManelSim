@@ -86,8 +86,6 @@ public class ManelSim {
 
 		System.out.println(Arrays.toString(args));
 
-		final EventScheduler scheduler = new EventScheduler();
-
 		File tracesDir = new File(args[0]);
 		if(!tracesDir.exists() || !tracesDir.isDirectory())
 			throw new IllegalArgumentException(args[0] + " doesn't exist or is not a directory");
@@ -97,42 +95,38 @@ public class ManelSim {
 		Integer replicationLevel = Integer.valueOf(args[3]);
 		Long timeBeforeUpdateData = Long.valueOf(args[4]);
 		Long timeBeforeDeleteData = Long.valueOf(args[5]);
+		
+		EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue = new EventsGeneratedBySimulationQueue();
 
 		// building network
 		Set<Machine> machines = 
-			createMachines(scheduler, tracesDir, timeBeforeSleep);
+			createMachines(eventsGeneratedBySimulationQueue, tracesDir, timeBeforeSleep);
 
-		Set<DataServer> dataServers = 
-			createDataServers(scheduler, machines);
+		Set<DataServer> dataServers = createDataServers(machines);
 		
 		DataPlacementAlgorithm placement = 
 			createPlacementPolice(placementPoliceName, dataServers);
 
 		MetadataServer metadataServer = 
-			new MetadataServer(scheduler, placement, replicationLevel, 
+			new MetadataServer(eventsGeneratedBySimulationQueue, placement, replicationLevel, 
 					timeBeforeDeleteData, timeBeforeUpdateData);
 
 		Set<FileSystemClient> clients = 
-			createClients(scheduler, machines, metadataServer);
+			createClients(eventsGeneratedBySimulationQueue, machines, metadataServer);
 
 		MultipleEventSource multipleEventSource = 
-			createMultipleEventParser(clients, machines, tracesDir);
+			createMultipleEventParser(clients, machines, tracesDir, eventsGeneratedBySimulationQueue);
 
-		EventInjector eventInjector = 
-			new EventInjector(scheduler, multipleEventSource);
-		
-		scheduler.registerObserver(eventInjector);
-		
-		eventInjector.injectNext();
-		scheduler.start();
+		new EventScheduler(multipleEventSource).start();
 
 		System.out.println(Aggregator.getInstance().summarize());
 	}
 
 	private static MultipleEventSource createMultipleEventParser(
-			Set<FileSystemClient> clients, Set<Machine> machines, File tracesDir) {
+			Set<FileSystemClient> clients, Set<Machine> machines, File tracesDir,
+			EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue) {
 
-		EventSource []  parsers = new EventSource[machines.size() + clients.size()];
+		EventSource []  parsers = new EventSource[machines.size() + clients.size() + 1];
 
 		try {
 			int parserCount = 0;
@@ -147,10 +141,12 @@ public class ManelSim {
 					new FileInputStream(new File(tracesDir, "fs-" + client.getMachine().getId()));
 				parsers[parserCount++] = new FileSystemEventParser(client, traceStream);
 			}
+			parsers[parserCount] = eventsGeneratedBySimulationQueue;
+			
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException(e);
 		}
-
+		
 		return new MultipleEventSource(parsers);
 	}
 
@@ -169,24 +165,25 @@ public class ManelSim {
 	/**
 	 * It create all clients.
 	 * 
-	 * @param scheduler
+	 * @param aPlaceForEventsGeneratedBySimulation
 	 * @param herald
 	 * @param aggregator
 	 * @param machines2
 	 * @return
 	 */
-	private static Set<FileSystemClient> createClients(EventScheduler scheduler, Set<Machine> machines, MetadataServer herald) {
+	private static Set<FileSystemClient> createClients(EventsGeneratedBySimulationQueue aPlaceForEventsGeneratedBySimulation, Set<Machine> machines, MetadataServer herald) {
 
 		Set<FileSystemClient> newClients = new HashSet<FileSystemClient>();
 
 		for(Machine machine : machines) {
-			newClients.add(new FileSystemClient(scheduler, machine, herald));
+			newClients.add(new FileSystemClient(aPlaceForEventsGeneratedBySimulation, machine, herald));
 		}
 
 		return newClients;
 	}
 
-	private static Set<Machine> createMachines(EventScheduler scheduler, File tracesDir, long timeBeforeSleep) {
+	private static Set<Machine> createMachines(EventsGeneratedBySimulationQueue aPlaceForEventsGeneratedBySimulation, 
+			File tracesDir, long timeBeforeSleep) {
 		Set<Machine> machines = new HashSet<Machine>();
 		List<String> fsTracesFiles = Arrays.asList(tracesDir.list(fsTracesFilter));
 		List<String> idlenessTracesFiles = Arrays.asList(tracesDir.list(idlenessTracesFilter));
@@ -194,7 +191,7 @@ public class ManelSim {
 		for(String fsTraceFile : fsTracesFiles) {
 			String machineName = fsTraceFile.split("-")[1];
 			if(idlenessTracesFiles.contains("idleness-" + machineName)) {
-				machines.add(new Machine(scheduler, machineName, timeBeforeSleep));
+				machines.add(new Machine(aPlaceForEventsGeneratedBySimulation, machineName, timeBeforeSleep));
 			}
 		}
 
@@ -204,16 +201,16 @@ public class ManelSim {
 	/**
 	 * Create Data Servers.
 	 * 
-	 * @param scheduler
+	 * @param aPlaceForEventsGeneratedBySimulation
 	 * @param machines
 	 * @return
 	 */
-	private static Set<DataServer> createDataServers(EventScheduler scheduler, Set<Machine> machines) {
+	private static Set<DataServer> createDataServers(Set<Machine> machines) {
 
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 
 		for (Machine machine : machines) {
-			dataServers.add(new DataServer(scheduler, machine));
+			dataServers.add(new DataServer(machine));
 		}
 
 		return dataServers;

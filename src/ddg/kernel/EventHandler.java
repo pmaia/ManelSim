@@ -1,7 +1,6 @@
-/* JEEventHandler - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package ddg.kernel;
+
+import ddg.emulator.EventsGeneratedBySimulationQueue;
 
 
 /**
@@ -11,48 +10,22 @@ package ddg.kernel;
  */
 public abstract class EventHandler {
 
-	private static Integer theUniqueHandlerId;
-	private final Integer HandlerId;
-	private final EventScheduler theUniqueEventScheduler;
-
+	private final EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue;
+	
 	/**
 	 * @param scheduler
 	 */
-	public EventHandler(EventScheduler scheduler) {
-
-		if (theUniqueHandlerId != null) {
-			theUniqueHandlerId = Integer.valueOf(theUniqueHandlerId.intValue() + 1);
-		} else {
-			theUniqueHandlerId = Integer.valueOf(1);
-		}
-		HandlerId = theUniqueHandlerId;
-		theUniqueEventScheduler = scheduler;
-		theUniqueEventScheduler.registerHandler(this);
+	public EventHandler(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue) {
+		this.eventsGeneratedBySimulationQueue = eventsGeneratedBySimulationQueue;
 	}
 
-	/**
-	 * @return
-	 */
-	protected EventScheduler getScheduler() {
-		return theUniqueEventScheduler;
+	public void send(Event event) {
+		eventsGeneratedBySimulationQueue.addEvent(event);
 	}
-
+	
 	/**
 	 * @param jeevent
 	 */
 	public abstract void handleEvent(Event jeevent);
 
-	/**
-	 * @param anEvent
-	 */
-	public void send(Event anEvent) {
-		theUniqueEventScheduler.schedule(anEvent);
-	}
-
-	/**
-	 * @return
-	 */
-	public Integer getHandlerId() {
-		return HandlerId;
-	}
 }

@@ -10,26 +10,16 @@ package ddg.kernel;
  */
 public abstract class Event implements Comparable<Event> {
 
-	private static int eventId = 0;
-
-	private final int myEventId;
 	private final String name;
 
-	private final Integer theTargetHandlerId;
+	private final EventHandler handler;
 	private final Time scheduledTime;
 	private final Time duration;
 
-	/**
-	 * @param aName
-	 * @param aHandler
-	 * @param scheduledTime
-	 */
-	public Event(String aName, EventHandler aHandler, Time scheduledTime, Time duration) {
+	public Event(String name, EventHandler handler, Time scheduledTime, Time duration) {
 
-		myEventId = eventId++;
-
-		name = aName;
-		theTargetHandlerId = aHandler.getHandlerId();
+		this.name = name;
+		this.handler = handler;
 		this.scheduledTime = scheduledTime;
 		this.duration = duration;
 	}
@@ -37,8 +27,8 @@ public abstract class Event implements Comparable<Event> {
 	/**
 	 * @return
 	 */
-	public Integer getTheTargetHandlerId() {
-		return theTargetHandlerId;
+	public EventHandler getHandler() {
+		return handler;
 	}
 
 	/**
@@ -57,13 +47,6 @@ public abstract class Event implements Comparable<Event> {
 	
 	public Time getDuration() {
 		return this.duration;
-	}
-
-	/**
-	 * @return
-	 */
-	public int getEventId() {
-		return myEventId;
 	}
 
 	@Override

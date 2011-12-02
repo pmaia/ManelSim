@@ -37,28 +37,27 @@ public class MultipleEventSource implements EventSource {
 	@Override
 	public Event getNextEvent() {
 		
-		int smallestTimeEventParserId = 0;
+		int smallestTimeEventSourceId = 0;
 		Event smallestTimeEvent;
-		while((smallestTimeEvent = parsers[smallestTimeEventParserId].getNextEvent()) == null) {
-			smallestTimeEventParserId++;
+		while((smallestTimeEvent = parsers[smallestTimeEventSourceId].getNextEvent()) == null) {
+			smallestTimeEventSourceId++;
 			
-			if(smallestTimeEventParserId == this.parsers.length){
+			if(smallestTimeEventSourceId == this.parsers.length){
 				break;
 			}
 		}
 
-		for(int i = smallestTimeEventParserId + 1; i < this.parsers.length; i++) {
+		for(int i = smallestTimeEventSourceId + 1; i < this.parsers.length; i++) {
 			Event smallestTimeEventCandidate = parsers[i].getNextEvent();
 			
 			if(smallestTimeEventCandidate != null){
 				
-				if(smallestTimeEvent.getScheduledTime().
-						compareTo(smallestTimeEventCandidate.getScheduledTime()) <= 0) {
+				if(smallestTimeEvent.getScheduledTime().isEarlierThan(smallestTimeEventCandidate.getScheduledTime())) {
 					parsers[i].pushBack(smallestTimeEventCandidate);
 				} else {
-					parsers[smallestTimeEventParserId].pushBack(smallestTimeEvent);
+					parsers[smallestTimeEventSourceId].pushBack(smallestTimeEvent);
 					
-					smallestTimeEventParserId = i;
+					smallestTimeEventSourceId = i;
 					smallestTimeEvent = smallestTimeEventCandidate;
 				}
 				

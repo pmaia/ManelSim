@@ -27,8 +27,8 @@ public class SleepEvent extends Event {
 	
 	public static final String EVENT_NAME = "sleep";
 	
-	public SleepEvent(Machine aHandler, Time aScheduledTime) {
-		super(EVENT_NAME, aHandler, aScheduledTime, null);
+	public SleepEvent(Machine aHandler, Time aScheduledTime, Time duration) {
+		super(EVENT_NAME, aHandler, aScheduledTime, duration);
 	}
 	
 	@Override
@@ -36,9 +36,4 @@ public class SleepEvent extends Event {
 		return EVENT_NAME + "\t" + getScheduledTime();
 	}
 	
-	@Override
-	public Time getDuration() {
-		throw new UnsupportedOperationException("It's not possible to know the duration of an sleep period");
-	}
-
 }

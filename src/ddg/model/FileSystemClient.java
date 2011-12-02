@@ -1,5 +1,6 @@
 package ddg.model;
 
+import ddg.emulator.EventsGeneratedBySimulationQueue;
 import ddg.emulator.event.filesystem.CloseEvent;
 import ddg.emulator.event.filesystem.ReadEvent;
 import ddg.emulator.event.filesystem.UnlinkEvent;
@@ -7,7 +8,6 @@ import ddg.emulator.event.filesystem.WriteEvent;
 import ddg.emulator.event.machine.FileSystemActivityEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
-import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.model.data.ReplicationGroup;
 
@@ -23,9 +23,10 @@ public class FileSystemClient extends EventHandler {
 	 * @param machine
 	 * @param metadataServer
 	 */
-	public FileSystemClient(EventScheduler scheduler, Machine machine, MetadataServer metadataServer) {
+	public FileSystemClient(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue,
+			Machine machine, MetadataServer metadataServer) {
 
-		super(scheduler);
+		super(eventsGeneratedBySimulationQueue);
 
 		this.metadataServer = metadataServer;
 		this.machine = machine;
@@ -58,7 +59,7 @@ public class FileSystemClient extends EventHandler {
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		sendFSActivity(primaryDataServerMachine, readEvent.getDuration());
+		sendFSActivity(primaryDataServerMachine, readEvent.getScheduledTime(), readEvent.getDuration());
 	}
 	
 	private void handleWrite(WriteEvent writeEvent) {
@@ -69,13 +70,12 @@ public class FileSystemClient extends EventHandler {
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		sendFSActivity(primaryDataServerMachine, writeEvent.getDuration());
+		sendFSActivity(primaryDataServerMachine, writeEvent.getScheduledTime(), writeEvent.getDuration());
 	}
 	
-	private void sendFSActivity(Machine machine, Time duration) {
+	private void sendFSActivity(Machine machine, Time now, Time duration) {
 		boolean isLocalFS = getMachine().equals(machine);
 		
-		Time now = getScheduler().now();
 		FileSystemActivityEvent fsActivity = 
 			new FileSystemActivityEvent(machine, now, duration, isLocalFS);
 		
@@ -85,13 +85,13 @@ public class FileSystemClient extends EventHandler {
 	private void handleClose(CloseEvent closeEvent) {
 		String filePath = closeEvent.getFilePath();
 		
-		metadataServer.closePath(this, filePath);		
+		metadataServer.closePath(this, filePath, closeEvent.getScheduledTime());		
 	}
 	
 	private void handleUnlink(UnlinkEvent unlinkEvent) {
 		String filePath = unlinkEvent.getFilePath();
 		
-		metadataServer.deletePath(this, filePath);
+		metadataServer.deletePath(this, filePath, unlinkEvent.getScheduledTime());
 	}
 
 	/**

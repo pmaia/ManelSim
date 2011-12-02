@@ -35,7 +35,7 @@ public class UserIdlenessEvent extends Event {
 
 	@Override
 	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime();
+		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + getDuration();
 	}
 
 }

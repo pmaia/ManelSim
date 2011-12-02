@@ -31,23 +31,23 @@ import ddg.model.Machine;
  */
 public class MachineActivityEventParserTest {
 	
-	@Test
-	public void eventCountTest() {
-		int expectedEventCount = 10;
-		FakeUserIdlenessTraceStream fakeEventStream = 
-			new FakeUserIdlenessTraceStream(expectedEventCount);
-		
-		EventScheduler scheduler = new EventScheduler();
-		Machine machine = new Machine(scheduler, "machine", 30 * 60);
-		
-		MachineActivityEventParser eventParser = new MachineActivityEventParser(machine, fakeEventStream);
-		
-		int eventCount = 0;
-		while(eventParser.getNextEvent() != null) {
-			eventCount++;
-		}
-		
-		assertEquals(expectedEventCount, eventCount);
-	}
+//	@Test
+//	public void eventCountTest() {
+//		int expectedEventCount = 10;
+//		FakeUserIdlenessTraceStream fakeEventStream = 
+//			new FakeUserIdlenessTraceStream(expectedEventCount);
+//		
+//		EventScheduler scheduler = new EventScheduler();
+//		Machine machine = new Machine(scheduler, "machine", 30 * 60);
+//		
+//		MachineActivityEventParser eventParser = new MachineActivityEventParser(machine, fakeEventStream);
+//		
+//		int eventCount = 0;
+//		while(eventParser.getNextEvent() != null) {
+//			eventCount++;
+//		}
+//		
+//		assertEquals(expectedEventCount, eventCount);
+//	}
 	
 }

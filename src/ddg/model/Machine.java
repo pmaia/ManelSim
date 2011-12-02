@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ddg.emulator.EventsGeneratedBySimulationQueue;
 import ddg.emulator.event.machine.FileSystemActivityEvent;
 import ddg.emulator.event.machine.ShutdownEvent;
 import ddg.emulator.event.machine.SleepEvent;
@@ -12,7 +13,6 @@ import ddg.emulator.event.machine.UserActivityEvent;
 import ddg.emulator.event.machine.UserIdlenessEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
-import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.kernel.Time.Unit;
 import ddg.model.data.DataServer;
@@ -78,12 +78,13 @@ public class Machine extends EventHandler {
 	
 	/**
 	 * 
-	 * @param scheduler
+	 * @param eventsGeneratedBySimulationQueue
 	 * @param id
 	 * @param timeBeforeSleep
 	 */
-	public Machine(EventScheduler scheduler, String id, long timeBeforeSleep) {
-		super(scheduler);
+	public Machine(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue, String id, long timeBeforeSleep) {
+		
+		super(eventsGeneratedBySimulationQueue);
 		
 		this.id = id;
 		this.deployedDataServers = new HashSet<DataServer>();
@@ -91,7 +92,7 @@ public class Machine extends EventHandler {
 		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
 
 		currentStateName = ShutdownEvent.EVENT_NAME;
-		currentStateStartTime = scheduler.now();
+		currentStateStartTime = Time.GENESIS;
 		supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
 		pendingFSActivityEvents = new ArrayList<FileSystemActivityEvent>();
 	}
@@ -171,7 +172,7 @@ public class Machine extends EventHandler {
 		 * This is done to make sure the event that changes the state was already handled.
 		 */
 		Time oneSecond = new Time(1, Unit.SECONDS);
-		Time now = getScheduler().now();		
+		Time now = fsActivity.getScheduledTime();		
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME)) {
 			if(fsActivity.isFromLocalFSClient()) {
@@ -180,9 +181,9 @@ public class Machine extends EventHandler {
 				UserIdlenessEvent idlenessEvent = null;
 				
 				if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
-					idlenessEvent = buildUserIdlenessEventToWakeUp(SHUTDOWN_TRANSITION_DURATION);
+					idlenessEvent = buildUserIdlenessEventToWakeUp(now, SHUTDOWN_TRANSITION_DURATION);
 				} else {
-					idlenessEvent = buildUserIdlenessEventToWakeUp(SLEEP_TRANSITION_DURATION);
+					idlenessEvent = buildUserIdlenessEventToWakeUp(now, SLEEP_TRANSITION_DURATION);
 				}
 				
 				Time fsActivityEventStartTime = supposedCurrentStateEndTime.plus(oneSecond);
@@ -228,8 +229,7 @@ public class Machine extends EventHandler {
 		}
 	}
 	
-	private UserIdlenessEvent buildUserIdlenessEventToWakeUp(Time transitionDuration) {
-		Time now = getScheduler().now();
+	private UserIdlenessEvent buildUserIdlenessEventToWakeUp(Time now, Time transitionDuration) {
 		Time idlenessStart = null;
 
 		//if the machine has not finished the transition to the current state yet	
@@ -250,7 +250,7 @@ public class Machine extends EventHandler {
 
 	private void handleShutdown(ShutdownEvent event) {
 		Aggregator aggregator = Aggregator.getInstance();
-		Time now = getScheduler().now();		
+		Time now = event.getScheduledTime();		
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
@@ -289,7 +289,7 @@ public class Machine extends EventHandler {
 	private void handleUserActivity(UserActivityEvent event) {
 		
 		Aggregator aggregator = Aggregator.getInstance();
-		Time now = getScheduler().now();		
+		Time now = event.getScheduledTime();		
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
@@ -317,7 +317,7 @@ public class Machine extends EventHandler {
 	private void handleUserIdleness(UserIdlenessEvent event) {
 		Aggregator aggregator = Aggregator.getInstance();
 		Time idlenessDuration = event.getDuration();
-		Time now = getScheduler().now();
+		Time now = event.getScheduledTime();
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
@@ -342,13 +342,13 @@ public class Machine extends EventHandler {
 			supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 		} else {
 			Time bedTime = now.plus(timeBeforeSleep);
-			Time duration = now.plus(idlenessDuration).minus(bedTime);
+			Time sleepDuration = now.plus(idlenessDuration).minus(bedTime);
 			
 			//we must sleep only if we have time to wake up
-			if(duration.compareTo(SLEEP_TRANSITION_DURATION.times(2)) >= 0) { 
-				send(new SleepEvent(this, bedTime));
+			if(!sleepDuration.isEarlierThan(SLEEP_TRANSITION_DURATION.times(2))) { 
+				send(new SleepEvent(this, bedTime, sleepDuration));
 				
-				supposedCurrentStateEndTime = currentStateStartTime.plus(duration);
+				supposedCurrentStateEndTime = currentStateStartTime.plus(timeBeforeSleep);
 			} else {
 				supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 			}
@@ -359,7 +359,7 @@ public class Machine extends EventHandler {
 	
 	private void handleSleep(SleepEvent event) {
 		Aggregator aggregator = Aggregator.getInstance();
-		Time now = getScheduler().now();		
+		Time now = event.getScheduledTime();		
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
