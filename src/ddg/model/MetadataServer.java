@@ -5,7 +5,7 @@ import java.util.Map;
 
 import ddg.emulator.event.filesystem.DeleteReplicationGroup;
 import ddg.emulator.event.filesystem.UpdateReplicationGroup;
-import ddg.emulator.event.machine.UserActivityEvent;
+import ddg.emulator.event.machine.FileSystemActivityEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
@@ -59,7 +59,7 @@ public class MetadataServer extends EventHandler {
 		this.timeBeforeUpdateReplicas = new Time(timeBeforeUpdateReplicas, Unit.SECONDS);
 	}
 
-	public ReplicationGroup openPath(DDGClient client, String filePath) {
+	public ReplicationGroup openPath(FileSystemClient client, String filePath) {
 
 		if (!files.containsKey(filePath)) {
 			createFile(filePath, replicationLevel, client);
@@ -71,16 +71,20 @@ public class MetadataServer extends EventHandler {
 		return replicationGroup;
 	}
 	
-	public void closePath(DDGClient client, String filePath) {
+	public void closePath(FileSystemClient client, String filePath) {
 		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
-		if(replicationGroup != null && replicationGroup.isChanged()) {
+		Time noTime = new Time(0, Unit.SECONDS);
+		
+		boolean hasChanged = !noTime.equals(replicationGroup.getTotalChangesDuration());
+		
+		if(replicationGroup != null && hasChanged) {
 			Time time = getScheduler().now().plus(timeBeforeUpdateReplicas);
-			send(new UpdateReplicationGroup(this, time, filePath));
+			send(new UpdateReplicationGroup(this, time, replicationGroup.getTotalChangesDuration(), filePath));
 		}
 	}
 	
-	public void deletePath(DDGClient client, String filePath) {
+	public void deletePath(FileSystemClient client, String filePath) {
 		ReplicationGroup replicationGroup = files.remove(filePath);
 		
 		if(replicationGroup != null) {
@@ -91,7 +95,7 @@ public class MetadataServer extends EventHandler {
 		
 	}
 
-	private ReplicationGroup createFile(String filePath, int replicationLevel, DDGClient client) {
+	private ReplicationGroup createFile(String filePath, int replicationLevel, FileSystemClient client) {
 
 		if (files.containsKey(filePath)) {
 			return null;
@@ -118,16 +122,26 @@ public class MetadataServer extends EventHandler {
 		} 
 
 	}
+	
+	private void sendFSActivity(Machine machine, Time duration) {
+		Time now = getScheduler().now();
+		FileSystemActivityEvent fsActivity = 
+			new FileSystemActivityEvent(machine, now, duration, false);
+		
+		send(fsActivity);
+	}
 
 	private void handleUpdateReplicationGroup(UpdateReplicationGroup anEvent) {
 		ReplicationGroup replicationGroup = 
 				files.get(anEvent.getFilePath());
 		
 		if(replicationGroup != null) {
+			Time duration = replicationGroup.getTotalChangesDuration();
+			
 			Machine primaryMachine = replicationGroup.getPrimary().getMachine();
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
-				wakeUpIfSleeping(primaryMachine);
-				wakeUpIfSleeping(dataServer.getMachine());
+				sendFSActivity(primaryMachine, duration);
+				sendFSActivity(dataServer.getMachine(), duration);
 			}
 		}
 	}
@@ -137,16 +151,13 @@ public class MetadataServer extends EventHandler {
 				files.get(anEvent.getFilePath());
 		
 		if(replicationGroup != null) {
-			wakeUpIfSleeping(replicationGroup.getPrimary().getMachine());
+			Time duration = new Time(0, Unit.SECONDS);
+			
+			sendFSActivity(replicationGroup.getPrimary().getMachine(), duration);
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
-				wakeUpIfSleeping(dataServer.getMachine());
+				sendFSActivity(dataServer.getMachine(), duration);
 			}
 		}
 	}
 
-	private void wakeUpIfSleeping(Machine machine) {
-		if(machine.isSleeping()) {
-			machine.handleEvent(new UserActivityEvent(machine, getScheduler().now(), true));
-		}
-	}
 }

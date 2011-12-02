@@ -25,7 +25,7 @@ import ddg.emulator.EventSource;
 import ddg.kernel.Event;
 import ddg.kernel.Time;
 import ddg.kernel.Time.Unit;
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 
 /**
  * A parser for the trace of calls to the file system.
@@ -37,13 +37,13 @@ public class FileSystemEventParser implements EventSource {
 
 	private final BufferedReader bufferedReader;
 
-	private final DDGClient client;
+	private final FileSystemClient client;
 
 	/**
 	 * @param traceStream
 	 * @throws IOException
 	 */
-	public FileSystemEventParser(DDGClient client, InputStream traceStream) {
+	public FileSystemEventParser(FileSystemClient client, InputStream traceStream) {
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.client = client;
 	}

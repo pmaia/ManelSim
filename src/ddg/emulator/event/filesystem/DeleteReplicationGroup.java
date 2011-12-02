@@ -18,6 +18,7 @@ package ddg.emulator.event.filesystem;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
 
 /**
  *
@@ -28,9 +29,11 @@ public class DeleteReplicationGroup extends Event {
 	public static final String EVENT_NAME = "delete-replication-group";
 	
 	private final String filePath;
+	
+	private static final Time DELETE_REPLICATION_GROUP_DURATION = new Time(0, Unit.SECONDS);
 
 	public DeleteReplicationGroup(EventHandler aHandler, Time aScheduledTime, String filePath) {
-		super(EVENT_NAME, aHandler, aScheduledTime);
+		super(EVENT_NAME, aHandler, aScheduledTime, DELETE_REPLICATION_GROUP_DURATION);
 		
 		this.filePath = filePath;
 	}

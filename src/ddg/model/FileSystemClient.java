@@ -4,14 +4,14 @@ import ddg.emulator.event.filesystem.CloseEvent;
 import ddg.emulator.event.filesystem.ReadEvent;
 import ddg.emulator.event.filesystem.UnlinkEvent;
 import ddg.emulator.event.filesystem.WriteEvent;
-import ddg.emulator.event.machine.UserActivityEvent;
+import ddg.emulator.event.machine.FileSystemActivityEvent;
 import ddg.kernel.Event;
 import ddg.kernel.EventHandler;
 import ddg.kernel.EventScheduler;
 import ddg.kernel.Time;
 import ddg.model.data.ReplicationGroup;
 
-public class DDGClient extends EventHandler {
+public class FileSystemClient extends EventHandler {
 
 	private final String id;
 	private final MetadataServer metadataServer;
@@ -23,7 +23,7 @@ public class DDGClient extends EventHandler {
 	 * @param machine
 	 * @param metadataServer
 	 */
-	public DDGClient(EventScheduler scheduler, Machine machine, MetadataServer metadataServer) {
+	public FileSystemClient(EventScheduler scheduler, Machine machine, MetadataServer metadataServer) {
 
 		super(scheduler);
 
@@ -58,26 +58,28 @@ public class DDGClient extends EventHandler {
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		if(primaryDataServerMachine.isSleeping() && !getMachine().equals(primaryDataServerMachine)) { 
-			Time now = getScheduler().now();
-			UserActivityEvent wakeUp = new UserActivityEvent(primaryDataServerMachine, now, true);
-			primaryDataServerMachine.handleEvent(wakeUp);
-		}
+		sendFSActivity(primaryDataServerMachine, readEvent.getDuration());
 	}
 	
 	private void handleWrite(WriteEvent writeEvent) {
 		String filePath = writeEvent.getFilePath();
 		ReplicationGroup group = metadataServer.openPath(this, filePath);
-		group.setChanged(true);
+		group.addChangesDuration(writeEvent.getDuration());
 		
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();
 		
-		if(primaryDataServerMachine.isSleeping() && !getMachine().equals(primaryDataServerMachine)) {
-			Time now = getScheduler().now();
-			UserActivityEvent wakeUp = new UserActivityEvent(primaryDataServerMachine, now, true);
-			primaryDataServerMachine.handleEvent(wakeUp);
-		}
+		sendFSActivity(primaryDataServerMachine, writeEvent.getDuration());
+	}
+	
+	private void sendFSActivity(Machine machine, Time duration) {
+		boolean isLocalFS = getMachine().equals(machine);
+		
+		Time now = getScheduler().now();
+		FileSystemActivityEvent fsActivity = 
+			new FileSystemActivityEvent(machine, now, duration, isLocalFS);
+		
+		send(fsActivity);
 	}
 	
 	private void handleClose(CloseEvent closeEvent) {
@@ -136,7 +138,7 @@ public class DDGClient extends EventHandler {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DDGClient other = (DDGClient) obj;
+		FileSystemClient other = (FileSystemClient) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

@@ -27,27 +27,14 @@ public class UserActivityEvent extends Event {
 	
 	public static final String EVENT_NAME = "wake-up";
 	
-	private final boolean fsWakeUp;
-	
 	/**
 	 * 
 	 * @param aHandler
 	 * @param aScheduledTime
 	 * @param duration 
-	 * @param fsWakeUp true if the wake up was caused by the opportunistic file system 
 	 */
-	public UserActivityEvent(Machine aHandler, Time aScheduledTime, Time duration, boolean fsWakeUp) {
+	public UserActivityEvent(Machine aHandler, Time aScheduledTime, Time duration) {
 		super(EVENT_NAME, aHandler, aScheduledTime, duration);
-		
-		this.fsWakeUp = fsWakeUp;
-	}
-	
-	/**
-	 * 
-	 * @return true if the wake up was caused by file system activity
-	 */
-	public boolean wasCausedByTheOpportunisticFS() {
-		return this.fsWakeUp;
 	}
 	
 	@Override

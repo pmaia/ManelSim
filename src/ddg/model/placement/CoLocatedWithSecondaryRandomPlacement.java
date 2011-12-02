@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 
@@ -41,7 +41,7 @@ public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReplicationGroup createFile(DDGClient client, String fileName, int replicationLevel) {
+	public ReplicationGroup createFile(FileSystemClient client, String fileName, int replicationLevel) {
 		
 		DataServer primary = null;
 		Set<DataServer> secondaries;

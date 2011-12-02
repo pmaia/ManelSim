@@ -20,7 +20,7 @@ import static ddg.model.placement.DataPlacementUtil.chooseRandomDataServers;
 import java.util.HashSet;
 import java.util.Set;
 
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 
@@ -37,7 +37,7 @@ public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
 	}
 
 	@Override
-	public ReplicationGroup createFile(DDGClient client, String fileName,
+	public ReplicationGroup createFile(FileSystemClient client, String fileName,
 			int replicationLevel) {
 		
 		Set<DataServer> choosenDataServes = 

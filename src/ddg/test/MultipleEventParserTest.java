@@ -30,7 +30,7 @@ import ddg.emulator.MultipleEventSource;
 import ddg.emulator.event.filesystem.FileSystemEventParser;
 import ddg.kernel.Event;
 import ddg.kernel.EventScheduler;
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 import ddg.model.Machine;
 
 /**
@@ -54,9 +54,9 @@ public class MultipleEventParserTest {
 		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
 		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
 		
-		DDGClient client1 = new DDGClient(scheduler, machine1, null);
-		DDGClient client2 = new DDGClient(scheduler, machine2, null);
-		DDGClient client3 = new DDGClient(scheduler, machine3, null);
+		FileSystemClient client1 = new FileSystemClient(scheduler, machine1, null);
+		FileSystemClient client2 = new FileSystemClient(scheduler, machine2, null);
+		FileSystemClient client3 = new FileSystemClient(scheduler, machine3, null);
 		
 		parsers[0] = new FileSystemEventParser(client1, trace1);
 		parsers[1] = new FileSystemEventParser(client2, trace2);
@@ -86,9 +86,9 @@ public class MultipleEventParserTest {
 		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
 		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
 		
-		DDGClient client1 = new DDGClient(scheduler, machine1, null);
-		DDGClient client2 = new DDGClient(scheduler, machine2, null);
-		DDGClient client3 = new DDGClient(scheduler, machine3, null);
+		FileSystemClient client1 = new FileSystemClient(scheduler, machine1, null);
+		FileSystemClient client2 = new FileSystemClient(scheduler, machine2, null);
+		FileSystemClient client3 = new FileSystemClient(scheduler, machine3, null);
 		
 		parsers[0] = new FileSystemEventParser(client1, trace1);
 		parsers[1] = new FileSystemEventParser(client2, trace2);

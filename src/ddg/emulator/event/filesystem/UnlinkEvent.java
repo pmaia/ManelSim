@@ -17,7 +17,8 @@ package ddg.emulator.event.filesystem;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;
-import ddg.model.DDGClient;
+import ddg.kernel.Time.Unit;
+import ddg.model.FileSystemClient;
 
 /**
  *
@@ -28,9 +29,11 @@ public class UnlinkEvent extends Event {
 	public static final String EVENT_NAME = "unlink";
 	
 	private final String filePath;
+	
+	private static final Time UNLINK_DURATION = new Time(0, Unit.SECONDS);
 
-	public UnlinkEvent(DDGClient aHandler, Time aScheduledTime, String filePath) {
-		super(EVENT_NAME, aHandler, aScheduledTime);
+	public UnlinkEvent(FileSystemClient aHandler, Time aScheduledTime, String filePath) {
+		super(EVENT_NAME, aHandler, aScheduledTime, UNLINK_DURATION);
 		
 		this.filePath = filePath;
 	}

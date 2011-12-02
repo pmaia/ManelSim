@@ -29,8 +29,8 @@ public class UpdateReplicationGroup extends Event {
 	
 	private final String filePath;
 
-	public UpdateReplicationGroup(MetadataServer aHandler, Time aScheduledTime, String filePath) {
-		super(EVENT_NAME, aHandler, aScheduledTime);
+	public UpdateReplicationGroup(MetadataServer aHandler, Time aScheduledTime, Time duration, String filePath) {
+		super(EVENT_NAME, aHandler, aScheduledTime, duration);
 		
 		this.filePath = filePath;
 	}

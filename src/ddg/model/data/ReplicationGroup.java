@@ -5,13 +5,17 @@ package ddg.model.data;
 
 import java.util.Set;
 
+import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
+
 public class ReplicationGroup {
 
 	private final String fileName;
 	private final DataServer primary;
 	private final Set<DataServer> secondaries;
-	private boolean changed;
-
+	
+	private Time totalChangesDuration = new Time(0, Unit.SECONDS);
+	
 	public ReplicationGroup(String fileName, DataServer primary, Set<DataServer> secondaries) {
 
 		if (fileName == null)
@@ -39,12 +43,12 @@ public class ReplicationGroup {
 		return secondaries;
 	}
 
-	public void setChanged(boolean changed) {
-		this.changed = changed;
+	public void addChangesDuration(Time changeDuration) {
+		totalChangesDuration = totalChangesDuration.plus(changeDuration);
 	}
 	
-	public boolean isChanged() {
-		return this.changed;
+	public Time getTotalChangesDuration() {
+		return totalChangesDuration;
 	}
 
 	@Override

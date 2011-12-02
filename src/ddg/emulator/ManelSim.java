@@ -30,7 +30,7 @@ import ddg.emulator.event.filesystem.FileSystemEventParser;
 import ddg.emulator.event.machine.MachineActivityEventParser;
 import ddg.kernel.EventScheduler;
 import ddg.model.Aggregator;
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 import ddg.model.Machine;
 import ddg.model.MetadataServer;
 import ddg.model.data.DataServer;
@@ -112,7 +112,7 @@ public class ManelSim {
 			new MetadataServer(scheduler, placement, replicationLevel, 
 					timeBeforeDeleteData, timeBeforeUpdateData);
 
-		Set<DDGClient> clients = 
+		Set<FileSystemClient> clients = 
 			createClients(scheduler, machines, metadataServer);
 
 		MultipleEventSource multipleEventSource = 
@@ -130,7 +130,7 @@ public class ManelSim {
 	}
 
 	private static MultipleEventSource createMultipleEventParser(
-			Set<DDGClient> clients, Set<Machine> machines, File tracesDir) {
+			Set<FileSystemClient> clients, Set<Machine> machines, File tracesDir) {
 
 		EventSource []  parsers = new EventSource[machines.size() + clients.size()];
 
@@ -142,7 +142,7 @@ public class ManelSim {
 					new FileInputStream(new File(tracesDir, "idleness-" + machine.getId()));
 				parsers[parserCount++] = new MachineActivityEventParser(machine, traceStream);
 			}
-			for(DDGClient client : clients) {
+			for(FileSystemClient client : clients) {
 				traceStream = 
 					new FileInputStream(new File(tracesDir, "fs-" + client.getMachine().getId()));
 				parsers[parserCount++] = new FileSystemEventParser(client, traceStream);
@@ -175,12 +175,12 @@ public class ManelSim {
 	 * @param machines2
 	 * @return
 	 */
-	private static Set<DDGClient> createClients(EventScheduler scheduler, Set<Machine> machines, MetadataServer herald) {
+	private static Set<FileSystemClient> createClients(EventScheduler scheduler, Set<Machine> machines, MetadataServer herald) {
 
-		Set<DDGClient> newClients = new HashSet<DDGClient>();
+		Set<FileSystemClient> newClients = new HashSet<FileSystemClient>();
 
 		for(Machine machine : machines) {
-			newClients.add(new DDGClient(scheduler, machine, herald));
+			newClients.add(new FileSystemClient(scheduler, machine, herald));
 		}
 
 		return newClients;

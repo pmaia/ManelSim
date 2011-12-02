@@ -20,7 +20,8 @@ package ddg.emulator.event.filesystem;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;
-import ddg.model.DDGClient;
+import ddg.kernel.Time.Unit;
+import ddg.model.FileSystemClient;
 
 /**
  * 
@@ -31,14 +32,16 @@ public class CloseEvent extends Event {
 	public static final String EVENT_NAME = "close";
 	
 	private final String filePath;
+	
+	private static final Time CLOSE_DURATION = new Time(0, Unit.SECONDS);
 
 	/**
 	 * @param filePath
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public CloseEvent(DDGClient handler, Time scheduledTime, String filePath) {
-		super(EVENT_NAME, handler, scheduledTime);
+	public CloseEvent(FileSystemClient handler, Time scheduledTime, String filePath) {
+		super(EVENT_NAME, handler, scheduledTime, CLOSE_DURATION);
 		
 		this.filePath = filePath;
 	}

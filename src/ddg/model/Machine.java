@@ -40,7 +40,7 @@ public class Machine extends EventHandler {
 	public static final Time   SHUTDOWN_TRANSITION_DURATION	= new Time(60, Unit.SECONDS); //FIXME need to discover the right value
 	
 	private final Set<DataServer> deployedDataServers;
-	private final Set<DDGClient> clients;
+	private final Set<FileSystemClient> clients;
 	
 	/**
 	 * The amount of time this machine must wait idle before sleep
@@ -87,7 +87,7 @@ public class Machine extends EventHandler {
 		
 		this.id = id;
 		this.deployedDataServers = new HashSet<DataServer>();
-		this.clients = new HashSet<DDGClient>();
+		this.clients = new HashSet<FileSystemClient>();
 		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
 
 		currentStateName = ShutdownEvent.EVENT_NAME;
@@ -113,7 +113,7 @@ public class Machine extends EventHandler {
 	/**
 	 * @return
 	 */
-	public Set<DDGClient> getDeployedClients() {
+	public Set<FileSystemClient> getDeployedClients() {
 		return clients;
 	}
 
@@ -121,7 +121,7 @@ public class Machine extends EventHandler {
 	 * @param newClient
 	 * @return
 	 */
-	public boolean bindClient(DDGClient newClient) {
+	public boolean bindClient(FileSystemClient newClient) {
 		return clients.add(newClient);
 	}
 
@@ -139,7 +139,7 @@ public class Machine extends EventHandler {
 	public boolean isDeployed(DataServer dataServer) {
 		return deployedDataServers.contains(dataServer);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */

@@ -15,7 +15,7 @@
  */
 package ddg.model.placement;
 
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 import ddg.model.data.ReplicationGroup;
 
 /**
@@ -26,6 +26,6 @@ import ddg.model.data.ReplicationGroup;
  */
 public interface DataPlacementAlgorithm {
 
-	ReplicationGroup createFile(DDGClient client, String fileName, int replicationLevel);
+	ReplicationGroup createFile(FileSystemClient client, String fileName, int replicationLevel);
 	
 }

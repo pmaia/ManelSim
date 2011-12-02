@@ -20,7 +20,7 @@ package ddg.emulator.event.filesystem;
 
 import ddg.kernel.Event;
 import ddg.kernel.Time;
-import ddg.model.DDGClient;
+import ddg.model.FileSystemClient;
 
 /**
  * 
@@ -32,7 +32,6 @@ public class ReadEvent extends Event {
 
 	private final long length;
 	private final String filePath;
-	private final Time duration;
 
 	/**
 	 * 
@@ -41,12 +40,11 @@ public class ReadEvent extends Event {
 	 * @param handler
 	 * @param scheduledTime
 	 */
-	public ReadEvent(DDGClient handler, Time scheduledTime, Time duration, String filePath, long length) {
-		super(EVENT_NAME, handler, scheduledTime);
+	public ReadEvent(FileSystemClient handler, Time scheduledTime, Time duration, String filePath, long length) {
+		super(EVENT_NAME, handler, scheduledTime, duration);
 		
 		this.filePath = filePath;
 		this.length = length;
-		this.duration = duration;
 	}
 
 	/**
@@ -61,10 +59,6 @@ public class ReadEvent extends Event {
 	 */
 	public long getLength() {
 		return length;
-	}
-	
-	public Time getDuration() {
-		return duration;
 	}
 	
 	@Override

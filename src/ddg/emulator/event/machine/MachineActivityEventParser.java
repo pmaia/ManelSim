@@ -72,7 +72,7 @@ public class MachineActivityEventParser implements EventSource {
 				} else if(eventType.equals("shutdown")) {
 					event = new ShutdownEvent(machine, aScheduledTime, duration);
 				} else if(eventType.equals("activity")) {
-					event = new UserActivityEvent(machine, aScheduledTime, duration, false);
+					event = new UserActivityEvent(machine, aScheduledTime, duration);
 				} else {
 					throw new RuntimeException(eventType + " is not recognized by this parser as a valid event type.");
 				}
