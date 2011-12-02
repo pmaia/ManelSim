@@ -133,7 +133,7 @@ public class FileSystemEventParser implements EventSource {
 		long length = Long.parseLong(tokenizer.nextToken());
 
 		return new WriteEvent(client, timestampAndDuration[0], length, 
-				timestampAndDuration[2], filePath); 
+				timestampAndDuration[1], filePath); 
 	}
 	
 	private Time [] parseTime(String traceTimestamp) {
