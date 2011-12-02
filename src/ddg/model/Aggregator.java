@@ -3,8 +3,6 @@ package ddg.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import ddg.kernel.Time;
-
 public class Aggregator {
 
 	private final Map<String, MachineAvailability> availabilityTotalsPerMachine = 
@@ -52,31 +50,43 @@ public class Aggregator {
 	}
 	
 	public String summarize() {
-//		StringBuilder summary = new StringBuilder();
-//		
-//		//summarize availability
-//		summary.append("\n\n============================================ \nAvailability summary: \n");
-//		
-//		long totalActiveDurationMillis = 0;
-//		long totalInactiveDurationMillis = 0;
-//		long totalTransitions = 0;
-//		
-//		for(String machine : availabilityTotalsPerMachine.keySet()) {
-//			MachineAvailability mAvailability = availabilityTotalsPerMachine.get(machine);
-//			
-//			summary.append(String.format("\nMachine=%s\tActive=%d ms\tInactive=%d ms\tTransitions=%d", 
-//					machine, mAvailability.getTotalActiveDuration(), mAvailability.getTotalSleepingDuration(), 
-//					mAvailability.getTransitionsCount()));
-//			
-//			totalActiveDurationMillis += mAvailability.getTotalActiveDuration();
-//			totalInactiveDurationMillis += mAvailability.getTotalSleepingDuration();
-//			totalTransitions += mAvailability.getTransitionsCount();
-//		}
-//		
-//		summary.append(String.format("\n\nTotal active duration:\t%d ms", totalActiveDurationMillis));
-//		summary.append(String.format("\nTotal inactive duration:\t%d ms", totalInactiveDurationMillis));
-//		summary.append(String.format("\nTotal transitions:\t%d", totalTransitions));
-//		
+		StringBuilder summary = new StringBuilder();
+		
+		//summarize availability
+		summary.append("\n\n============================================ \nAvailability summary: \n");
+		
+		double totalActiveDuration = 0;
+		double totalIdleDuration = 0;
+		double totalSleepingDuration = 0;
+		double totalShutdownDuration = 0;
+		int shutdownCount = 0;
+		int sleepCount = 0;
+		
+		for(String machine : availabilityTotalsPerMachine.keySet()) {
+			MachineAvailability ma = availabilityTotalsPerMachine.get(machine);
+			
+			String format = "\nMachine=%s\tActive=%f ms\tIdle=%f ms\tSleeping=%f ms\tTurned off=%f ms\t" +
+					"Shutdowns=%d\tSleepings=%d";
+			
+			summary.append(String.format(format, machine, ma.getTotalActiveDuration(), ma.getTotalIdleDuration(), 
+					ma.getTotalSleepingDuration(), ma.getTotalShutdownDuration(), ma.getShutdownCount(), 
+					ma.getSleepCount()));
+			
+			totalActiveDuration +=  ma.getTotalActiveDuration();
+			totalIdleDuration += ma.getTotalIdleDuration();
+			totalSleepingDuration += ma.getTotalSleepingDuration();
+			totalShutdownDuration += ma.getTotalShutdownDuration();
+			shutdownCount += ma.getShutdownCount();
+			sleepCount += ma.getSleepCount();
+		}
+		
+		summary.append(String.format("\n\nTotal active duration:\t%d ms",totalActiveDuration));
+		summary.append(String.format("\n\nTotal idle duration:\t%d ms", totalIdleDuration));
+		summary.append(String.format("\n\nTotal sleeping duration:\t%d ms", totalSleepingDuration));
+		summary.append(String.format("\n\nTotal turned off duration:\t%d ms", totalShutdownDuration));
+		summary.append(String.format("\n\nTotal shutdowns:\t%d ms", shutdownCount));
+		summary.append(String.format("\n\nTotal sleeps:\t%d ms", sleepCount));
+		
 //		//summarize energy consumption
 //		summary.append("\n\n============================================ \nEnergy consumption summary: \n");
 //		double activeConsumptionWh = toHours(totalActiveDurationMillis) * ACTIVE_POWER_IN_WATTS;
@@ -88,17 +98,8 @@ public class Aggregator {
 //		
 //		summary.append(String.format("\nEnergy consumption without opportunistic distributed file system:\t%f kWh",
 //				energyConsumptionkWh));
-//		
-//		return summary.toString();
-		return null; //TODO implementar
-	}
-	
-	private double toHours(double timeInMillis) {
-		return ((timeInMillis / 1000) / 60) / 60;
-	}
-	
-	private double toHours(Time time) {
-		return toHours(time.asMilliseconds());
+		
+		return summary.toString();
 	}
 	
 }
