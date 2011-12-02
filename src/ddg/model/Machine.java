@@ -30,17 +30,14 @@ public class Machine extends EventHandler {
 	 * The source of the values below is Lesandro's work: 
 	 * "On the Impact of Energy-saving Strategies in Opportunistic Grids"
 	 */
-	public static final double TRANSITION_POWER_IN_WATTS = 140;
-	public static final double ACTIVE_POWER_IN_WATTS = 140;
-	public static final double IDLE_POWER_IN_WATTS = 0; //FIXME need to discover the right value
-	public static final double SLEEP_POWER_IN_WATTS = 3.33;
-	public static final double TO_SLEEP_POWER = 0; //FIXME need to discover the right value
-	public static final double FROM_SLEEP_POWER = 0; //FIXME need to discover the right value
-	public static final double TO_SHUTDOWN_POWER = 0; //FIXME need to discover the right value
-	public static final double FROM_SHUTDOWN_POWER = 0; //FIXME need to discover the right value 
-	
-	public static final Time SLEEP_TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
-	public static final Time SHUTDOWN_TRANSITION_DURATION = new Time(60, Unit.SECONDS); //FIXME need to discover the right value
+	public static final double TRANSITION_POWER_IN_WATTS 	= 140;
+	public static final double ACTIVE_POWER_IN_WATTS 		= 140;
+	public static final double IDLE_POWER_IN_WATTS 			= 0; //FIXME need to discover the right value
+	public static final double SLEEP_POWER_IN_WATTS 		= 3.33;
+	public static final double SLEEP_TRANSITION_POWER 		= 0; //FIXME need to discover the right value
+	public static final double SHUTDOWN_TRANSITION_POWER 	= 0; //FIXME need to discover the right value
+	public static final Time   SLEEP_TRANSITION_DURATION 	= new Time(2500, Unit.MILLISECONDS);
+	public static final Time   SHUTDOWN_TRANSITION_DURATION	= new Time(60, Unit.SECONDS); //FIXME need to discover the right value
 	
 	private final Set<DataServer> deployedDataServers;
 	private final Set<DDGClient> clients;
@@ -49,14 +46,33 @@ public class Machine extends EventHandler {
 	 * The amount of time this machine must wait idle before sleep
 	 */
 	private final Time timeBeforeSleep;
-	
+	/**
+	 * Machine's unique identification
+	 */
 	private final String id;
-
+	/**
+	 * A list that holds the events from the local file system that arrived while the machine was sleeping or turned off
+	 */
 	private List<FileSystemActivityEvent> pendingFSActivityEvents;
+	/**
+	 * The name of the state the machine is at a given moment
+	 */
 	private String currentStateName;
+	/**
+	 * The time in which this machine transitioned to the current state
+	 */
 	private Time currentStateStartTime;
-	private Time currentStateSupposedEndTime;
-	
+	/**
+	 * The time in which this machine will have its state changed again. 
+	 * Note that if the machine is in a state such as SLEEP or SHUTDOWN, a FileSystemActivityEvent can change the
+	 * machine's state before this time. That's why it's called supposedCurrentStateEndTime.  
+	 */
+	private Time supposedCurrentStateEndTime;
+	/**
+	 * The two fields below are used to keep track of file system activity that happened while the machine was idle 
+	 * (without user activity). The total time that the machine remained active while the user was idle is given by the
+	 * subtraction of fsActivityWhileIdleEndTime and fsActivityWhileIdleStartTime. 
+	 */
 	private double fsActivityWhileIdleStartTime = -1;
 	private double fsActivityWhileIdleEndTime = -1;
 	
@@ -76,7 +92,7 @@ public class Machine extends EventHandler {
 
 		currentStateName = ShutdownEvent.EVENT_NAME;
 		currentStateStartTime = scheduler.now();
-		currentStateSupposedEndTime = Time.END_OF_THE_WORLD;
+		supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
 		pendingFSActivityEvents = new ArrayList<FileSystemActivityEvent>();
 	}
 	
@@ -163,25 +179,29 @@ public class Machine extends EventHandler {
 			} else {
 				UserIdlenessEvent idlenessEvent = null;
 				
-				if(currentStateName.equals(SHUTDOWN_TRANSITION_DURATION)) {
+				if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
 					idlenessEvent = buildUserIdlenessEventToWakeUp(SHUTDOWN_TRANSITION_DURATION);
 				} else {
 					idlenessEvent = buildUserIdlenessEventToWakeUp(SLEEP_TRANSITION_DURATION);
 				}
 				
+				Time fsActivityEventStartTime = supposedCurrentStateEndTime.plus(oneSecond);
+				if(idlenessEvent != null) {
+					send(idlenessEvent);
+					fsActivityEventStartTime = idlenessEvent.getScheduledTime().plus(oneSecond);
+				}
+				
 				FileSystemActivityEvent newFSActivityEvent = new FileSystemActivityEvent(this, 
-						idlenessEvent.getScheduledTime().plus(oneSecond), fsActivity.getDuration(), 
-						fsActivity.isFromLocalFSClient());
+						fsActivityEventStartTime, fsActivity.getDuration(), false);
 				
 				send(newFSActivityEvent);		
-				send(idlenessEvent);
 			}
 		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
 			//if this fs event duration is greater than the duration of the current state
-			if(currentStateSupposedEndTime.isEarlierThan(now.plus(fsActivity.getDuration()))) {
-				Time duration = now.plus(fsActivity.getDuration()).minus(currentStateSupposedEndTime); 
+			if(supposedCurrentStateEndTime.isEarlierThan(now.plus(fsActivity.getDuration()))) {
+				Time duration = now.plus(fsActivity.getDuration()).minus(supposedCurrentStateEndTime); 
 				FileSystemActivityEvent newFSActivityEvent = new FileSystemActivityEvent(this, 
-						currentStateSupposedEndTime.plus(oneSecond), duration, 
+						supposedCurrentStateEndTime.plus(oneSecond), duration, 
 						fsActivity.isFromLocalFSClient());
 				
 				send(newFSActivityEvent);
@@ -192,17 +212,13 @@ public class Machine extends EventHandler {
 			}
 			
 			//if this fs event duration is greater than the duration of the current state
-			if(currentStateSupposedEndTime.isEarlierThan(now.plus(fsActivity.getDuration()))) {
+			if(supposedCurrentStateEndTime.isEarlierThan(now.plus(fsActivity.getDuration()))) {
 				
-				Time thePortionOfTimeThatFitsInThisState = currentStateSupposedEndTime.minus(now);
-				
-				if(now.plus(thePortionOfTimeThatFitsInThisState).asMilliseconds() > fsActivityWhileIdleEndTime) {
-					fsActivityWhileIdleEndTime = now.plus(thePortionOfTimeThatFitsInThisState).asMilliseconds();
-				}
-				
+				fsActivityWhileIdleEndTime = supposedCurrentStateEndTime.asMilliseconds();
+								
 				FileSystemActivityEvent newFSActivityEvent = new FileSystemActivityEvent(this, 
-						currentStateSupposedEndTime.plus(oneSecond), 
-						fsActivity.getDuration().minus(thePortionOfTimeThatFitsInThisState), 
+						supposedCurrentStateEndTime.plus(oneSecond), 
+						fsActivity.getDuration().minus(supposedCurrentStateEndTime.minus(now)), 
 						fsActivity.isFromLocalFSClient());
 				
 				send(newFSActivityEvent);
@@ -216,14 +232,16 @@ public class Machine extends EventHandler {
 		Time now = getScheduler().now();
 		Time idlenessStart = null;
 
-		//checking if the machine has already finished the transition to the current state
+		//if the machine has not finished the transition to the current state yet	
 		if(now.minus(transitionDuration).isEarlierThan(currentStateStartTime)) {
 			idlenessStart = currentStateStartTime.plus(transitionDuration.times(2));	
-		} else {
+		} else if(now.plus(transitionDuration).isEarlierThan(supposedCurrentStateEndTime)) {
 			idlenessStart = now.plus(transitionDuration);
+		} else { //the machine is already waking up
+			return null;
 		}
 		
-		Time userIdlenessDuration = currentStateSupposedEndTime.minus(idlenessStart);
+		Time userIdlenessDuration = supposedCurrentStateEndTime.minus(idlenessStart);
 		
 		UserIdlenessEvent idlenessEvent = new UserIdlenessEvent(this, idlenessStart, userIdlenessDuration);
 		
@@ -247,17 +265,24 @@ public class Machine extends EventHandler {
 			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
 			
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
-			double fsActivityWhileIdleDuration = fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime;
-			aggregator.aggregateIdleDuration(getId(), currentStateActualDuration - fsActivityWhileIdleDuration);
-			aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
+			aggregateIdlenessPeriod(currentStateActualDuration);
 			
-			fsActivityWhileIdleEndTime = -1;
-			fsActivityWhileIdleStartTime = -1;
 		}
 		
 		currentStateName = ShutdownEvent.EVENT_NAME;
 		currentStateStartTime = now;
-		currentStateSupposedEndTime = currentStateStartTime.plus(event.getDuration());
+		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
+	}
+	
+	private void aggregateIdlenessPeriod(double idlenessDuration) {
+		Aggregator aggregator = Aggregator.getInstance();
+		
+		double fsActivityWhileIdleDuration = fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime;
+		aggregator.aggregateIdleDuration(getId(), idlenessDuration - fsActivityWhileIdleDuration);
+		aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
+		
+		fsActivityWhileIdleEndTime = -1;
+		fsActivityWhileIdleStartTime = -1;
 	}
 
 	private void handleUserActivity(UserActivityEvent event) {
@@ -277,17 +302,13 @@ public class Machine extends EventHandler {
 			throw new IllegalStateException(String.format("The machine %s was already in activity.", getId()));
 			
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
-			double fsActivityWhileIdleDuration = fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime;
-			aggregator.aggregateIdleDuration(getId(), currentStateActualDuration - fsActivityWhileIdleDuration);
-			aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
+			aggregateIdlenessPeriod(currentStateActualDuration);
 			
-			fsActivityWhileIdleEndTime = -1;
-			fsActivityWhileIdleStartTime = -1;
 		}
 		
 		currentStateName = UserActivityEvent.EVENT_NAME;
 		currentStateStartTime = now;
-		currentStateSupposedEndTime = currentStateStartTime.plus(event.getDuration());
+		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 		
 		handlePendingFileSystemActivityEvents();
 	}
@@ -310,19 +331,14 @@ public class Machine extends EventHandler {
 			
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
 			// if the fs wakes the machine up it is possible that we have idle to idle transition
-			double fsActivityWhileIdleDuration = fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime;
-			aggregator.aggregateIdleDuration(getId(), currentStateActualDuration - fsActivityWhileIdleDuration);
-			aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
-			
-			fsActivityWhileIdleEndTime = -1;
-			fsActivityWhileIdleStartTime = -1;
+			aggregateIdlenessPeriod(currentStateActualDuration);
 		}
 		
 		currentStateName = UserIdlenessEvent.EVENT_NAME;
 		currentStateStartTime = now;
 		
 		if(idlenessDuration.isEarlierThan(timeBeforeSleep)) {
-			currentStateSupposedEndTime = currentStateStartTime.plus(event.getDuration());
+			supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 		} else {
 			Time bedTime = now.plus(timeBeforeSleep);
 			Time duration = now.plus(idlenessDuration).minus(bedTime);
@@ -333,9 +349,9 @@ public class Machine extends EventHandler {
 				
 				send(new SleepEvent(this, bedTime));
 				
-				currentStateSupposedEndTime = currentStateStartTime.plus(duration);
+				supposedCurrentStateEndTime = currentStateStartTime.plus(duration);
 			} else {
-				currentStateSupposedEndTime = currentStateStartTime.plus(event.getDuration());
+				supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 			}
 		}
 		
@@ -358,17 +374,12 @@ public class Machine extends EventHandler {
 			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
 			
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
-			double fsActivityWhileIdleDuration = fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime;
-			aggregator.aggregateIdleDuration(getId(), currentStateActualDuration - fsActivityWhileIdleDuration);
-			aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
-			
-			fsActivityWhileIdleEndTime = -1;
-			fsActivityWhileIdleStartTime = -1;
+			aggregateIdlenessPeriod(currentStateActualDuration);
 		}
 		
 		currentStateName = SleepEvent.EVENT_NAME;
 		currentStateStartTime = now;
-		currentStateSupposedEndTime = currentStateStartTime.plus(event.getDuration());
+		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 	}
 	
 	private void handlePendingFileSystemActivityEvents() {
