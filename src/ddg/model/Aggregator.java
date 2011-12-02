@@ -3,6 +3,8 @@ package ddg.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import ddg.kernel.Time;
+
 public class Aggregator {
 
 	private final Map<String, MachineAvailability> availabilityTotalsPerMachine = 
@@ -23,19 +25,19 @@ public class Aggregator {
 		availabilityTotalsPerMachine.clear();
 	}
 	
-	public void aggregateActiveDuration(String machine, double activeDuration) {
+	public void aggregateActiveDuration(String machine, Time activeDuration) {
 		getMachineAvailability(machine).addActiveDuration(activeDuration);
 	}
 	
-	public void aggregateIdleDuration(String machine, double idleDuration) {
+	public void aggregateIdleDuration(String machine, Time idleDuration) {
 		getMachineAvailability(machine).addIdleDuration(idleDuration);
 	}
 	
-	public void aggregateSleepingDuration(String machine, double sleepingDuration) {
+	public void aggregateSleepingDuration(String machine, Time sleepingDuration) {
 		getMachineAvailability(machine).addSleepingDuration(sleepingDuration);
 	}
 	
-	public void aggregateShutdownDuration(String machine, double shutdownDuration) {
+	public void aggregateShutdownDuration(String machine, Time shutdownDuration) {
 		getMachineAvailability(machine).addShutdownDuration(shutdownDuration);
 	}
 	
@@ -55,37 +57,43 @@ public class Aggregator {
 		//summarize availability
 		summary.append("\n\n============================================ \nAvailability summary: \n");
 		
-		double totalActiveDuration = 0;
-		double totalIdleDuration = 0;
-		double totalSleepingDuration = 0;
-		double totalShutdownDuration = 0;
+		long totalActiveDuration = 0;
+		long totalIdleDuration = 0;
+		long totalSleepingDuration = 0;
+		long totalShutdownDuration = 0;
 		int shutdownCount = 0;
 		int sleepCount = 0;
 		
 		for(String machine : availabilityTotalsPerMachine.keySet()) {
 			MachineAvailability ma = availabilityTotalsPerMachine.get(machine);
 			
-			String format = "\nMachine=%s\tActive=%f ms\tIdle=%f ms\tSleeping=%f ms\tTurned off=%f ms\t" +
+			long machineActiveDuration =  ma.getTotalActiveDuration().asMilliseconds();
+			long machineIdleDuration = ma.getTotalIdleDuration().asMilliseconds();
+			long machineSleepingDuration = ma.getTotalSleepingDuration().asMilliseconds();
+			long machineShutdownDuration = ma.getTotalShutdownDuration().asMilliseconds();
+			int machineShutdownCount = ma.getShutdownCount();  
+			int machineSleepCount = ma.getSleepCount();
+			
+			String format = "\nMachine=%s\tActive=%d ms\tIdle=%d ms\tSleeping=%d ms\tTurned off=%d ms\t" +
 					"Shutdowns=%d\tSleepings=%d";
 			
-			summary.append(String.format(format, machine, ma.getTotalActiveDuration(), ma.getTotalIdleDuration(), 
-					ma.getTotalSleepingDuration(), ma.getTotalShutdownDuration(), ma.getShutdownCount(), 
-					ma.getSleepCount()));
+			summary.append(String.format(format, machine, machineActiveDuration, machineIdleDuration, 
+					machineSleepingDuration, machineShutdownDuration, machineShutdownCount, machineSleepCount));
 			
-			totalActiveDuration +=  ma.getTotalActiveDuration();
-			totalIdleDuration += ma.getTotalIdleDuration();
-			totalSleepingDuration += ma.getTotalSleepingDuration();
-			totalShutdownDuration += ma.getTotalShutdownDuration();
-			shutdownCount += ma.getShutdownCount();
-			sleepCount += ma.getSleepCount();
+			totalActiveDuration +=  machineActiveDuration;
+			totalIdleDuration += machineIdleDuration;
+			totalSleepingDuration += machineSleepingDuration;
+			totalShutdownDuration += machineShutdownDuration;
+			shutdownCount += machineShutdownCount;
+			sleepCount += machineSleepCount;
 		}
 		
 		summary.append(String.format("\n\nTotal active duration:\t%d ms",totalActiveDuration));
-		summary.append(String.format("\n\nTotal idle duration:\t%d ms", totalIdleDuration));
-		summary.append(String.format("\n\nTotal sleeping duration:\t%d ms", totalSleepingDuration));
-		summary.append(String.format("\n\nTotal turned off duration:\t%d ms", totalShutdownDuration));
-		summary.append(String.format("\n\nTotal shutdowns:\t%d ms", shutdownCount));
-		summary.append(String.format("\n\nTotal sleeps:\t%d ms", sleepCount));
+		summary.append(String.format("\nTotal idle duration:\t%d ms", totalIdleDuration));
+		summary.append(String.format("\nTotal sleeping duration:\t%d ms", totalSleepingDuration));
+		summary.append(String.format("\nTotal turned off duration:\t%d ms", totalShutdownDuration));
+		summary.append(String.format("\nTotal shutdowns:\t%d ms", shutdownCount));
+		summary.append(String.format("\nTotal sleeps:\t%d ms", sleepCount));
 		
 //		//summarize energy consumption
 //		summary.append("\n\n============================================ \nEnergy consumption summary: \n");

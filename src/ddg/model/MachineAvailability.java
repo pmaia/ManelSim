@@ -15,6 +15,9 @@
  */
 package ddg.model;
 
+import ddg.kernel.Time;
+import ddg.kernel.Time.Unit;
+
 /**
  * Stores the total times in which a machine remained active, idle, sleeping, turned off or in some intermediary state. 
  *
@@ -22,45 +25,45 @@ package ddg.model;
  */
 public class MachineAvailability {
 	
-	private double totalActiveDuration = 0;
-	private double totalIdleDuration = 0;
-	private double totalSleepingDuration = 0;
-	private double totalShutdownDuration = 0;
+	private Time totalActiveDuration = new Time(0, Unit.SECONDS);
+	private Time totalIdleDuration = new Time(0, Unit.SECONDS);
+	private Time totalSleepingDuration = new Time(0, Unit.SECONDS);
+	private Time totalShutdownDuration = new Time(0, Unit.SECONDS);
 	
 	private int shutdownCount = 0;
 	private int sleepCount = 0;
 
-	public void addActiveDuration(double increment) {
-		totalActiveDuration += increment;
+	public void addActiveDuration(Time increment) {
+		totalActiveDuration.plus(increment);
 	}
 	
-	public void addIdleDuration(double increment) {
-		totalIdleDuration += increment;
+	public void addIdleDuration(Time increment) {
+		totalIdleDuration.plus(increment);
 	}
 	
-	public void addSleepingDuration(double increment) {
-		totalSleepingDuration += increment;
+	public void addSleepingDuration(Time increment) {
+		totalSleepingDuration.plus(increment);
 		sleepCount++;
 	}
 	
-	public void addShutdownDuration(double increment) {
-		totalShutdownDuration += increment;
+	public void addShutdownDuration(Time increment) {
+		totalShutdownDuration.plus(increment);
 		shutdownCount++;
 	}
 	
-	public double getTotalActiveDuration() {
+	public Time getTotalActiveDuration() {
 		return totalActiveDuration;
 	}
 	
-	public double getTotalIdleDuration() {
+	public Time getTotalIdleDuration() {
 		return totalIdleDuration;
 	}
 	
-	public double getTotalSleepingDuration() {
+	public Time getTotalSleepingDuration() {
 		return totalSleepingDuration;
 	}
 	
-	public double getTotalShutdownDuration() {
+	public Time getTotalShutdownDuration() {
 		return totalShutdownDuration;
 	}
 	

@@ -73,8 +73,8 @@ public class Machine extends EventHandler {
 	 * (without user activity). The total time that the machine remained active while the user was idle is given by the
 	 * subtraction of fsActivityWhileIdleEndTime and fsActivityWhileIdleStartTime. 
 	 */
-	private double fsActivityWhileIdleStartTime = -1;
-	private double fsActivityWhileIdleEndTime = -1;
+	private long fsActivityWhileIdleStartTime = -1;
+	private long fsActivityWhileIdleEndTime = -1;
 	
 	/**
 	 * 
@@ -252,7 +252,7 @@ public class Machine extends EventHandler {
 		Aggregator aggregator = Aggregator.getInstance();
 		Time now = getScheduler().now();		
 		
-		double currentStateActualDuration = now.minus(currentStateStartTime).asMilliseconds();
+		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
 			throw new IllegalStateException(String.format("The machine %s was already turned off.", getId()));
@@ -274,11 +274,12 @@ public class Machine extends EventHandler {
 		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 	}
 	
-	private void aggregateIdlenessPeriod(double idlenessDuration) {
+	private void aggregateIdlenessPeriod(Time idlenessDuration) {
 		Aggregator aggregator = Aggregator.getInstance();
 		
-		double fsActivityWhileIdleDuration = fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime;
-		aggregator.aggregateIdleDuration(getId(), idlenessDuration - fsActivityWhileIdleDuration);
+		Time fsActivityWhileIdleDuration = new Time(fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime, 
+				Unit.MICROSECONDS);
+		aggregator.aggregateIdleDuration(getId(), idlenessDuration.minus(fsActivityWhileIdleDuration));
 		aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
 		
 		fsActivityWhileIdleEndTime = -1;
@@ -290,7 +291,7 @@ public class Machine extends EventHandler {
 		Aggregator aggregator = Aggregator.getInstance();
 		Time now = getScheduler().now();		
 		
-		double currentStateActualDuration = now.minus(currentStateStartTime).asMilliseconds();
+		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
 			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);
@@ -318,7 +319,7 @@ public class Machine extends EventHandler {
 		Time idlenessDuration = event.getDuration();
 		Time now = getScheduler().now();
 		
-		double currentStateActualDuration = now.minus(currentStateStartTime).asMilliseconds();
+		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
 			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);
@@ -344,9 +345,7 @@ public class Machine extends EventHandler {
 			Time duration = now.plus(idlenessDuration).minus(bedTime);
 			
 			//we must sleep only if we have time to wake up
-			if(duration.compareTo(SLEEP_TRANSITION_DURATION.plus(SLEEP_TRANSITION_DURATION)) >= 0) { 
-				aggregator.aggregateIdleDuration(getId(), timeBeforeSleep.asMilliseconds());
-				
+			if(duration.compareTo(SLEEP_TRANSITION_DURATION.times(2)) >= 0) { 
 				send(new SleepEvent(this, bedTime));
 				
 				supposedCurrentStateEndTime = currentStateStartTime.plus(duration);
@@ -362,7 +361,7 @@ public class Machine extends EventHandler {
 		Aggregator aggregator = Aggregator.getInstance();
 		Time now = getScheduler().now();		
 		
-		double currentStateActualDuration = now.minus(currentStateStartTime).asMilliseconds();
+		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
 			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);

@@ -1,25 +1,23 @@
-/* JETime - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
 package ddg.kernel;
 
 /**
  * 
- * @author thiago - thiago@lsd.ufcg.edu.br
+ * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
+ * @author Thiago Emmanuel - thiagoepdc@lsd.ufcg.edu.br
  */
 public final class Time implements Comparable<Time> {
 	
-	public static final Time END_OF_THE_WORLD = new Time(Long.MAX_VALUE, Unit.MILLISECONDS); 
+	public static final Time END_OF_THE_WORLD = new Time(Long.MAX_VALUE, Unit.MICROSECONDS); 
 
-	private final double timeMilliSeconds;
-	
 	public enum Unit {SECONDS, MILLISECONDS, MICROSECONDS}
+	
+	private final long timeMicroSeconds;
 
-	public Time(double time, Unit unit) {
+	public Time(long time, Unit unit) {
 		switch(unit) {
-		case SECONDS: this.timeMilliSeconds = time * 1000; break;
-		case MILLISECONDS: this.timeMilliSeconds = time; break;
-		case MICROSECONDS: this.timeMilliSeconds = time / 1000; break;
+		case SECONDS: this.timeMicroSeconds = time * 1000000; break;
+		case MILLISECONDS: this.timeMicroSeconds = time * 1000; break;
+		case MICROSECONDS: this.timeMicroSeconds = time; break;
 		default:
 			throw new IllegalArgumentException("Impossible argument exception");
 		}
@@ -30,19 +28,19 @@ public final class Time implements Comparable<Time> {
 	 * @return
 	 */
 	public Time plus(Time otherETime) {
-		return new Time(timeMilliSeconds + otherETime.timeMilliSeconds, Unit.MILLISECONDS);
+		return new Time(timeMicroSeconds + otherETime.timeMicroSeconds, Unit.MILLISECONDS);
 	}
 	
 	public Time minus(Time otherETime) {
-		return new Time(timeMilliSeconds - otherETime.timeMilliSeconds, Unit.MILLISECONDS);
+		return new Time(timeMicroSeconds - otherETime.timeMicroSeconds, Unit.MILLISECONDS);
 	}
 	
 	public Time times(int multiplier) {
-		return new Time(timeMilliSeconds * multiplier, Unit.MILLISECONDS);
+		return new Time(timeMicroSeconds * multiplier, Unit.MILLISECONDS);
 	}
 	
-	public double asMilliseconds() {
-		return timeMilliSeconds;
+	public long asMilliseconds() {
+		return timeMicroSeconds / 1000;
 	}
 
 	/**
@@ -59,7 +57,7 @@ public final class Time implements Comparable<Time> {
 	 */
 	@Override
 	public int compareTo(Time o) {
-		double diff = timeMilliSeconds - o.timeMilliSeconds;
+		double diff = timeMicroSeconds - o.timeMicroSeconds;
 		if (diff < 0) {
 			return -1;
 		} else if (diff > 0) {
@@ -69,10 +67,10 @@ public final class Time implements Comparable<Time> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns the String that represents this {@link Time} as milliseconds
 	 */
 	@Override
 	public String toString() {
-		return String.valueOf(timeMilliSeconds);
+		return String.valueOf(asMilliseconds());
 	}
 }
