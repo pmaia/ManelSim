@@ -22,8 +22,8 @@ for line in sys.stdin:
 	if time_between_logs > 1:
 		if (time_between_logs - idleness_time < 6 * 60 or # (the gap is too small) 
                     equals(idleness_time, previous_idleness_time + time_between_logs, 1)): # (it is a continuation of the previous idleness)
-			previous_timestamp = timestamp - 1
-			previous_idleness_time = previous_idleness_time + time_between_logs - 1
+			previous_timestamp = timestamp - idleness_time - 1
+			previous_idleness_time = previous_idleness_time + time_between_logs - idleness_time - 1
 		else: 
 			print "idleness\t" + str(previous_timestamp - previous_idleness_time) + "\t" + str(previous_idleness_time)
 			print "shutdown\t" + str(previous_timestamp) + "\t" + str(time_between_logs - idleness_time)
