@@ -74,13 +74,13 @@ public class MetadataServer extends EventHandler {
 	public void closePath(FileSystemClient client, String filePath, Time now) {
 		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
-		Time noTime = new Time(0, Unit.SECONDS);
-		
-		boolean hasChanged = !noTime.equals(replicationGroup.getTotalChangesDuration());
-		
-		if(replicationGroup != null && hasChanged) {
-			Time time = now.plus(timeBeforeUpdateReplicas);
-			send(new UpdateReplicationGroup(this, time, replicationGroup.getTotalChangesDuration(), filePath));
+		if(replicationGroup != null) {
+			Time noTime = new Time(0, Unit.SECONDS);
+			
+			if(!noTime.equals(replicationGroup.getTotalChangesDuration())) {
+				Time time = now.plus(timeBeforeUpdateReplicas);
+				send(new UpdateReplicationGroup(this, time, replicationGroup.getTotalChangesDuration(), filePath));
+			}
 		}
 	}
 	

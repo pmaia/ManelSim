@@ -57,14 +57,29 @@ public final class Time implements Comparable<Time> {
 	 * @return
 	 */
 	@Override
-	public int compareTo(Time o) {
-		double diff = timeMicroSeconds - o.timeMicroSeconds;
+	public int compareTo(Time otherTime) {
+		long diff = timeMicroSeconds - otherTime.timeMicroSeconds;
 		if (diff < 0) {
 			return -1;
 		} else if (diff > 0) {
 			return 1;
 		}
 		return 0;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof Time))
+			return false;
+		
+		Time otherTime = (Time)obj;
+		
+		return otherTime.timeMicroSeconds == timeMicroSeconds;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)timeMicroSeconds;
 	}
 
 	/**
