@@ -3,9 +3,9 @@ package ddg.model;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
-import ddg.emulator.EventsGeneratedBySimulationQueue;
 import ddg.emulator.event.machine.FileSystemActivityEvent;
 import ddg.emulator.event.machine.ShutdownEvent;
 import ddg.emulator.event.machine.SleepEvent;
@@ -82,7 +82,7 @@ public class Machine extends EventHandler {
 	 * @param id
 	 * @param timeBeforeSleep
 	 */
-	public Machine(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue, String id, long timeBeforeSleep) {
+	public Machine(PriorityQueue<Event> eventsGeneratedBySimulationQueue, String id, long timeBeforeSleep) {
 		
 		super(eventsGeneratedBySimulationQueue);
 		

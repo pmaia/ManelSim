@@ -1,6 +1,6 @@
 package ddg.kernel;
 
-import ddg.emulator.EventsGeneratedBySimulationQueue;
+import java.util.PriorityQueue;
 
 
 /**
@@ -10,17 +10,17 @@ import ddg.emulator.EventsGeneratedBySimulationQueue;
  */
 public abstract class EventHandler {
 
-	private final EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue;
+	private final PriorityQueue<Event> eventsGeneratedBySimulationQueue;
 	
 	/**
 	 * @param scheduler
 	 */
-	public EventHandler(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue) {
+	public EventHandler(PriorityQueue<Event> eventsGeneratedBySimulationQueue) {
 		this.eventsGeneratedBySimulationQueue = eventsGeneratedBySimulationQueue;
 	}
 
 	public void send(Event event) {
-		eventsGeneratedBySimulationQueue.addEvent(event);
+		eventsGeneratedBySimulationQueue.add(event);
 	}
 	
 	/**

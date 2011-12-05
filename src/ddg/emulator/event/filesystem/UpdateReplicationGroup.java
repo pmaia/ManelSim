@@ -41,7 +41,7 @@ public class UpdateReplicationGroup extends Event {
 	
 	@Override
 	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath;
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath;
 	}
 
 }

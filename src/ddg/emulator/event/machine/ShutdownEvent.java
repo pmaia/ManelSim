@@ -31,5 +31,9 @@ public class ShutdownEvent extends Event {
 	public ShutdownEvent(EventHandler aHandler, Time aScheduledTime, Time duration) {
 		super(EVENT_NAME, aHandler, aScheduledTime, duration);
 	}
-
+	
+	@Override
+	public String toString() {
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime();
+	}
 }

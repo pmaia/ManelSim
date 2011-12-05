@@ -24,10 +24,12 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import ddg.emulator.event.filesystem.FileSystemEventParser;
 import ddg.emulator.event.machine.MachineActivityEventParser;
+import ddg.kernel.Event;
 import ddg.kernel.EventScheduler;
 import ddg.model.Aggregator;
 import ddg.model.FileSystemClient;
@@ -96,7 +98,7 @@ public class ManelSim {
 		Long timeBeforeUpdateData = Long.valueOf(args[4]);
 		Long timeBeforeDeleteData = Long.valueOf(args[5]);
 		
-		EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue = new EventsGeneratedBySimulationQueue();
+		PriorityQueue<Event> eventsGeneratedBySimulationQueue = new PriorityQueue<Event>();
 
 		// building network
 		Set<Machine> machines = 
@@ -124,9 +126,9 @@ public class ManelSim {
 
 	private static MultipleEventSource createMultipleEventParser(
 			Set<FileSystemClient> clients, Set<Machine> machines, File tracesDir,
-			EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue) {
+			PriorityQueue<Event> eventsGeneratedBySimulationQueue) {
 
-		EventSource []  parsers = new EventSource[machines.size() + clients.size() + 1];
+		EventSource []  parsers = new EventSource[machines.size() + clients.size()];
 
 		try {
 			int parserCount = 0;
@@ -141,13 +143,12 @@ public class ManelSim {
 					new FileInputStream(new File(tracesDir, "fs-" + client.getMachine().getId()));
 				parsers[parserCount++] = new FileSystemEventParser(client, traceStream);
 			}
-			parsers[parserCount] = eventsGeneratedBySimulationQueue;
 			
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException(e);
 		}
 		
-		return new MultipleEventSource(parsers);
+		return new MultipleEventSource(parsers, eventsGeneratedBySimulationQueue);
 	}
 
 	private static DataPlacementAlgorithm createPlacementPolice(String police, Set<DataServer> dataServers) {
@@ -171,7 +172,8 @@ public class ManelSim {
 	 * @param machines2
 	 * @return
 	 */
-	private static Set<FileSystemClient> createClients(EventsGeneratedBySimulationQueue aPlaceForEventsGeneratedBySimulation, Set<Machine> machines, MetadataServer herald) {
+	private static Set<FileSystemClient> createClients(PriorityQueue<Event> aPlaceForEventsGeneratedBySimulation,
+			Set<Machine> machines, MetadataServer herald) {
 
 		Set<FileSystemClient> newClients = new HashSet<FileSystemClient>();
 
@@ -182,7 +184,7 @@ public class ManelSim {
 		return newClients;
 	}
 
-	private static Set<Machine> createMachines(EventsGeneratedBySimulationQueue aPlaceForEventsGeneratedBySimulation, 
+	private static Set<Machine> createMachines(PriorityQueue<Event> aPlaceForEventsGeneratedBySimulation, 
 			File tracesDir, long timeBeforeSleep) {
 		Set<Machine> machines = new HashSet<Machine>();
 		List<String> fsTracesFiles = Arrays.asList(tracesDir.list(fsTracesFilter));

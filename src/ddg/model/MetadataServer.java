@@ -2,8 +2,8 @@ package ddg.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
-import ddg.emulator.EventsGeneratedBySimulationQueue;
 import ddg.emulator.event.filesystem.DeleteReplicationGroup;
 import ddg.emulator.event.filesystem.UpdateReplicationGroup;
 import ddg.emulator.event.machine.FileSystemActivityEvent;
@@ -35,7 +35,7 @@ public class MetadataServer extends EventHandler {
 	 * @param timeBeforeDeleteData in seconds
 	 * @param timeBeforeUpdateReplicas in seconds
 	 */
-	public MetadataServer(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue, 
+	public MetadataServer(PriorityQueue<Event> eventsGeneratedBySimulationQueue, 
 			DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
 			long timeBeforeDeleteData, long timeBeforeUpdateReplicas) {
 		

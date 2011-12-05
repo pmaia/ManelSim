@@ -49,7 +49,8 @@ public class FileSystemActivityEvent extends Event {
 	
 	@Override
 	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + getDuration() + "\t" + localFSClient;
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" +
+				getDuration() + "\t" + localFSClient;
 	}
 
 }

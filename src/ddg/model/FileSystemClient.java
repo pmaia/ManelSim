@@ -1,6 +1,7 @@
 package ddg.model;
 
-import ddg.emulator.EventsGeneratedBySimulationQueue;
+import java.util.PriorityQueue;
+
 import ddg.emulator.event.filesystem.CloseEvent;
 import ddg.emulator.event.filesystem.ReadEvent;
 import ddg.emulator.event.filesystem.UnlinkEvent;
@@ -23,7 +24,7 @@ public class FileSystemClient extends EventHandler {
 	 * @param machine
 	 * @param metadataServer
 	 */
-	public FileSystemClient(EventsGeneratedBySimulationQueue eventsGeneratedBySimulationQueue,
+	public FileSystemClient(PriorityQueue<Event> eventsGeneratedBySimulationQueue,
 			Machine machine, MetadataServer metadataServer) {
 
 		super(eventsGeneratedBySimulationQueue);

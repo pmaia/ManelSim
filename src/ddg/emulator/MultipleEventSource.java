@@ -15,7 +15,10 @@
  */
 package ddg.emulator;
 
+import java.util.PriorityQueue;
+
 import ddg.kernel.Event;
+import ddg.kernel.Time;
 
 /**
  * An {@link EventSource} that aggregates a bunch of {@link EventSource}s and delivery their events in order.  
@@ -25,9 +28,11 @@ import ddg.kernel.Event;
 public class MultipleEventSource implements EventSource {
 	
 	private final PushBackEventParser [] parsers;
+	private final PriorityQueue<Event> simulationGeneratedEventsQueue;
 
-	public MultipleEventSource(EventSource[] parsers) {
+	public MultipleEventSource(EventSource[] parsers, PriorityQueue<Event> simulationGeneratedEventsQueue) {
 		this.parsers = new PushBackEventParser[parsers.length];
+		this.simulationGeneratedEventsQueue = simulationGeneratedEventsQueue;
 		
 		for(int i = 0; i < parsers.length; i++) {
 			this.parsers[i] = new PushBackEventParser(parsers[i]);
@@ -39,6 +44,7 @@ public class MultipleEventSource implements EventSource {
 		
 		int smallestTimeEventSourceId = 0;
 		Event smallestTimeEvent;
+		Event smallestTimeEventCandidate;
 		while((smallestTimeEvent = parsers[smallestTimeEventSourceId].getNextEvent()) == null) {
 			smallestTimeEventSourceId++;
 			
@@ -48,10 +54,9 @@ public class MultipleEventSource implements EventSource {
 		}
 
 		for(int i = smallestTimeEventSourceId + 1; i < this.parsers.length; i++) {
-			Event smallestTimeEventCandidate = parsers[i].getNextEvent();
+			smallestTimeEventCandidate = parsers[i].getNextEvent();
 			
 			if(smallestTimeEventCandidate != null){
-				
 				if(smallestTimeEvent.getScheduledTime().isEarlierThan(smallestTimeEventCandidate.getScheduledTime())) {
 					parsers[i].pushBack(smallestTimeEventCandidate);
 				} else {
@@ -60,9 +65,20 @@ public class MultipleEventSource implements EventSource {
 					smallestTimeEventSourceId = i;
 					smallestTimeEvent = smallestTimeEventCandidate;
 				}
-				
 			}
-			
+		}
+		
+		smallestTimeEventCandidate = simulationGeneratedEventsQueue.poll();
+		if(smallestTimeEventCandidate != null) {
+			Time smallestTimeCandidate = smallestTimeEventCandidate.getScheduledTime();
+			if(smallestTimeEvent == null) {
+				smallestTimeEvent = smallestTimeEventCandidate;
+			} else if(smallestTimeCandidate.isEarlierThan(smallestTimeEvent.getScheduledTime())) {
+				parsers[smallestTimeEventSourceId].pushBack(smallestTimeEvent);
+				smallestTimeEvent = smallestTimeEventCandidate;
+			} else {
+				simulationGeneratedEventsQueue.add(smallestTimeEventCandidate);
+			}
 		}
 		
 		return smallestTimeEvent;

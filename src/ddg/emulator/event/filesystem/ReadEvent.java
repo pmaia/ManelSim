@@ -63,7 +63,7 @@ public class ReadEvent extends Event {
 	
 	@Override
 	public String toString() {
-		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath + "\t" + length;
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath + "\t" + length;
 	}
 
 }
