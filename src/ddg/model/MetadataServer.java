@@ -136,7 +136,7 @@ public class MetadataServer extends EventHandler {
 		
 		if(replicationGroup != null) {
 			Time duration = replicationGroup.getTotalChangesDuration();
-			
+
 			Machine primaryMachine = replicationGroup.getPrimary().getMachine();
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
 				sendFSActivity(primaryMachine, anEvent.getScheduledTime(), duration);

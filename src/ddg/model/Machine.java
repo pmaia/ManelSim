@@ -172,7 +172,11 @@ public class Machine extends EventHandler {
 		 * This is done to make sure the event that changes the state was already handled.
 		 */
 		Time oneSecond = new Time(1, Unit.SECONDS);
-		Time now = fsActivity.getScheduledTime();		
+		Time now = fsActivity.getScheduledTime();
+		//DEBUG
+		if(supposedCurrentStateEndTime.minus(now).asMicroseconds() < 0)
+			supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
+		//DEBUG
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME)) {
 			if(fsActivity.isFromLocalFSClient()) {
@@ -279,6 +283,10 @@ public class Machine extends EventHandler {
 		
 		Time fsActivityWhileIdleDuration = new Time(fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime, 
 				Unit.MICROSECONDS);
+		//DEBUG
+		System.out.println("*************** " + idlenessDuration);
+		System.out.println("############### " + fsActivityWhileIdleDuration);
+		//DEBUG
 		aggregator.aggregateIdleDuration(getId(), idlenessDuration.minus(fsActivityWhileIdleDuration));
 		aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
 		
