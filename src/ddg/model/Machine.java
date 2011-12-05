@@ -346,9 +346,6 @@ public class Machine extends EventHandler {
 			
 			//we must sleep only if we have time to wake up
 			if(!sleepDuration.isEarlierThan(SLEEP_TRANSITION_DURATION.times(2))) { 
-				//DEBUG
-				System.out.println("Sent SLEEP:  " + bedTime + " " + getId());
-				//DEBUG
 				send(new SleepEvent(this, bedTime, sleepDuration));
 				
 				supposedCurrentStateEndTime = currentStateStartTime.plus(timeBeforeSleep);

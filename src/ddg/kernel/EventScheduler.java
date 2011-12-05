@@ -39,9 +39,7 @@ public final class EventScheduler {
 		
 		while ((aNextEvent = eventSource.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
 			Time anEventTime = aNextEvent.getScheduledTime();
-			//DEBUG
-			System.out.println(aNextEvent);
-			//DEBUG
+
 			if (anEventTime.isEarlierThan(now())) {
 				throw new RuntimeException("ERROR: emulation time(" + now()
 						+ ") " + "already ahead of event time("
