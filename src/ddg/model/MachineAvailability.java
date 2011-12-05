@@ -34,20 +34,20 @@ public class MachineAvailability {
 	private int sleepCount = 0;
 
 	public void addActiveDuration(Time increment) {
-		totalActiveDuration.plus(increment);
+		totalActiveDuration = totalActiveDuration.plus(increment);
 	}
 	
 	public void addIdleDuration(Time increment) {
-		totalIdleDuration.plus(increment);
+		totalIdleDuration = totalIdleDuration.plus(increment);
 	}
 	
 	public void addSleepingDuration(Time increment) {
-		totalSleepingDuration.plus(increment);
+		totalSleepingDuration = totalSleepingDuration.plus(increment);
 		sleepCount++;
 	}
 	
 	public void addShutdownDuration(Time increment) {
-		totalShutdownDuration.plus(increment);
+		totalShutdownDuration = totalShutdownDuration.plus(increment);
 		shutdownCount++;
 	}
 	
