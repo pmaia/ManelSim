@@ -65,21 +65,25 @@ public class FileSystemEventParser implements EventSource {
 		if (traceLine == null)
 			return null;
 
-		StringTokenizer tokenizer = new StringTokenizer(traceLine);
-		String operation = tokenizer.nextToken();
+		try {
+			StringTokenizer tokenizer = new StringTokenizer(traceLine);
+			String operation = tokenizer.nextToken();
 
-		if (operation.equals("read")) {
-			return parseReadEvent(tokenizer);
-		} else if (operation.equals("write")) {
-			return parseWriteEvent(tokenizer);
-		} else if (operation.equals("close")) {
-			return parseCloseEvent(tokenizer);
-		} else if (operation.equals("unlink")) {
-			return parseUnlinkEvent(tokenizer);
-		} else {
+			if (operation.equals("read")) {
+				return parseReadEvent(tokenizer);
+			} else if (operation.equals("write")) {
+				return parseWriteEvent(tokenizer);
+			} else if (operation.equals("close")) {
+				return parseCloseEvent(tokenizer);
+			} else if (operation.equals("unlink")) {
+				return parseUnlinkEvent(tokenizer);
+			} else {
+				return getNextEvent();
+			}
+		} catch(Throwable t ) {
+			System.err.println("Warning: Bad format line: " + traceLine);
 			return getNextEvent();
 		}
-
 	}
 
 	private String readNextLine() throws IOException {
