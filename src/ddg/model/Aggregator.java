@@ -67,14 +67,14 @@ public class Aggregator {
 		for(String machine : availabilityTotalsPerMachine.keySet()) {
 			MachineAvailability ma = availabilityTotalsPerMachine.get(machine);
 			
-			long machineActiveDuration =  ma.getTotalActiveDuration().asMilliseconds();
-			long machineIdleDuration = ma.getTotalIdleDuration().asMilliseconds();
-			long machineSleepingDuration = ma.getTotalSleepingDuration().asMilliseconds();
-			long machineShutdownDuration = ma.getTotalShutdownDuration().asMilliseconds();
+			long machineActiveDuration =  ma.getTotalActiveDuration().asMicroseconds();
+			long machineIdleDuration = ma.getTotalIdleDuration().asMicroseconds();
+			long machineSleepingDuration = ma.getTotalSleepingDuration().asMicroseconds();
+			long machineShutdownDuration = ma.getTotalShutdownDuration().asMicroseconds();
 			int machineShutdownCount = ma.getShutdownCount();  
 			int machineSleepCount = ma.getSleepCount();
 			
-			String format = "\nMachine=%s\tActive=%d ms\tIdle=%d ms\tSleeping=%d ms\tTurned off=%d ms\t" +
+			String format = "\nMachine=%s\tActive=%d us\tIdle=%d us\tSleeping=%d us\tTurned off=%d us\t" +
 					"Shutdowns=%d\tSleepings=%d";
 			
 			summary.append(String.format(format, machine, machineActiveDuration, machineIdleDuration, 
@@ -88,12 +88,12 @@ public class Aggregator {
 			sleepCount += machineSleepCount;
 		}
 		
-		summary.append(String.format("\n\nTotal active duration:\t%d ms",totalActiveDuration));
-		summary.append(String.format("\nTotal idle duration:\t%d ms", totalIdleDuration));
-		summary.append(String.format("\nTotal sleeping duration:\t%d ms", totalSleepingDuration));
-		summary.append(String.format("\nTotal turned off duration:\t%d ms", totalShutdownDuration));
-		summary.append(String.format("\nTotal shutdowns:\t%d ms", shutdownCount));
-		summary.append(String.format("\nTotal sleeps:\t%d ms", sleepCount));
+		summary.append(String.format("\n\nTotal active duration:\t%d us",totalActiveDuration));
+		summary.append(String.format("\nTotal idle duration:\t%d us", totalIdleDuration));
+		summary.append(String.format("\nTotal sleeping duration:\t%d us", totalSleepingDuration));
+		summary.append(String.format("\nTotal turned off duration:\t%d us", totalShutdownDuration));
+		summary.append(String.format("\nTotal shutdowns:\t%d", shutdownCount));
+		summary.append(String.format("\nTotal sleeps:\t%d", sleepCount));
 		
 //		//summarize energy consumption
 //		summary.append("\n\n============================================ \nEnergy consumption summary: \n");

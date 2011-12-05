@@ -78,7 +78,9 @@ public class FileSystemClient extends EventHandler {
 		
 		FileSystemActivityEvent fsActivity = 
 			new FileSystemActivityEvent(machine, now, duration, isLocalFS);
-		
+		//DEBUG
+			System.out.println("Sent by the client: " + fsActivity);
+		//DEBUG
 		send(fsActivity);
 	}
 	

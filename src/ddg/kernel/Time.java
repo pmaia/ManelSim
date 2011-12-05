@@ -40,8 +40,8 @@ public final class Time implements Comparable<Time> {
 		return new Time(timeMicroSeconds * multiplier, Unit.MICROSECONDS);
 	}
 	
-	public long asMilliseconds() {
-		return timeMicroSeconds / 1000;
+	public long asMicroseconds() {
+		return timeMicroSeconds;
 	}
 
 	/**
@@ -87,6 +87,6 @@ public final class Time implements Comparable<Time> {
 	 */
 	@Override
 	public String toString() {
-		return String.valueOf(asMilliseconds());
+		return String.valueOf(timeMicroSeconds);
 	}
 }

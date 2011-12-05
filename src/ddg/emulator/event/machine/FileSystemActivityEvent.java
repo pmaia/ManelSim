@@ -46,5 +46,10 @@ public class FileSystemActivityEvent extends Event {
 	public boolean isFromLocalFSClient() {
 		return localFSClient;
 	}
+	
+	@Override
+	public String toString() {
+		return EVENT_NAME + "\t" + getScheduledTime() + "\t" + getDuration() + "\t" + localFSClient;
+	}
 
 }

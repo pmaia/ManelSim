@@ -128,6 +128,9 @@ public class MetadataServer extends EventHandler {
 			new FileSystemActivityEvent(machine, now, duration, false);
 		
 		send(fsActivity);
+		//DEBUG
+		System.out.println("Sent: " + fsActivity);
+		//DEBUG
 	}
 
 	private void handleUpdateReplicationGroup(UpdateReplicationGroup anEvent) {
@@ -135,6 +138,9 @@ public class MetadataServer extends EventHandler {
 				files.get(anEvent.getFilePath());
 		
 		if(replicationGroup != null) {
+			//DEBUG
+				System.out.println("=>>> " + anEvent.getScheduledTime());
+			//DEBUG
 			Time duration = replicationGroup.getTotalChangesDuration();
 			
 			Machine primaryMachine = replicationGroup.getPrimary().getMachine();

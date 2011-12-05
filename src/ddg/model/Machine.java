@@ -209,13 +209,13 @@ public class Machine extends EventHandler {
 			}
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
 			if(fsActivityWhileIdleStartTime == -1) {
-				fsActivityWhileIdleStartTime = now.asMilliseconds();
+				fsActivityWhileIdleStartTime = now.asMicroseconds();
 			}
 			
 			//if this fs event duration is greater than the duration of the current state
 			if(supposedCurrentStateEndTime.isEarlierThan(now.plus(fsActivity.getDuration()))) {
 				
-				fsActivityWhileIdleEndTime = supposedCurrentStateEndTime.asMilliseconds();
+				fsActivityWhileIdleEndTime = supposedCurrentStateEndTime.asMicroseconds();
 								
 				FileSystemActivityEvent newFSActivityEvent = new FileSystemActivityEvent(this, 
 						supposedCurrentStateEndTime.plus(oneSecond), 
@@ -223,8 +223,8 @@ public class Machine extends EventHandler {
 						fsActivity.isFromLocalFSClient());
 				
 				send(newFSActivityEvent);
-			} else if(now.plus(fsActivity.getDuration()).asMilliseconds() > fsActivityWhileIdleEndTime) {
-					fsActivityWhileIdleEndTime = now.plus(fsActivity.getDuration()).asMilliseconds();
+			} else if(now.plus(fsActivity.getDuration()).asMicroseconds() > fsActivityWhileIdleEndTime) {
+					fsActivityWhileIdleEndTime = now.plus(fsActivity.getDuration()).asMicroseconds();
 			}
 		}
 	}
@@ -259,7 +259,7 @@ public class Machine extends EventHandler {
 			
 		} else if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
 			System.err.println(String.format("WARNING: A shutdown during a sleep time has occurred in machine %s at " +
-					"timestamp %d. We will keep the machine sleeping.", getId(), now.asMilliseconds()));
+					"timestamp %d. We will keep the machine sleeping.", getId(), now.asMicroseconds()));
 			
 		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
 			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
