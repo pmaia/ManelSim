@@ -346,6 +346,9 @@ public class Machine extends EventHandler {
 			
 			//we must sleep only if we have time to wake up
 			if(!sleepDuration.isEarlierThan(SLEEP_TRANSITION_DURATION.times(2))) { 
+				//DEBUG
+				System.out.println("Sent SLEEP:  " + bedTime + " " + getId());
+				//DEBUG
 				send(new SleepEvent(this, bedTime, sleepDuration));
 				
 				supposedCurrentStateEndTime = currentStateStartTime.plus(timeBeforeSleep);
@@ -366,9 +369,6 @@ public class Machine extends EventHandler {
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
 			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);
 
-		} else if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
-			throw new IllegalStateException(String.format("The machine %s was already sleeping.", getId()));
-			
 		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
 			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
 			

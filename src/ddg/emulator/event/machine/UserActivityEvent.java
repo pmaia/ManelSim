@@ -25,7 +25,7 @@ import ddg.model.Machine;
  */
 public class UserActivityEvent extends Event {
 	
-	public static final String EVENT_NAME = "wake-up";
+	public static final String EVENT_NAME = "activity";
 	
 	/**
 	 * 
