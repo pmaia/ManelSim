@@ -30,18 +30,18 @@ public class WriteEvent extends Event {
 
 	public static final String EVENT_NAME = "write";
 	
-	private final long length;
+	private final long fileSize;
 	private final String filePath;
 
-	public WriteEvent(FileSystemClient handler, Time scheduledTime, long length, Time duration, String filePath) {
+	public WriteEvent(FileSystemClient handler, Time scheduledTime, long fileSize, Time duration, String filePath) {
 		super(EVENT_NAME, handler, scheduledTime, duration);
 		
-		this.length = length;
+		this.fileSize = fileSize;
 		this.filePath = filePath;
 	}
 
-	public long getLength() {
-		return length;
+	public long getFileSize() {
+		return fileSize;
 	}
 	
 	public String getFilePath() {
@@ -50,6 +50,6 @@ public class WriteEvent extends Event {
 
 	@Override
 	public String toString() {
-		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath + "\t" + length;
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath + "\t" + fileSize;
 	}
 }
