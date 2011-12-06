@@ -101,7 +101,7 @@ def clean_write(tokens):
 			fullpath_to_filetype[fullpath] = filetype
 			fullpath_to_filesize[fullpath] = filesize
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			return "\t".join(['write', tokens[5], fullpath, length])
+			return "\t".join(['write', tokens[5], fullpath, filesize])
 		else:
 			return None
 	else:
