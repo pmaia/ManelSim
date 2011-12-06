@@ -7,6 +7,7 @@ import sys
 
 fdpid_to_fullpath = dict()
 fullpath_to_filetype = dict()
+fullpath_to_filesize = dict()
 bad_format_open = 0
 bad_format_do_filp_open = 0
 bad_format_close = 0
@@ -42,6 +43,7 @@ def handle_do_filp_open(tokens):
 		bad_format_do_filp_open = bad_format_do_filp_open + 1
 	else:
 		fullpath_to_filetype[tokens[8]] = tokens[10].split('|')[0]
+		fullpath_to_filesize[tokens[8]] = tokens[9]
 
 
 # line sample from the original trace
@@ -72,8 +74,8 @@ def clean_close(tokens):
 #	uid pid tid exec_name sys_write begin-elapsed (root pwd fullpath f_size f_type ino) fd count return
 #	0 6194 6194 (xprintidle) sys_write 1318539063058255-131 (/ /root/ /local/userActivityTracker/logs/tracker.log/ 10041417 S_IFREG|S_IROTH|S_IRGRP|S_IWUSR|S_IRUSR 2261065) 1 17 17
 # line transformed by clean_write
-#	write	begin-elapsed	fullpath	length
-#	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	17
+#	write	begin-elapsed	fullpath	filesize
+#	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	10041417
 def clean_write(tokens):
 	recovered = False
 	if len(tokens) != 15:
@@ -82,20 +84,22 @@ def clean_write(tokens):
 		unique_file_id = tokens[6] + '-' + tokens[1]
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
-		length = tokens[8]
+		filesize = fullpath_to_filesize.get(fullpath, None)
 		recovered = True
 	else:
 		unique_file_id = tokens[12] + '-' + tokens[1]
 		fullpath = tokens[8]
 		filetype = tokens[10].split('|')[0]
-		length = tokens[14]
+		filesize = tokens[9]
 
-	if fullpath != None and filetype != None:
+	if fullpath != None and filetype != None and filesize != None:
 		if recovered:
 			global recovered_write
 			recovered_write = recovered_write + 1
-		fdpid_to_fullpath[unique_file_id] = fullpath
-		fullpath_to_filetype[fullpath] = filetype
+		else:
+			fdpid_to_fullpath[unique_file_id] = fullpath
+			fullpath_to_filetype[fullpath] = filetype
+			fullpath_to_filesize[fullpath] = filesize
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
 			return "\t".join(['write', tokens[5], fullpath, length])
 		else:
@@ -129,8 +133,11 @@ def clean_read(tokens):
 		if recovered:
 			global recovered_read
 			recovered_read = recovered_read + 1
- 		fdpid_to_fullpath[unique_file_id] = fullpath
-		fullpath_to_filetype[fullpath] = filetype
+		else:
+	 		fdpid_to_fullpath[unique_file_id] = fullpath
+			fullpath_to_filetype[fullpath] = filetype
+			fullpath_to_filesize[fullpath] = tokens[9]
+
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
 			return "\t".join(['read', tokens[5], fullpath, length])
 		else:
