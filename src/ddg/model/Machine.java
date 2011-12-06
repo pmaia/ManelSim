@@ -283,10 +283,7 @@ public class Machine extends EventHandler {
 		
 		Time fsActivityWhileIdleDuration = new Time(fsActivityWhileIdleEndTime - fsActivityWhileIdleStartTime, 
 				Unit.MICROSECONDS);
-		//DEBUG
-		System.out.println("*************** " + idlenessDuration);
-		System.out.println("############### " + fsActivityWhileIdleDuration);
-		//DEBUG
+		
 		aggregator.aggregateIdleDuration(getId(), idlenessDuration.minus(fsActivityWhileIdleDuration));
 		aggregator.aggregateActiveDuration(getId(), fsActivityWhileIdleDuration);
 		
@@ -319,7 +316,7 @@ public class Machine extends EventHandler {
 		currentStateStartTime = now;
 		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 		
-		handlePendingFileSystemActivityEvents();
+		handlePendingFileSystemActivityEvents(now);
 	}
 	
 	private void handleUserIdleness(UserIdlenessEvent event) {
@@ -339,8 +336,7 @@ public class Machine extends EventHandler {
 			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
 			
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
-			// if the fs wakes the machine up it is possible that we have idle to idle transition
-			aggregateIdlenessPeriod(currentStateActualDuration);
+			return; // already idle... nothing to do here
 		}
 		
 		currentStateName = UserIdlenessEvent.EVENT_NAME;
@@ -362,7 +358,7 @@ public class Machine extends EventHandler {
 			}
 		}
 		
-		handlePendingFileSystemActivityEvents();
+		handlePendingFileSystemActivityEvents(now);
 	}
 	
 	private void handleSleep(SleepEvent event) {
@@ -386,9 +382,12 @@ public class Machine extends EventHandler {
 		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
 	}
 	
-	private void handlePendingFileSystemActivityEvents() {
+	private void handlePendingFileSystemActivityEvents(Time now) {
 		for(FileSystemActivityEvent fsActivityEvent : pendingFSActivityEvents) {
-			handleFileSystemActivityEvent(fsActivityEvent);
+			FileSystemActivityEvent newFsActivityEvent = 
+				new FileSystemActivityEvent(this, now, fsActivityEvent.getDuration(), 
+						fsActivityEvent.isFromLocalFSClient());
+			handleFileSystemActivityEvent(newFsActivityEvent);
 		}
 		
 		pendingFSActivityEvents.clear();
