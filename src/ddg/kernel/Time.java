@@ -43,6 +43,22 @@ public final class Time implements Comparable<Time> {
 	public long asMicroseconds() {
 		return timeMicroSeconds;
 	}
+	
+	public long asMilliseconds() {
+		return asMicroseconds() / 1000;
+	}
+	
+	public long asSeconds() {
+		return asMilliseconds() / 1000;
+	}
+	
+	public long asMinutes() {
+		return asSeconds() / 60;
+	}
+	
+	public long asHours() {
+		return asMinutes() / 60;
+	}
 
 	/**
 	 * @param otherTime

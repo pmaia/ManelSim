@@ -1,5 +1,13 @@
 package ddg.model;
 
+import static ddg.model.Machine.ACTIVE_POWER_IN_WATTS;
+import static ddg.model.Machine.IDLE_POWER_IN_WATTS;
+import static ddg.model.Machine.SHUTDOWN_POWER_IN_WATTS;
+import static ddg.model.Machine.SHUTDOWN_TRANSITION_DURATION;
+import static ddg.model.Machine.SLEEP_POWER_IN_WATTS;
+import static ddg.model.Machine.SLEEP_TRANSITION_DURATION;
+import static ddg.model.Machine.TRANSITION_POWER_IN_WATTS;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,20 +65,20 @@ public class Aggregator {
 		//summarize availability
 		summary.append("\n\n============================================ \nAvailability summary: \n");
 		
-		long totalActiveDuration = 0;
-		long totalIdleDuration = 0;
-		long totalSleepingDuration = 0;
-		long totalShutdownDuration = 0;
+		Time totalActiveDuration = Time.GENESIS;
+		Time totalIdleDuration = Time.GENESIS;
+		Time totalSleepingDuration = Time.GENESIS;
+		Time totalShutdownDuration = Time.GENESIS;
 		int shutdownCount = 0;
 		int sleepCount = 0;
 		
 		for(String machine : availabilityTotalsPerMachine.keySet()) {
 			MachineAvailability ma = availabilityTotalsPerMachine.get(machine);
 			
-			long machineActiveDuration =  ma.getTotalActiveDuration().asMicroseconds();
-			long machineIdleDuration = ma.getTotalIdleDuration().asMicroseconds();
-			long machineSleepingDuration = ma.getTotalSleepingDuration().asMicroseconds();
-			long machineShutdownDuration = ma.getTotalShutdownDuration().asMicroseconds();
+			Time machineActiveDuration =  ma.getTotalActiveDuration();
+			Time machineIdleDuration = ma.getTotalIdleDuration();
+			Time machineSleepingDuration = ma.getTotalSleepingDuration();
+			Time machineShutdownDuration = ma.getTotalShutdownDuration();
 			int machineShutdownCount = ma.getShutdownCount();  
 			int machineSleepCount = ma.getSleepCount();
 			
@@ -80,10 +88,10 @@ public class Aggregator {
 			summary.append(String.format(format, machine, machineActiveDuration, machineIdleDuration, 
 					machineSleepingDuration, machineShutdownDuration, machineShutdownCount, machineSleepCount));
 			
-			totalActiveDuration +=  machineActiveDuration;
-			totalIdleDuration += machineIdleDuration;
-			totalSleepingDuration += machineSleepingDuration;
-			totalShutdownDuration += machineShutdownDuration;
+			totalActiveDuration =  totalActiveDuration.plus(machineActiveDuration);
+			totalIdleDuration = totalIdleDuration.plus(machineIdleDuration);
+			totalSleepingDuration = totalSleepingDuration.plus(machineSleepingDuration);
+			totalShutdownDuration = totalShutdownDuration.plus(machineShutdownDuration);
 			shutdownCount += machineShutdownCount;
 			sleepCount += machineSleepCount;
 		}
@@ -95,17 +103,28 @@ public class Aggregator {
 		summary.append(String.format("\nTotal shutdowns:\t%d", shutdownCount));
 		summary.append(String.format("\nTotal sleeps:\t%d", sleepCount));
 		
-//		//summarize energy consumption
-//		summary.append("\n\n============================================ \nEnergy consumption summary: \n");
-//		double activeConsumptionWh = toHours(totalActiveDurationMillis) * ACTIVE_POWER_IN_WATTS;
-//		double inactiveConsumptionWh = toHours(totalInactiveDurationMillis) * STAND_BY_POWER_IN_WATTS;
-//		double transitionConsumptionWh = 
-//			totalTransitions * toHours(TRANSITION_DURATION) * TRANSITION_POWER_IN_WATTS;
-//		
-//		double energyConsumptionkWh = (activeConsumptionWh + inactiveConsumptionWh + transitionConsumptionWh) / 1000; 
-//		
-//		summary.append(String.format("\nEnergy consumption without opportunistic distributed file system:\t%f kWh",
-//				energyConsumptionkWh));
+		//summarize energy consumption
+		summary.append("\n\n============================================ \nEnergy consumption summary: \n");
+		double activeConsumptionWh = totalActiveDuration.asHours() * ACTIVE_POWER_IN_WATTS;
+		
+		double idleConsumptionWh = totalIdleDuration.asHours() * IDLE_POWER_IN_WATTS;
+		
+		Time totalSleepTransition = SLEEP_TRANSITION_DURATION.times(sleepCount * 2); //each sleep corresponds to two transitions
+		double sleepTransitionConsumptionWh = totalSleepTransition.asHours() * TRANSITION_POWER_IN_WATTS;
+		double sleepConsumptionWh = totalSleepingDuration.minus(totalSleepTransition).asHours() * SLEEP_POWER_IN_WATTS;
+		
+		Time totalShutdownTransition = SHUTDOWN_TRANSITION_DURATION.times(shutdownCount * 2); //each shutdown corresponds to two transitions
+		double shutdownTransitionConsumptionWh = totalShutdownTransition.asHours() * TRANSITION_POWER_IN_WATTS;
+		double shutdownConsumptionWh = 
+				totalShutdownDuration.minus(totalShutdownTransition).asHours() * SHUTDOWN_POWER_IN_WATTS;
+		
+		
+		double energyConsumptionkWh = 
+				( 		activeConsumptionWh + idleConsumptionWh + 
+						sleepConsumptionWh + shutdownConsumptionWh + 
+						sleepTransitionConsumptionWh + shutdownTransitionConsumptionWh) / 1000; 
+		
+		summary.append(String.format("\nEnergy consumption:\t%f kWh", energyConsumptionkWh));
 		
 		return summary.toString();
 	}
