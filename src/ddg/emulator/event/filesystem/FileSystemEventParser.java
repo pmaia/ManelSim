@@ -134,9 +134,9 @@ public class FileSystemEventParser implements EventSource {
 		
 		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
 		String filePath = tokenizer.nextToken();
-		long length = Long.parseLong(tokenizer.nextToken());
+		long fileSize = Long.parseLong(tokenizer.nextToken());
 
-		return new WriteEvent(client, timestampAndDuration[0], length, 
+		return new WriteEvent(client, timestampAndDuration[0], fileSize, 
 				timestampAndDuration[1], filePath); 
 	}
 	

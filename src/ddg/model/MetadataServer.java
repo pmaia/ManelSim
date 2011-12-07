@@ -17,6 +17,8 @@ import ddg.model.placement.DataPlacementAlgorithm;
 
 public class MetadataServer extends EventHandler {
 	
+	private static final double NETWORK_BANDWITH = 0.0128; // 0.0128 B/us == 100 Mbits/s 
+	
 	private final DataPlacementAlgorithm dataPlacement;
 	private final Time timeBeforeDeleteData;
 	private final Time timeBeforeUpdateReplicas;
@@ -74,13 +76,11 @@ public class MetadataServer extends EventHandler {
 	public void closePath(FileSystemClient client, String filePath, Time now) {
 		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
-		if(replicationGroup != null) {
-			Time noTime = new Time(0, Unit.SECONDS);
-			
-			if(!noTime.equals(replicationGroup.getTotalChangesDuration())) {
-				Time time = now.plus(timeBeforeUpdateReplicas);
-				send(new UpdateReplicationGroup(this, time, replicationGroup.getTotalChangesDuration(), filePath));
-			}
+		if(replicationGroup != null && replicationGroup.isChanged()) {
+			Time time = now.plus(timeBeforeUpdateReplicas);
+			Time duration = new Time((int)(replicationGroup.getFileSize() / NETWORK_BANDWITH), 
+					Unit.MICROSECONDS);
+			send(new UpdateReplicationGroup(this, time, duration, filePath));
 		}
 	}
 	
@@ -135,7 +135,7 @@ public class MetadataServer extends EventHandler {
 				files.get(anEvent.getFilePath());
 		
 		if(replicationGroup != null) {
-			Time duration = replicationGroup.getTotalChangesDuration();
+			Time duration = anEvent.getDuration();
 
 			Machine primaryMachine = replicationGroup.getPrimary().getMachine();
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {

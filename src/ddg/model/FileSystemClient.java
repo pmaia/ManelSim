@@ -66,7 +66,8 @@ public class FileSystemClient extends EventHandler {
 	private void handleWrite(WriteEvent writeEvent) {
 		String filePath = writeEvent.getFilePath();
 		ReplicationGroup group = metadataServer.openPath(this, filePath);
-		group.addChangesDuration(writeEvent.getDuration());
+		group.setChanged(true);
+		group.setFileSize(writeEvent.getFileSize());
 		
 		Machine primaryDataServerMachine =
 			group.getPrimary().getMachine();

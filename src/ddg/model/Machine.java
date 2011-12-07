@@ -37,7 +37,7 @@ public class Machine extends EventHandler {
 	public static final double SLEEP_TRANSITION_POWER 		= 0; //FIXME need to discover the right value
 	public static final double SHUTDOWN_TRANSITION_POWER 	= 0; //FIXME need to discover the right value
 	public static final Time   SLEEP_TRANSITION_DURATION 	= new Time(2500, Unit.MILLISECONDS);
-	public static final Time   SHUTDOWN_TRANSITION_DURATION	= new Time(60, Unit.SECONDS); //FIXME need to discover the right value
+	public static final Time   SHUTDOWN_TRANSITION_DURATION	= new Time(55, Unit.SECONDS);
 	
 	private final Set<DataServer> deployedDataServers;
 	private final Set<FileSystemClient> clients;
