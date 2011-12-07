@@ -83,7 +83,7 @@ public class Aggregator {
 			int machineSleepCount = ma.getSleepCount();
 			
 			String format = "\nMachine=%s\tActive=%s us\tIdle=%s us\tSleeping=%s us\tTurned off=%s us\t" +
-					"Shutdowns=%s\tSleepings=%s";
+					"Shutdowns=%d\tSleepings=%d";
 			
 			summary.append(String.format(format, machine, machineActiveDuration, machineIdleDuration, 
 					machineSleepingDuration, machineShutdownDuration, machineShutdownCount, machineSleepCount));
@@ -96,10 +96,10 @@ public class Aggregator {
 			sleepCount += machineSleepCount;
 		}
 		
-		summary.append(String.format("\n\nTotal active duration:\t%d us",totalActiveDuration));
-		summary.append(String.format("\nTotal idle duration:\t%d us", totalIdleDuration));
-		summary.append(String.format("\nTotal sleeping duration:\t%d us", totalSleepingDuration));
-		summary.append(String.format("\nTotal turned off duration:\t%d us", totalShutdownDuration));
+		summary.append(String.format("\n\nTotal active duration:\t%s us",totalActiveDuration));
+		summary.append(String.format("\nTotal idle duration:\t%s us", totalIdleDuration));
+		summary.append(String.format("\nTotal sleeping duration:\t%s us", totalSleepingDuration));
+		summary.append(String.format("\nTotal turned off duration:\t%s us", totalShutdownDuration));
 		summary.append(String.format("\nTotal shutdowns:\t%d", shutdownCount));
 		summary.append(String.format("\nTotal sleeps:\t%d", sleepCount));
 		
