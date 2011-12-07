@@ -17,7 +17,7 @@ import ddg.model.placement.DataPlacementAlgorithm;
 
 public class MetadataServer extends EventHandler {
 	
-	private static final double NETWORK_BANDWITH = 0.0128; // 0.0128 B/us == 100 Mbits/s 
+	private static final double NETWORK_BANDWITH = 13.1072; // 13.1072 B/us == 100 Mbits/s 
 	
 	private final DataPlacementAlgorithm dataPlacement;
 	private final Time timeBeforeDeleteData;

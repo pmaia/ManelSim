@@ -27,15 +27,14 @@ import ddg.model.data.DataServer;
 public class Machine extends EventHandler {
 	
 	/*
-	 * The source of the values below is Lesandro's work: 
-	 * "On the Impact of Energy-saving Strategies in Opportunistic Grids"
+	 * Source: Line 563 of the following spreadsheet:
+	 * 	http://downloads.energystar.gov/bi/qplist/computers_prod_list.xls
 	 */
-	public static final double TRANSITION_POWER_IN_WATTS 	= 140;
-	public static final double ACTIVE_POWER_IN_WATTS 		= 140;
-	public static final double IDLE_POWER_IN_WATTS 			= 0; //FIXME need to discover the right value
-	public static final double SLEEP_POWER_IN_WATTS 		= 3.33;
-	public static final double SLEEP_TRANSITION_POWER 		= 0; //FIXME need to discover the right value
-	public static final double SHUTDOWN_TRANSITION_POWER 	= 0; //FIXME need to discover the right value
+	public static final double TRANSITION_POWER_IN_WATTS 	= 191.9;
+	public static final double ACTIVE_POWER_IN_WATTS 		= 191.9;
+	public static final double IDLE_POWER_IN_WATTS 			= 53.54;
+	public static final double SLEEP_POWER_IN_WATTS 		= 2.71;
+	public static final double SHUTDOWN_POWER_IN_WATTS 		= .64;
 	public static final Time   SLEEP_TRANSITION_DURATION 	= new Time(2500, Unit.MILLISECONDS);
 	public static final Time   SHUTDOWN_TRANSITION_DURATION	= new Time(55, Unit.SECONDS);
 	
@@ -92,7 +91,11 @@ public class Machine extends EventHandler {
 		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
 
 		currentStateName = ShutdownEvent.EVENT_NAME;
-		currentStateStartTime = Time.GENESIS;
+		/*
+		 * FIXME IMPORTANT: the time hardcoded below is the start of the simulation considering just the traces used to SBRC 2012.
+		 * This makes the simulator useless for other set of traces.
+		 */
+		currentStateStartTime = new Time(1318967209, Unit.SECONDS);
 		supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
 		pendingFSActivityEvents = new ArrayList<FileSystemActivityEvent>();
 	}
