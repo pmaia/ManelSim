@@ -82,8 +82,8 @@ public class Aggregator {
 			int machineShutdownCount = ma.getShutdownCount();  
 			int machineSleepCount = ma.getSleepCount();
 			
-			String format = "\nMachine=%s\tActive=%d us\tIdle=%d us\tSleeping=%d us\tTurned off=%d us\t" +
-					"Shutdowns=%d\tSleepings=%d";
+			String format = "\nMachine=%s\tActive=%d us\tIdle=%s us\tSleeping=%s us\tTurned off=%s us\t" +
+					"Shutdowns=%s\tSleepings=%s";
 			
 			summary.append(String.format(format, machine, machineActiveDuration, machineIdleDuration, 
 					machineSleepingDuration, machineShutdownDuration, machineShutdownCount, machineSleepCount));
