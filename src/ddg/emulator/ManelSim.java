@@ -64,7 +64,8 @@ public class ManelSim {
 	/**
 	 * @param args
 	 * [0] (traces dir) - the traces in the directory must have the name &lt;trace type&gt;-&lt;machine name&gt;, 
-	 * where &lt;trace type&gt; could be either fs or idleness. All traces must come in pairs of fs and idleness. Single traces will be ignored.
+	 * where &lt;trace type&gt; could be either fs or idleness. All traces must come in pairs of fs and idleness. 
+	 * Single traces will be ignored.
 	 * Ex.: fs-cherne, idleness-cherne
 	 * @param args
 	 * [1] (data placement police) - random, co-random or co-balance
@@ -79,10 +80,10 @@ public class ManelSim {
 	 */
 	public static void main(String[] args) throws IOException {
 		
-		if(args.length != 6) {
+		if(args.length != 7) {
 			System.out.println("Usage: ManelSim <traces dir> <data placement policement>" +
 					" <time before sleep> <replication level> <time before update replicas>" +
-					" <time before delete replicas>");
+					" <time before delete replicas> <wake on lan>");
 			System.exit(1);
 		}
 
@@ -97,6 +98,7 @@ public class ManelSim {
 		Integer replicationLevel = Integer.valueOf(args[3]);
 		Long timeBeforeUpdateData = Long.valueOf(args[4]);
 		Long timeBeforeDeleteData = Long.valueOf(args[5]);
+		Boolean wakeOnLan = Boolean.valueOf(args[6]);
 		
 		PriorityQueue<Event> eventsGeneratedBySimulationQueue = new PriorityQueue<Event>();
 
@@ -111,10 +113,10 @@ public class ManelSim {
 
 		MetadataServer metadataServer = 
 			new MetadataServer(eventsGeneratedBySimulationQueue, placement, replicationLevel, 
-					timeBeforeDeleteData, timeBeforeUpdateData);
+					timeBeforeDeleteData, timeBeforeUpdateData, wakeOnLan);
 
 		Set<FileSystemClient> clients = 
-			createClients(eventsGeneratedBySimulationQueue, machines, metadataServer);
+			createClients(eventsGeneratedBySimulationQueue, machines, metadataServer, wakeOnLan);
 
 		MultipleEventSource multipleEventSource = 
 			createMultipleEventParser(clients, machines, tracesDir, eventsGeneratedBySimulationQueue);
@@ -167,18 +169,18 @@ public class ManelSim {
 	 * It create all clients.
 	 * 
 	 * @param aPlaceForEventsGeneratedBySimulation
-	 * @param herald
+	 * @param metadataServer
 	 * @param aggregator
 	 * @param machines2
 	 * @return
 	 */
 	private static Set<FileSystemClient> createClients(PriorityQueue<Event> aPlaceForEventsGeneratedBySimulation,
-			Set<Machine> machines, MetadataServer herald) {
+			Set<Machine> machines, MetadataServer metadataServer, boolean wakeOnLan) {
 
 		Set<FileSystemClient> newClients = new HashSet<FileSystemClient>();
 
 		for(Machine machine : machines) {
-			newClients.add(new FileSystemClient(aPlaceForEventsGeneratedBySimulation, machine, herald));
+			newClients.add(new FileSystemClient(aPlaceForEventsGeneratedBySimulation, machine, metadataServer, wakeOnLan));
 		}
 
 		return newClients;

@@ -28,29 +28,29 @@ public class FileSystemActivityEvent extends Event {
 	
 	public static final String EVENT_NAME = "fs-activity";
 	
-	private final boolean localFSClient;
+	private final boolean wakeOnLan;
 	
 	/**
 	 * 
 	 * @param handler the {@link Machine} that will handle this event
 	 * @param scheduledTime
 	 * @param duration
-	 * @param localFSClient true if this event was started by a client deployed in <i>handler</i>
+	 * @param wakeOnLan true if this event should wake up a asleep machine
 	 */
-	public FileSystemActivityEvent(Machine handler, Time scheduledTime, Time duration, boolean localFSClient) {
+	public FileSystemActivityEvent(Machine handler, Time scheduledTime, Time duration, boolean wakeOnLan) {
 		super(EVENT_NAME, handler, scheduledTime, duration);
 		
-		this.localFSClient = localFSClient;
+		this.wakeOnLan = wakeOnLan;
 	}
 
-	public boolean isFromLocalFSClient() {
-		return localFSClient;
+	public boolean wakeOnLan() {
+		return wakeOnLan;
 	}
 	
 	@Override
 	public String toString() {
 		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" +
-				getDuration() + "\t" + localFSClient;
+				getDuration() + "\t" + wakeOnLan;
 	}
 
 }

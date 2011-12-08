@@ -18,6 +18,7 @@ package ddg.model.placement;
 import static ddg.model.placement.DataPlacementUtil.chooseRandomDataServers;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -80,6 +81,19 @@ public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgor
 		}
 
 		return new ReplicationGroup(fileName, primary, secondaries);
+	}
+
+	@Override
+	public DataServer giveMeASingleDataServer(List<DataServer> exceptions) {
+		Set<DataServer> copyOfAvailableDataServers = new HashSet<DataServer>(dataServers);
+		copyOfAvailableDataServers.removeAll(exceptions);
+		
+		for(DataServer dataServer : copyOfAvailableDataServers) {
+			if(dataServer.getMachine().isAwake())
+				return dataServer;
+		}
+		
+		return null;
 	}
 
 }

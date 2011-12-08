@@ -15,7 +15,10 @@
  */
 package ddg.model.placement;
 
+import java.util.List;
+
 import ddg.model.FileSystemClient;
+import ddg.model.data.DataServer;
 import ddg.model.data.ReplicationGroup;
 
 /**
@@ -27,5 +30,12 @@ import ddg.model.data.ReplicationGroup;
 public interface DataPlacementAlgorithm {
 
 	ReplicationGroup createFile(FileSystemClient client, String fileName, int replicationLevel);
+	
+	/**
+	 * 
+	 * @param exceptions
+	 * @return one of the {@link DataServer}s known that is not in exceptions  
+	 */
+	DataServer giveMeASingleDataServer(List<DataServer> exceptions);
 	
 }

@@ -17,6 +17,7 @@ public class FileSystemClient extends EventHandler {
 	private final String id;
 	private final MetadataServer metadataServer;
 	private final Machine machine;
+	private final boolean wakeOnLan;
 
 	/**
 	 * 
@@ -25,12 +26,13 @@ public class FileSystemClient extends EventHandler {
 	 * @param metadataServer
 	 */
 	public FileSystemClient(PriorityQueue<Event> eventsGeneratedBySimulationQueue,
-			Machine machine, MetadataServer metadataServer) {
+			Machine machine, MetadataServer metadataServer, boolean wakeOnLan) {
 
 		super(eventsGeneratedBySimulationQueue);
 
 		this.metadataServer = metadataServer;
 		this.machine = machine;
+		this.wakeOnLan = wakeOnLan;
 		this.id = "client" + machine.bindClient(this) + machine;
 	}
 
@@ -76,10 +78,14 @@ public class FileSystemClient extends EventHandler {
 	}
 	
 	private void sendFSActivity(Machine machine, Time now, Time duration) {
-		boolean isLocalFS = getMachine().equals(machine);
+		boolean wakeOnLan = false;
 		
+		if(!getMachine().equals(machine) && this.wakeOnLan) {
+			wakeOnLan = true;
+		}
+			
 		FileSystemActivityEvent fsActivity = 
-			new FileSystemActivityEvent(machine, now, duration, isLocalFS);
+			new FileSystemActivityEvent(machine, now, duration, wakeOnLan);
 
 		send(fsActivity);
 	}

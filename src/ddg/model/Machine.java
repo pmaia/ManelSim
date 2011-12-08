@@ -100,6 +100,10 @@ public class Machine extends EventHandler {
 		pendingFSActivityEvents = new ArrayList<FileSystemActivityEvent>();
 	}
 	
+	public boolean isAwake() {
+		return !(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME));
+	}
+	
 	/**
 	 * @return the id
 	 */
@@ -182,7 +186,7 @@ public class Machine extends EventHandler {
 		//DEBUG
 		
 		if(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME)) {
-			if(fsActivity.isFromLocalFSClient()) {
+			if(!fsActivity.wakeOnLan()) {
 				pendingFSActivityEvents.add(fsActivity);
 			} else {
 				UserIdlenessEvent idlenessEvent = null;
@@ -210,7 +214,7 @@ public class Machine extends EventHandler {
 				Time duration = now.plus(fsActivity.getDuration()).minus(supposedCurrentStateEndTime); 
 				FileSystemActivityEvent newFSActivityEvent = new FileSystemActivityEvent(this, 
 						supposedCurrentStateEndTime.plus(oneSecond), duration, 
-						fsActivity.isFromLocalFSClient());
+						fsActivity.wakeOnLan());
 				
 				send(newFSActivityEvent);
 			}
@@ -227,7 +231,7 @@ public class Machine extends EventHandler {
 				FileSystemActivityEvent newFSActivityEvent = new FileSystemActivityEvent(this, 
 						supposedCurrentStateEndTime.plus(oneSecond), 
 						fsActivity.getDuration().minus(supposedCurrentStateEndTime.minus(now)), 
-						fsActivity.isFromLocalFSClient());
+						fsActivity.wakeOnLan());
 				
 				send(newFSActivityEvent);
 			} else if(now.plus(fsActivity.getDuration()).asMicroseconds() > fsActivityWhileIdleEndTime) {
@@ -389,7 +393,7 @@ public class Machine extends EventHandler {
 		for(FileSystemActivityEvent fsActivityEvent : pendingFSActivityEvents) {
 			FileSystemActivityEvent newFsActivityEvent = 
 				new FileSystemActivityEvent(this, now, fsActivityEvent.getDuration(), 
-						fsActivityEvent.isFromLocalFSClient());
+						fsActivityEvent.wakeOnLan());
 			handleFileSystemActivityEvent(newFsActivityEvent);
 		}
 		

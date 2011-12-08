@@ -18,6 +18,7 @@ package ddg.model.placement;
 import static ddg.model.placement.DataPlacementUtil.chooseRandomDataServers;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import ddg.model.FileSystemClient;
@@ -58,4 +59,9 @@ public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
 		
 	}
 
+	@Override
+	public DataServer giveMeASingleDataServer(List<DataServer> exceptions) {
+		throw new UnsupportedOperationException("When this explodes in someone's face it's time to become supported");
+	}
+	
 }

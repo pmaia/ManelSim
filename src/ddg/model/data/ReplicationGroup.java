@@ -3,6 +3,7 @@
  */
 package ddg.model.data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class ReplicationGroup {
@@ -28,6 +29,11 @@ public class ReplicationGroup {
 		this.secondaries = secondaries;
 
 	}
+	
+	public void replaceSecondaryDataServer(DataServer replaced, DataServer replacement) {
+		secondaries.remove(replaced);
+		secondaries.add(replacement);
+	}
 
 	public String getFileName() {
 		return fileName;
@@ -38,7 +44,7 @@ public class ReplicationGroup {
 	}
 
 	public Set<DataServer> getSecondaries() {
-		return secondaries;
+		return new HashSet<DataServer>(secondaries);
 	}
 	
 	public void setChanged(boolean changed) {

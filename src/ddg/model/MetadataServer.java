@@ -1,6 +1,8 @@
 package ddg.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -28,6 +30,7 @@ public class MetadataServer extends EventHandler {
 	private final Map<String, ReplicationGroup> toDelete;
 	
 	private final int replicationLevel;
+	private final boolean wakeOnLan;
 
 	/**
 	 * 
@@ -39,7 +42,7 @@ public class MetadataServer extends EventHandler {
 	 */
 	public MetadataServer(PriorityQueue<Event> eventsGeneratedBySimulationQueue, 
 			DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
-			long timeBeforeDeleteData, long timeBeforeUpdateReplicas) {
+			long timeBeforeDeleteData, long timeBeforeUpdateReplicas, boolean wakeOnLan) {
 		
 		super(eventsGeneratedBySimulationQueue);
 
@@ -59,6 +62,7 @@ public class MetadataServer extends EventHandler {
 		this.replicationLevel = replicationLevel;
 		this.timeBeforeDeleteData = new Time(timeBeforeDeleteData, Unit.SECONDS);
 		this.timeBeforeUpdateReplicas = new Time(timeBeforeUpdateReplicas, Unit.SECONDS);
+		this.wakeOnLan = wakeOnLan;
 	}
 
 	public ReplicationGroup openPath(FileSystemClient client, String filePath) {
@@ -123,9 +127,9 @@ public class MetadataServer extends EventHandler {
 
 	}
 	
-	private void sendFSActivity(Machine machine, Time now, Time duration) {
+	private void sendFSActivity(Machine machine, Time now, Time duration, boolean wakeOnLan) {
 		FileSystemActivityEvent fsActivity = 
-			new FileSystemActivityEvent(machine, now, duration, false);
+			new FileSystemActivityEvent(machine, now, duration, wakeOnLan);
 		
 		send(fsActivity);
 	}
@@ -138,23 +142,39 @@ public class MetadataServer extends EventHandler {
 			Time duration = anEvent.getDuration();
 
 			Machine primaryMachine = replicationGroup.getPrimary().getMachine();
+			
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
-				sendFSActivity(primaryMachine, anEvent.getScheduledTime(), duration);
-				sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration);
+				sendFSActivity(primaryMachine, anEvent.getScheduledTime(), duration, true);
+				
+				Machine secondaryMachine = dataServer.getMachine();
+				if(!wakeOnLan && !secondaryMachine.isAwake()) {
+					List<DataServer> exceptions = new ArrayList<DataServer>();
+					exceptions.add(replicationGroup.getPrimary());
+					DataServer replacement = dataPlacement.giveMeASingleDataServer(exceptions);
+					
+					if(replacement != null) {
+						sendFSActivity(replacement.getMachine(), anEvent.getScheduledTime(), duration, false);
+						replicationGroup.replaceSecondaryDataServer(dataServer, replacement);
+					} else {
+						sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration, true);
+					}
+				} else {
+					sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration, wakeOnLan);
+				}
 			}
 		}
 	}
 
 	private void handleDeleteReplicationGroup(DeleteReplicationGroup anEvent) {
 		ReplicationGroup replicationGroup =
-				files.get(anEvent.getFilePath());
+				toDelete.remove(anEvent.getFilePath());
 		
-		if(replicationGroup != null) {
+		if(replicationGroup != null && wakeOnLan) {
 			Time duration = new Time(0, Unit.SECONDS);
 			
-			sendFSActivity(replicationGroup.getPrimary().getMachine(), anEvent.getScheduledTime(), duration);
+			sendFSActivity(replicationGroup.getPrimary().getMachine(), anEvent.getScheduledTime(), duration, true);
 			for(DataServer dataServer : replicationGroup.getSecondaries()) {
-				sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration);
+				sendFSActivity(dataServer.getMachine(), anEvent.getScheduledTime(), duration, true);
 			}
 		}
 	}
