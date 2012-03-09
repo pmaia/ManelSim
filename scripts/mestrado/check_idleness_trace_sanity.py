@@ -6,7 +6,7 @@
 #	2- the module of the difference between two consecutive timestamps is almost always 1 (bigger gaps can occur but it's something we need to take a look)
 #	3- timestamps of log entries must appear only once (if the first property is enforced, this one is too)
 #	4- when cumulated idleness time decreases, its value must never be greater than the difference between its timestamp and the previous one
-#	5- when cumulated idleness time increases, its value must never be different of the sum of the previous cumulated idleness and the difference between timestamps
+#	5- when cumulated idleness time increases, its value must never be different from the sum of the previous cumulated idleness and the difference between timestamps
 #	
 
 import sys
@@ -25,20 +25,18 @@ for line in sys.stdin:
 	ts_diff = current_ts - previous_ts
 
 	if ts_diff <= 0:
-		print 'error: back to past in line ' + str(line_number)
+		print 'error: back to past in line ' + str(line_number) + '. ts_diff = ' + str(ts_diff)
 	elif ts_diff > 1:
 		print 'warn: gap of ' + str(ts_diff) + ' seconds found in line ' + str(line_number)
 	
 	if ts_diff >= 1:
 		if cur_idleness < prev_idleness:
 			if cur_idleness > ts_diff:
-				print 'error: cumulated idleness time is smaller than the previous one but bigger than ts_diff in line ' + str(line_number)
+				print 'error: cumulated idleness time is smaller than the previous one but bigger than ts_diff in line ' + \
+				str(line_number) + '. cur_idleness = ' + str(cur_idleness) + ', ts_diff = ' + str(ts_diff)
 		elif cur_idleness != (prev_idleness + ts_diff):
-			print 'error: cumulated idlenes time is bigger than the previous one plus ts_diff in line ' + str(line_number)
-
+			print 'error: cumulated idleness time is bigger than the previous one plus ts_diff in line ' + str(line_number) + \
+			'. q. how big? a. ' + str(cur_idleness - prev_idleness + ts_diff)
 	previous_line = line
 
-#def log_details():
-#	details = 'pts: ' + str(previous_ts)
-#	details += 
-#
+
