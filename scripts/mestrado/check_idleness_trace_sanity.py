@@ -36,7 +36,7 @@ for line in sys.stdin:
 				str(line_number) + '. cur_idleness = ' + str(cur_idleness) + ', ts_diff = ' + str(ts_diff)
 		elif cur_idleness > (prev_idleness + ts_diff):
 			print 'error: cumulated idleness time is bigger than the previous one plus ts_diff in line ' + str(line_number) + \
-			'. q. how big? a. ' + str(cur_idleness - prev_idleness + ts_diff)
+			'. q. how big? a. ' + str(cur_idleness - (prev_idleness + ts_diff))
 	previous_line = line
 
 
