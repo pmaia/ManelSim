@@ -3,7 +3,7 @@
 # verifies if an idleness trace has the following properties:
 #
 #	1- timestamps of log entries are always growing
-#	2- the module of the difference between two consecutive timestamps is almost always 1 (bigger gaps can occur but it's something we need to take a look)
+#	2- the module of the difference between two consecutive timestamps is almost always 1 (greater gaps can occur but it's something we need to take a look)
 #	3- timestamps of log entries must appear only once (if the first property is enforced, this one is too)
 #	4- when cumulated idleness time decreases, its value must never be greater than the difference between its timestamp and the previous one
 #	5- when cumulated idleness time increases, its value must never be different from the sum of the previous cumulated idleness and the difference between timestamps
@@ -32,10 +32,10 @@ for line in sys.stdin:
 	if ts_diff >= 1:
 		if cur_idleness < prev_idleness:
 			if cur_idleness > ts_diff:
-				print 'error: cumulated idleness time is smaller than the previous one but bigger than ts_diff in line ' + \
+				print 'error: cumulated idleness time is less than the previous one but greater than ts_diff in line ' + \
 				str(line_number) + '. cur_idleness = ' + str(cur_idleness) + ', ts_diff = ' + str(ts_diff)
 		elif cur_idleness > (prev_idleness + ts_diff + 1):
-			print 'error: cumulated idleness time is bigger than the previous one plus ts_diff in line ' + str(line_number) + \
+			print 'error: cumulated idleness time is greater than the previous one plus ts_diff in line ' + str(line_number) + \
 			'. q. how big? a. ' + str(cur_idleness - (prev_idleness + ts_diff))
 	previous_line = line
 
