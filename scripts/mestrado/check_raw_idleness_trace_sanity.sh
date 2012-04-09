@@ -26,9 +26,9 @@ for line in sys.stdin:
 	idiff = cur_idleness - prev_idleness
 
 	if ts_diff <= 0:
-		print 'error: back to past in line ' + str(line_number) + '. ts_diff = ' + str(ts_diff) + ' idiff= ' + str(idiff)
+		print 'error: back to past in line ' + str(line_number) + '. ts_diff = ' + str(ts_diff) 
 	elif ts_diff > 1:
-		print 'warn: gap of ' + str(ts_diff) + ' seconds found in line ' + str(line_number) + ' idiff= ' + str(idiff)
+		print 'warn: gap of ' + str(ts_diff) + ' seconds found in line ' + str(line_number) 
 
 #	if ts_diff >= 1:
 #		if cur_idleness < prev_idleness:
