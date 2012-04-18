@@ -4,6 +4,7 @@
 # 2. remove all unnecessary information like user id, process id, thread id, open flag, etc
 
 import sys
+from maps_serializer import *
 
 fdpid_to_fullpath = dict()
 fullpath_to_filetype = dict()
@@ -167,9 +168,15 @@ def clean_unlink(tokens):
 	else:
 		return "\t".join(['unlink', tokens[5], fullpath])
 
+
+
 ### Main ###
 
 very_bad_lines_count = 0
+
+if len(sys.argv) > 1:
+	serialized_maps = open(sys.argv[1], "r")
+	deserialize_maps(serialized_maps)
 
 for line in sys.stdin:
 	tokens = line.split()
@@ -193,6 +200,13 @@ for line in sys.stdin:
 			print clean_line
 	except:
 		very_bad_lines_count = very_bad_lines_count + 1
+
+map_of_maps = dict()
+map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
+map_of_maps['fullpath_to_filetype'] = fullpath_to_filetype
+map_of_maps['fullpath_to_filesize'] = fullpath_to_filesize
+
+serialize_maps(map_of_maps, './map_to_the_next_guy')
 
 print '# number of bad formatted reads, writes, opens, closes and unlinks'
 print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
