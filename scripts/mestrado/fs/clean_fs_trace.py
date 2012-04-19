@@ -174,14 +174,16 @@ def clean_unlink(tokens):
 
 very_bad_lines_count = 0
 
-if len(sys.argv) > 1:
-	serialized_maps = open(sys.argv[1], "r")
-	map_of_maps = deserialize_maps(serialized_maps)
+if len(sys.argv) != 3:
+	print "Usage: " + sys.argv[0] + " <input maps file> <output maps file>"
+	sys.exit(1)
 
-	fdpid_to_fullpath = map_of_maps['fdpid_to_fullpath']
-	fullpath_to_filetype = map_of_maps['fullpath_to_filetype']
-	fullpath_to_filesize = map_of_maps['fullpath_to_filesize']
+serialized_maps = open(sys.argv[1], "r")
+map_of_maps = deserialize_maps(serialized_maps)
 
+fdpid_to_fullpath = map_of_maps['fdpid_to_fullpath']
+fullpath_to_filetype = map_of_maps['fullpath_to_filetype']
+fullpath_to_filesize = map_of_maps['fullpath_to_filesize']
 
 for line in sys.stdin:
 	tokens = line.split()
@@ -211,7 +213,7 @@ map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
 map_of_maps['fullpath_to_filetype'] = fullpath_to_filetype
 map_of_maps['fullpath_to_filesize'] = fullpath_to_filesize
 
-serialize_maps(map_of_maps, './map_to_the_next_guy')
+serialize_maps(map_of_maps, sys.argv[2])
 
 print '# number of bad formatted reads, writes, opens, closes and unlinks'
 print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
