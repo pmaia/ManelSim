@@ -176,7 +176,12 @@ very_bad_lines_count = 0
 
 if len(sys.argv) > 1:
 	serialized_maps = open(sys.argv[1], "r")
-	deserialize_maps(serialized_maps)
+	map_of_maps = deserialize_maps(serialized_maps)
+
+	fdpid_to_fullpath = map_of_maps['fdpid_to_fullpath']
+	fullpath_to_filetype = map_of_maps['fullpath_to_filetype']
+	fullpath_to_filesize = map_of_maps['fullpath_to_filesize']
+
 
 for line in sys.stdin:
 	tokens = line.split()
