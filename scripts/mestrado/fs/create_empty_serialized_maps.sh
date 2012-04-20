@@ -1,6 +1,6 @@
 #!/bin/bash
 
-machines="abelhinha celacanto charroco cherne gupi jurupoca mulato ourico palmito pepino pimpim roncador sargento traira viola"
+machines="abelhinha&celacanto&charroco&cherne&gupi&jurupoca&mulato&ourico&palmito&pepino&pimpim&roncador&sargento&traira&viola"
 maps="# fdpid_to_fullpath&# fullpath_to_filetype&# fullpath_to_filesize"
 
 IFS='&'
