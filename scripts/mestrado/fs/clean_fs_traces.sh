@@ -13,7 +13,7 @@ do
 
 	if [ -d $machine_filtered_traces_dir -a -f $input_maps_file ]; then
 		echo "Cleaning $machine"
-		cat_args=`ls $machine_filtered_traces_dir | sort -n -t '.' -k 1,14 -k 3`
+		cat_args=`ls $machine_filtered_traces_dir | sort -n -t '.' -k 1,14 -k 3 | xargs -i echo $machine_filtered_traces_dir/{}`
 		cat $cat_args | ./clean_fs_trace.py $input_maps_file $output_maps_file > $cleaned_traces_dir/$machine-cleaned
 	else
 		echo "Skipping $machine"
