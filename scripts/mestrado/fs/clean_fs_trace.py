@@ -4,7 +4,7 @@
 # 2. remove all unnecessary information like user id, process id, thread id, open flag, etc
 
 import sys
-from maps_serializer import *
+from clean_fs_trace_utils import *
 
 fdpid_to_fullpath = dict()
 fullpath_to_filetype = dict()
@@ -22,17 +22,16 @@ recovered_read = 0
 #	uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
 #	0 2097 2097 (udisks-daemon) sys_open 1318539063003892-2505 / /dev/sdb 34816 0 7
 def handle_sys_open(tokens):
-	if len(tokens) != 11:
+	if len(tokens) < 11:
 		global bad_format_open
 		bad_format_open = bad_format_open + 1
 	else:
-		if not tokens[7].startswith('/'):
-			fullpath = tokens[6] + tokens[7]
-		else:
-			fullpath = tokens[7]
-	
-		unique_file_id =  tokens[10] + '-' + tokens[1]
-	
+		path_with_duplicated_parent = ""
+		for i in xrange(6, len(tokens) - 3 ):
+			path_with_duplicated_parent += tokens[i]
+		
+		fullpath = remove_duplicated_parent(path_with_duplicated_parent)
+		unique_file_id = tokens[-1] + '-' + tokens[1]
 		fdpid_to_fullpath[unique_file_id] = fullpath 
 
 # line sample from the original trace
@@ -171,57 +170,57 @@ def clean_unlink(tokens):
 
 
 ### Main ###
-
-very_bad_lines_count = 0
-
-if len(sys.argv) != 3:
-	print "Usage: " + sys.argv[0] + " <input maps file> <output maps file>"
-	sys.exit(1)
-
-serialized_maps = open(sys.argv[1], "r")
-map_of_maps = deserialize_maps(serialized_maps)
-
-fdpid_to_fullpath = map_of_maps['fdpid_to_fullpath']
-fullpath_to_filetype = map_of_maps['fullpath_to_filetype']
-fullpath_to_filesize = map_of_maps['fullpath_to_filesize']
-
-for line in sys.stdin:
-	tokens = line.split()
-
-	try:
-		clean_line = None
-		if tokens[4] == 'sys_open':
-			handle_sys_open(tokens)
-		elif tokens[4] == 'do_filp_open':
-			handle_do_filp_open(tokens)
-		elif tokens[4] == 'sys_close':
-			clean_line = clean_close(tokens)
-		elif tokens[4] == 'sys_write':
-			clean_line = clean_write(tokens)
-		elif tokens[4] == 'sys_read':
-			clean_line = clean_read(tokens)
-		elif tokens[4] == 'sys_unlink':
-			clean_line = clean_unlink(tokens)
-
-		if clean_line != None:
-			print clean_line
-	except:
-		very_bad_lines_count = very_bad_lines_count + 1
-
-map_of_maps = dict()
-map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
-map_of_maps['fullpath_to_filetype'] = fullpath_to_filetype
-map_of_maps['fullpath_to_filesize'] = fullpath_to_filesize
-
-serialize_maps(map_of_maps, sys.argv[2])
-
-print '# number of bad formatted reads, writes, opens, closes and unlinks'
-print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
-print '# writes:\t' + str(bad_format_write) + ' (recovered = ' + str(recovered_write) + ')'
-print '# opens:\t' + str(bad_format_open)
-print '# do filp opens:\t' + str(bad_format_do_filp_open)
-print '# closes:\t' + str(bad_format_close)
-print '# unlinks:\t' + str(bad_format_unlink)
-print '# very bad lines: \t' + str(very_bad_lines_count)
+if __name__ == "__main__"
+	very_bad_lines_count = 0
+	
+	if len(sys.argv) != 3:
+		print "Usage: " + sys.argv[0] + " <input maps file> <output maps file>"
+		sys.exit(1)
+	
+	serialized_maps = open(sys.argv[1], "r")
+	map_of_maps = deserialize_maps(serialized_maps)
+	
+	fdpid_to_fullpath = map_of_maps['fdpid_to_fullpath']
+	fullpath_to_filetype = map_of_maps['fullpath_to_filetype']
+	fullpath_to_filesize = map_of_maps['fullpath_to_filesize']
+	
+	for line in sys.stdin:
+		tokens = line.split()
+	
+		try:
+			clean_line = None
+			if tokens[4] == 'sys_open':
+				handle_sys_open(tokens)
+			elif tokens[4] == 'do_filp_open':
+				handle_do_filp_open(tokens)
+			elif tokens[4] == 'sys_close':
+				clean_line = clean_close(tokens)
+			elif tokens[4] == 'sys_write':
+				clean_line = clean_write(tokens)
+			elif tokens[4] == 'sys_read':
+				clean_line = clean_read(tokens)
+			elif tokens[4] == 'sys_unlink':
+				clean_line = clean_unlink(tokens)
+	
+			if clean_line != None:
+				print clean_line
+		except:
+			very_bad_lines_count = very_bad_lines_count + 1
+	
+	map_of_maps = dict()
+	map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
+	map_of_maps['fullpath_to_filetype'] = fullpath_to_filetype
+	map_of_maps['fullpath_to_filesize'] = fullpath_to_filesize
+	
+	serialize_maps(map_of_maps, sys.argv[2])
+	
+	print '# number of bad formatted reads, writes, opens, closes and unlinks'
+	print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
+	print '# writes:\t' + str(bad_format_write) + ' (recovered = ' + str(recovered_write) + ')'
+	print '# opens:\t' + str(bad_format_open)
+	print '# do filp opens:\t' + str(bad_format_do_filp_open)
+	print '# closes:\t' + str(bad_format_close)
+	print '# unlinks:\t' + str(bad_format_unlink)
+	print '# very bad lines: \t' + str(very_bad_lines_count)
 
 ### End ###
