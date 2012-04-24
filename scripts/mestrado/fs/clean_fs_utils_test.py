@@ -54,13 +54,6 @@ class TestTraceWalk(unittest.TestCase):
 		line = serialized_map.readline()
 		self.assertEquals(line, 'another_one_key\tanother_one_value\n')
 
-	def test_remove_duplicated_parent(self):
-		self.assertEquals(remove_duplicated_parent("/home/user/home/user/file"), "/home/user/file")
-		self.assertEquals(remove_duplicated_parent("/home/user/file"), "/home/user/file" )
-		self.assertEquals(remove_duplicated_parent("/home/user with blank/file"), "/home/user with blank/file")
-		self.assertEquals(remove_duplicated_parent("/a/b/a/b/a/b/a/b/a/b/c"), "/a/b/a/b/c")
-		self.assertEquals(remove_duplicated_parent("//a/a/file"), "/a/a/file")
-		self.assertEquals(remove_duplicated_parent("//"), "/")
-
+	
 if __name__ == "__main__":
 	unittest.main()

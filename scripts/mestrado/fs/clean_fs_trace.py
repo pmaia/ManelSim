@@ -26,11 +26,14 @@ def handle_sys_open(tokens):
 		global bad_format_open
 		bad_format_open = bad_format_open + 1
 	else:
-		path_with_duplicated_parent = ""
-		for i in xrange(6, len(tokens) - 3 ):
-			path_with_duplicated_parent += tokens[i]
+		fullpath = ""
+		for i in xrange(6, len(tokens) - 3):
+			fullpath += tokens[i]
+
+		index_of_double_slashes = fullpath.find("//")
+		if index_of_double_slashes != -1:
+			fullpath = fullpath[index_of_double_slashes + 1:]
 		
-		fullpath = remove_duplicated_parent(path_with_duplicated_parent)
 		unique_file_id = tokens[-1] + '-' + tokens[1]
 		fdpid_to_fullpath[unique_file_id] = fullpath 
 
