@@ -59,7 +59,8 @@ class TestTraceWalk(unittest.TestCase):
 		self.assertEquals(remove_duplicated_parent("/home/user/file"), "/home/user/file" )
 		self.assertEquals(remove_duplicated_parent("/home/user with blank/file"), "/home/user with blank/file")
 		self.assertEquals(remove_duplicated_parent("/a/b/a/b/a/b/a/b/a/b/c"), "/a/b/a/b/c")
-		self.assertEquals(remove_duplicated_parent("//a/a/file"), "//a/a/file")
+		self.assertEquals(remove_duplicated_parent("//a/a/file"), "/a/a/file")
+		self.assertEquals(remove_duplicated_parent("//"), "/")
 
 if __name__ == "__main__":
 	unittest.main()
