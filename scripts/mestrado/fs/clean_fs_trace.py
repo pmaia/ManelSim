@@ -21,13 +21,13 @@ recovered_read = 0
 def join(start, end, tokens):
 	joined = ""
 	for i in xrange(start, end):
-		joined += tokens[i]
+		joined += (tokens[i] + " ")
 	return joined
 
 def remove_basedir_if_present(fullpath):
-	index_of_double_slashes = fullpath.find("//")
+	index_of_double_slashes = fullpath.find("/ /")
 	if index_of_double_slashes != -1:
-		fullpath = fullpath[index_of_double_slashes + 1:]
+		fullpath = fullpath[index_of_double_slashes + 2:]
 	return fullpath
 
 # line sample from the original trace
