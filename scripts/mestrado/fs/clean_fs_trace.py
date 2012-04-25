@@ -92,7 +92,6 @@ def clean_close(tokens):
 #	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	10041417
 def clean_write(tokens):
 	recovered = False
-	reliable = True
 	unique_file_id = tokens[-3] + '-' + tokens[1]
 	if len(tokens) < 15:
 		global bad_format_write
@@ -108,19 +107,17 @@ def clean_write(tokens):
 			fullpath = tokens[8]
 		else:
 			fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
-			reliable = False
 
 	if fullpath != None and filetype != None and filesize != None:
 		if recovered:
 			global recovered_write
 			recovered_write += 1
-		elif reliable:
+		else:
 			fdpid_to_fullpath[unique_file_id] = fullpath
 			fullpath_to_filetype[fullpath] = filetype
 			fullpath_to_filesize[fullpath] = filesize
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			preffix = "" if reliable else "#"
-			return preffix + ("\t".join(['write', tokens[5], fullpath, filesize]))
+			return "\t".join(['write', tokens[5], fullpath, filesize])
 		else:
 			return None
 	else:
@@ -134,7 +131,6 @@ def clean_write(tokens):
 #	read	1318539063447564-329	/proc/stat/	2971
 def clean_read(tokens):
 	recovered = False
-	reliable = True
 	unique_file_id = tokens[-3] + '-' + tokens[1]
 	length = tokens[-1]
 	if len(tokens) < 15:
@@ -149,20 +145,18 @@ def clean_read(tokens):
 			fullpath = tokens[8]
 		else:
 			fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
-			reliable = False
 
 	if fullpath != None and filetype != None:
 		if recovered:
 			global recovered_read
 			recovered_read += 1
-		elif reliable:
+		else:
 	 		fdpid_to_fullpath[unique_file_id] = fullpath
 			fullpath_to_filetype[fullpath] = filetype
 			fullpath_to_filesize[fullpath] = tokens[9]
 
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			preffix = "" if reliable else "#"
-			return preffix + ("\t".join(['read', tokens[5], fullpath, length]))
+			return "\t".join(['read', tokens[5], fullpath, length])
 		else:
 			return None
 	else:
