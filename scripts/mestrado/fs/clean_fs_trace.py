@@ -36,7 +36,7 @@ def remove_basedir_if_present(fullpath):
 def handle_sys_open(tokens):
 	if len(tokens) < 11:
 		global bad_format_open
-		bad_format_open = bad_format_open + 1
+		bad_format_open += 1
 	else:
 		fullpath = remove_basedir_if_present(join(6, len(tokens) - 3, tokens))
 		
@@ -49,7 +49,7 @@ def handle_sys_open(tokens):
 def handle_do_filp_open(tokens):
 	if len(tokens) < 16:
 		global bad_format_do_filp_open
-		bad_format_do_filp_open = bad_format_do_filp_open + 1
+		bad_format_do_filp_open += 1
 	elif len(tokens) == 16:
 		fullpath_to_filetype[tokens[8]] = tokens[10].split('|')[0]
 		fullpath_to_filesize[tokens[8]] = tokens[9]
@@ -69,8 +69,8 @@ def handle_do_filp_open(tokens):
 def clean_close(tokens):
 	if len(tokens) != 8:
 		global bad_format_close
-		bad_format_close = bad_format_close + 1
-		return None;
+		bad_format_close += 1
+		return None
 
 	unique_file_id = tokens[6] + '-' + tokens[1]
 	fullpath = fdpid_to_fullpath.get(unique_file_id, None)
@@ -96,7 +96,7 @@ def clean_write(tokens):
 	unique_file_id = tokens[-3] + '-' + tokens[1]
 	if len(tokens) < 15:
 		global bad_format_write
-		bad_format_write = bad_format_write + 1
+		bad_format_write += 1
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
 		filesize = fullpath_to_filesize.get(fullpath, None)
@@ -113,7 +113,7 @@ def clean_write(tokens):
 	if fullpath != None and filetype != None and filesize != None:
 		if recovered:
 			global recovered_write
-			recovered_write = recovered_write + 1
+			recovered_write += 1
 		elif reliable:
 			fdpid_to_fullpath[unique_file_id] = fullpath
 			fullpath_to_filetype[fullpath] = filetype
@@ -139,7 +139,7 @@ def clean_read(tokens):
 	length = tokens[-1]
 	if len(tokens) < 15:
 		global bad_format_read
-		bad_format_read = bad_format_read + 1
+		bad_format_read += 1
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
 		recovered = True
@@ -154,7 +154,7 @@ def clean_read(tokens):
 	if fullpath != None and filetype != None:
 		if recovered:
 			global recovered_read
-			recovered_read = recovered_read + 1
+			recovered_read += 1
 		elif reliable:
 	 		fdpid_to_fullpath[unique_file_id] = fullpath
 			fullpath_to_filetype[fullpath] = filetype
@@ -177,7 +177,7 @@ def clean_read(tokens):
 def clean_unlink(tokens):
 	if len(tokens) != 9:
 		global bad_format_unlink
-		bad_format_unlink = bad_format_unlink + 1
+		bad_format_unlink += 1
 		return None;
 
 	if not tokens[7].startswith('/'):
@@ -190,8 +190,11 @@ def clean_unlink(tokens):
 	else:
 		return "\t".join(['unlink', tokens[5], fullpath])
 
-### Main ###
-if __name__ == "__main__"
+def main():
+	global fdpid_to_fullpath
+	global fullpath_to_filetype
+	global fullpath_to_filesize
+	
 	very_bad_lines_count = 0
 	
 	if len(sys.argv) != 3:
@@ -226,7 +229,7 @@ if __name__ == "__main__"
 			if clean_line != None:
 				print clean_line
 		except:
-			very_bad_lines_count = very_bad_lines_count + 1
+			very_bad_lines_count += 1
 	
 	map_of_maps = dict()
 	map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
@@ -244,4 +247,7 @@ if __name__ == "__main__"
 	print '# unlinks:\t' + str(bad_format_unlink)
 	print '# very bad lines: \t' + str(very_bad_lines_count)
 
+### Main ###
+if __name__ == "__main__":
+	main()
 ### End ###
