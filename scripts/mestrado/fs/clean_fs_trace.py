@@ -4,7 +4,7 @@
 # 2. remove all unnecessary information like user id, process id, thread id, open flag, etc
 
 import sys
-from clean_fs_trace_utils import *
+from clean_fs_utils import *
 
 fdpid_to_fullpath = dict()
 fullpath_to_filetype = dict()
