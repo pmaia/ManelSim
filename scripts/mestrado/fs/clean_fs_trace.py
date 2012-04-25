@@ -18,6 +18,18 @@ bad_format_unlink = 0
 recovered_write = 0
 recovered_read = 0
 
+def join(start, end, tokens):
+	joined = ""
+	for i in xrange(start, end):
+		joined += tokens[i]
+	return joined
+
+def remove_basedir_if_present(fullpath):
+	index_of_double_slashes = fullpath.find("//")
+	if index_of_double_slashes != -1:
+		fullpath = fullpath[index_of_double_slashes + 1:]
+	return fullpath
+
 # line sample from the original trace
 #	uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
 #	0 2097 2097 (udisks-daemon) sys_open 1318539063003892-2505 / /dev/sdb 34816 0 7
@@ -26,13 +38,7 @@ def handle_sys_open(tokens):
 		global bad_format_open
 		bad_format_open = bad_format_open + 1
 	else:
-		fullpath = ""
-		for i in xrange(6, len(tokens) - 3):
-			fullpath += tokens[i]
-
-		index_of_double_slashes = fullpath.find("//")
-		if index_of_double_slashes != -1:
-			fullpath = fullpath[index_of_double_slashes + 1:]
+		fullpath = remove_basedir_if_present(join(6, len(tokens) - 3, tokens))
 		
 		unique_file_id = tokens[-1] + '-' + tokens[1]
 		fdpid_to_fullpath[unique_file_id] = fullpath 
@@ -41,12 +47,17 @@ def handle_sys_open(tokens):
 # uid pid tid exec_name do_filp_open begin-elapsed (root pwd fullpath f_size f_type ino) pathname openflag mode acc_mode
 # 1159 2076 2194 (gnome-do) do_filp_open 1318539555109420-33 (/ /home/thiagoepdc/ /tmp/tmp2b688269.tmp/ 10485760 S_IFREG|S_IWUSR|S_IRUSR 12) <unknown> 32834 420 0
 def handle_do_filp_open(tokens):
-	if len(tokens) != 16:
+	if len(tokens) < 16:
 		global bad_format_do_filp_open
 		bad_format_do_filp_open = bad_format_do_filp_open + 1
-	else:
+	elif len(tokens) == 16:
 		fullpath_to_filetype[tokens[8]] = tokens[10].split('|')[0]
 		fullpath_to_filesize[tokens[8]] = tokens[9]
+	else:
+		fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
+
+		fullpath_to_filetype[fullpath] = tokens[-6].split('|')[0]
+		fullpath_to_filesize[fullpath] = tokens[-7]
 
 
 # line sample from the original trace
@@ -81,30 +92,35 @@ def clean_close(tokens):
 #	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	10041417
 def clean_write(tokens):
 	recovered = False
-	if len(tokens) != 15:
+	reliable = True
+	unique_file_id = tokens[-3] + '-' + tokens[1]
+	if len(tokens) < 15:
 		global bad_format_write
 		bad_format_write = bad_format_write + 1
-		unique_file_id = tokens[6] + '-' + tokens[1]
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
 		filesize = fullpath_to_filesize.get(fullpath, None)
 		recovered = True
 	else:
-		unique_file_id = tokens[12] + '-' + tokens[1]
-		fullpath = tokens[8]
-		filetype = tokens[10].split('|')[0]
-		filesize = tokens[9]
+		filetype = tokens[-5].split('|')[0]
+		filesize = tokens[-6]
+		if len(tokens) == 15:
+			fullpath = tokens[8]
+		else:
+			fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
+			reliable = False
 
 	if fullpath != None and filetype != None and filesize != None:
 		if recovered:
 			global recovered_write
 			recovered_write = recovered_write + 1
-		else:
+		elif reliable:
 			fdpid_to_fullpath[unique_file_id] = fullpath
 			fullpath_to_filetype[fullpath] = filetype
 			fullpath_to_filesize[fullpath] = filesize
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			return "\t".join(['write', tokens[5], fullpath, filesize])
+			preffix = "" if reliable else "#"
+			return preffix + ("\t".join(['write', tokens[5], fullpath, filesize]))
 		else:
 			return None
 	else:
@@ -118,31 +134,35 @@ def clean_write(tokens):
 #	read	1318539063447564-329	/proc/stat/	2971
 def clean_read(tokens):
 	recovered = False
-	if len(tokens) != 15:
+	reliable = True
+	unique_file_id = tokens[-3] + '-' + tokens[1]
+	length = tokens[-1]
+	if len(tokens) < 15:
 		global bad_format_read
 		bad_format_read = bad_format_read + 1
-		unique_file_id = tokens[6] + '-' + tokens[1]
 		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 		filetype = fullpath_to_filetype.get(fullpath, None)
-		length = tokens[8]
 		recovered = True
 	else:
-		unique_file_id = tokens[12] + '-' + tokens[1]
-		fullpath = tokens[8]
-		filetype = tokens[10].split('|')[0]
-		length = tokens[14]
+		filetype = tokens[-5].split('|')[0]
+		if len(tokens) == 15:
+			fullpath = tokens[8]
+		else:
+			fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
+			reliable = False
 
 	if fullpath != None and filetype != None:
 		if recovered:
 			global recovered_read
 			recovered_read = recovered_read + 1
-		else:
+		elif reliable:
 	 		fdpid_to_fullpath[unique_file_id] = fullpath
 			fullpath_to_filetype[fullpath] = filetype
 			fullpath_to_filesize[fullpath] = tokens[9]
 
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			return "\t".join(['read', tokens[5], fullpath, length])
+			preffix = "" if reliable else "#"
+			return preffix + ("\t".join(['read', tokens[5], fullpath, length]))
 		else:
 			return None
 	else:
@@ -155,7 +175,7 @@ def clean_read(tokens):
 #	unlink	begin-elapsed	fullpath	
 #	unlink	1318539134533662-8118	/local/thiagoepdc/workspace_beefs/.metadata/.plugins/org.eclipse.jdt.ui/jdt-images/1.png	
 def clean_unlink(tokens):
-	if len(tokens) != 0:
+	if len(tokens) != 9:
 		global bad_format_unlink
 		bad_format_unlink = bad_format_unlink + 1
 		return None;
@@ -169,8 +189,6 @@ def clean_unlink(tokens):
 		return None
 	else:
 		return "\t".join(['unlink', tokens[5], fullpath])
-
-
 
 ### Main ###
 if __name__ == "__main__"
