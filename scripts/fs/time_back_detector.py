@@ -4,17 +4,23 @@ import sys
 
 def extract_time(line):
 	time_str = line.split()[1].split("-")[0]
-	return int(time)
+	return int(time_str)
 
 def main():
 	prev_timestamp = extract_time(sys.stdin.readline())
 	line_count = 1
 	for line in sys.stdin:
 		line_count += 1
-		timestamp = extract_time(line) 
+		if not line.startswith("#"):
+			timestamp = extract_time(line) 
 
-		if timestamp < prev_timestamp:
-			print "back in time. line " + str(line_count)
+			ts_diff = (timestamp - prev_timestamp) / 1000000
+			if ts_diff < -10:
+				print "error: back in time of " + str(ts_diff * -1) + " secs. line " + str(line_count)
+			elif ts_diff < 0:
+				print "warning: back in time of " + str(ts_diff * -1) + " secs line " + str(line_count)
+
+			prev_timestamp = timestamp
 
 if __name__ == "__main__":
 	main()
