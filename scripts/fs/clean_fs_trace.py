@@ -115,19 +115,18 @@ def handle_sys_open(tokens):
 #	close	1318539063006403-37	/local/userActivityTracker/logs/tracker.log/
 def clean_close(tokens):
 	if len(tokens) != 8:
-		global bad_format_close
-		bad_format_close += 1
-		return None
+		raise Exception("missing tokens in sys_close")
 
 	unique_file_id = tokens[6] + '-' + tokens[1]
 	fullpath = fdpid_to_fullpath.get(unique_file_id, None)
 	filetype = fullpath_to_filetype.get(fullpath, None)
+	begin_elapsed = check_get_begin_elapsed(tokens)
 
 	if fullpath != None and filetype != None:
 		del fdpid_to_fullpath[unique_file_id]
 
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			return "\t".join(['close', tokens[5], fullpath])
+			return "\t".join(['close', begin_elapsed, fullpath])
 		else:
 			return None
 
@@ -170,19 +169,14 @@ def clean_read_write(tokens):
 #	unlink	1318539134533662-8118	/local/thiagoepdc/workspace_beefs/.metadata/.plugins/org.eclipse.jdt.ui/jdt-images/1.png	
 def clean_unlink(tokens):
 	if len(tokens) != 9:
-		global bad_format_unlink
-		bad_format_unlink += 1
-		return None;
+		raise Exception("missing tokens in sys_unlink")
 
-	if not tokens[7].startswith('/'):
-		fullpath = tokens[6] + tokens[7]
-	else:
-		fullpath = tokens[7]
+	fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-2]))
 
-	if not fullpath.startswith("/home"):
-		return None
-	else:
+	if fullpath.startswith("/home"):
 		return "\t".join(['unlink', tokens[5], fullpath])
+	else:
+		return None
 
 def main():
 	global fdpid_to_fullpath
