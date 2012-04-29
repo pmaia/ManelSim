@@ -4,6 +4,7 @@ machines="abelhinha celacanto charroco cherne gupi jurupoca mulato ourico palmit
 
 filtered_traces_dir=$1
 cleaned_traces_dir=$2
+error_dir=$3
 
 for machine in $machines
 do
@@ -14,7 +15,7 @@ do
 	if [ -d $machine_filtered_traces_dir -a -f $input_maps_file ]; then
 		echo "Cleaning $machine"
 		cat_args=`ls $machine_filtered_traces_dir | sort -n -t '.' -k 1,14 -k 3 | xargs -i echo $machine_filtered_traces_dir/{}`
-		cat $cat_args | ./clean_fs_trace.py $input_maps_file $output_maps_file > $cleaned_traces_dir/$machine-cleaned
+		cat $cat_args | ./clean_fs_trace.py $input_maps_file $output_maps_file 1> $cleaned_traces_dir/$machine-cleaned 2> $error_dir/$machine-error
 	else
 		echo "Skipping $machine"
 	fi

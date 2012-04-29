@@ -9,20 +9,6 @@ from clean_fs_utils import *
 fdpid_to_fullpath = dict()
 fullpath_to_filetype = dict()
 fullpath_to_filesize = dict()
-bad_format_open = 0
-bad_format_do_filp_open = 0
-bad_format_close = 0
-bad_format_read = 0
-bad_format_write = 0
-bad_format_unlink = 0
-recovered_write = 0
-recovered_read = 0
-
-def join(start, end, tokens):
-	joined = ""
-	for i in xrange(start, end):
-		joined += (tokens[i] + " ")
-	return joined
 
 def remove_basedir_if_present(fullpath):
 	index_of_double_slashes = fullpath.find("/ /")
@@ -30,35 +16,96 @@ def remove_basedir_if_present(fullpath):
 		fullpath = fullpath[index_of_double_slashes + 2:]
 	return fullpath
 
-# line sample from the original trace
-#	uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
-#	0 2097 2097 (udisks-daemon) sys_open 1318539063003892-2505 / /dev/sdb 34816 0 7
-def handle_sys_open(tokens):
-	if len(tokens) < 11:
-		global bad_format_open
-		bad_format_open += 1
-	else:
-		fullpath = remove_basedir_if_present(join(6, len(tokens) - 3, tokens))
+def check_filetype(tokens):
+	filetype = tokens[-5].split('|')[0] 
+
+	if filetype == 'sys_read' or filetype == 'sys_write': 
+	#so, it's missing all the stuff between parentheses and I'll try to recover it
+		fdpid = "-".join([tokens[-3], tokens[1]])
+		if fdpid in fdpid_to_fullpath:
+			filetype = fullpath_to_filetype[fdpid_to_fullpath[fdpid]]
+
+	return filetype == 'S_IFREG'
+	
+def check_get_bytes_transfered(tokens):
+	return int(tokens[-1])
+
+def check_get_filesize(tokens): 
+	try:
+		filesize = int(tokens[-6])
+	except (ValueError):
+		fdpid = "-".join([tokens[-3], tokens[1]])
+		if fdpid in fdpid_to_fullpath:
+			filesize = int(fullpath_to_filesize[fdpid_to_fullpath[fdpid]])
+
+	if filesize < 0:
+		raise Exception("Invalid or missing filesize")
+
+	return str(filesize)
+
+def check_get_begin_elapsed(tokens):
+	begin_elapsed = tokens[5]
+	operation_start = int(begin_elapsed.split("-")[0])
+	operation_duration = int(begin_elapsed.split("-")[1])
+	
+	if operation_start < 0 or operation_duration < 0:
+		raise Exception("Invalid start time and/or duration")
+
+	return begin_elapsed
+
+def check_get_fullpath(tokens):
+	fdpid = '-'.join([tokens[-3], tokens[1]])
+	
+	if len(tokens) >= 15:
+		# So, this is a well formed line or the universe is conspiring against me
+		fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-3]))
 		
-		unique_file_id = tokens[-1] + '-' + tokens[1]
-		fdpid_to_fullpath[unique_file_id] = fullpath 
+		if fdpid_to_fullpath[fdpid] != fullpath:
+			if fdpid_to_fullpath[fdpid] == None:
+				sys.stderr.write(" ".join(["WARNING:", "Missing open to fd-pid:", fdpid, "Line:", line, "\n"]))
+			else:
+				sys.stderr.write(" ".join(["WARNING:", "Missing close to fd-pid:", fdpid, "Line:", line, "\n"]))
+
+		fdpid_to_fullpath[fdpid] = fullpath
+		fullpath_to_filetype[fullpath] = tokens[-5].split('|')[0]
+		fullpath_to_filesize[fullpath] = tokens[-6]
+	else:
+		fullpath = fdpid_to_fullpath.get(fdpid, None) 
+		# The probability of this information be wrong is not 0. 
+		# But I believe it's really low. 
+		# It would be necessary that a call to close were missing to a certain fd-pid pair and 
+		# that the subsequent calls to sys_write/sys_read that coincidentally have the same fd-pid were bad formed.
+
+	if fullpath == None:
+		raise Exception("Irrecoverable bad formed line")
+
+	return fullpath
 
 # line sample from the original trace
 # uid pid tid exec_name do_filp_open begin-elapsed (root pwd fullpath f_size f_type ino) pathname openflag mode acc_mode
 # 1159 2076 2194 (gnome-do) do_filp_open 1318539555109420-33 (/ /home/thiagoepdc/ /tmp/tmp2b688269.tmp/ 10485760 S_IFREG|S_IWUSR|S_IRUSR 12) <unknown> 32834 420 0
 def handle_do_filp_open(tokens):
 	if len(tokens) < 16:
-		global bad_format_do_filp_open
-		bad_format_do_filp_open += 1
-	elif len(tokens) == 16:
-		fullpath_to_filetype[tokens[8]] = tokens[10].split('|')[0]
-		fullpath_to_filesize[tokens[8]] = tokens[9]
-	else:
-		fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
+		raise Exception("missing tokens in do_filp_open")
 
-		fullpath_to_filetype[fullpath] = tokens[-6].split('|')[0]
-		fullpath_to_filesize[fullpath] = tokens[-7]
+	fullpath = remove_basedir_if_present(" ".join(tokens[7:len(tokens)-6]))
 
+	fullpath_to_filetype[fullpath] = tokens[-6].split('|')[0]
+	fullpath_to_filesize[fullpath] = tokens[-7]
+
+
+# line sample from the original trace
+# uid pid tid exec_name sys_open begin-elapsed cwd filename flags mode return
+# 0 2097 2097 (udisks-daemon) sys_open 1318539063003892-2505 / /dev/sdb 34816 0 7
+def handle_sys_open(tokens):
+	if len(tokens) < 11:
+		raise Exception("missing tokens in sys_open")
+	
+	fullpath = remove_basedir_if_present(" ".join([tokens[6:len(tokens)-3]))
+	unique_file_id = "-".join([tokens[-1], tokens[1]])
+	fdpid_to_fullpath[unique_file_id] = fullpath 
+	fullpath_to_filetype[fullpath] = None
+	fullpath_to_filesize[fullpath] = None
 
 # line sample from the original trace
 #	uid pid tid exec_name sys_close begin-elapsed fd return
@@ -87,80 +134,33 @@ def clean_close(tokens):
 # line sample from the original trace: 
 #	uid pid tid exec_name sys_write begin-elapsed (root pwd fullpath f_size f_type ino) fd count return
 #	0 6194 6194 (xprintidle) sys_write 1318539063058255-131 (/ /root/ /local/userActivityTracker/logs/tracker.log/ 10041417 S_IFREG|S_IROTH|S_IRGRP|S_IWUSR|S_IRUSR 2261065) 1 17 17
-# line transformed by clean_write
-#	write	begin-elapsed	fullpath	filesize
-#	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	10041417
-def clean_write(tokens):
-	recovered = False
-	unique_file_id = tokens[-3] + '-' + tokens[1]
-	if len(tokens) < 15:
-		global bad_format_write
-		bad_format_write += 1
-		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
-		filetype = fullpath_to_filetype.get(fullpath, None)
-		filesize = fullpath_to_filesize.get(fullpath, None)
-		recovered = True
-	else:
-		filetype = tokens[-5].split('|')[0]
-		filesize = tokens[-6]
-		if len(tokens) == 15:
-			fullpath = tokens[8]
-		else:
-			fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
-
-	if fullpath != None and filetype != None and filesize != None:
-		if recovered:
-			global recovered_write
-			recovered_write += 1
-		else:
-			fdpid_to_fullpath[unique_file_id] = fullpath
-			fullpath_to_filetype[fullpath] = filetype
-			fullpath_to_filesize[fullpath] = filesize
-		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			return "\t".join(['write', tokens[5], fullpath, filesize])
-		else:
-			return None
-	else:
-		return None
-
+# line transformed by clean_read_write
+#	write	begin-elapsed	fullpath	bytes_transfered	filesize
+#	write	1318539063058255-131	/local/userActivityTracker/logs/tracker.log/	17	10041417
+# 
+#	or, if it's a sys_read call:
+#
 # line sample from the original trace: 
 #	uid pid tid exec_name sys_read begin-elapsed (root pwd fullpath f_size f_type ino) fd count return
 #	114 1562 1562 (snmpd) sys_read 1318539063447564-329 (/ / /proc/stat/ 0 S_IFREG|S_IROTH|S_IRGRP|S_IRUSR 4026531975) 8 3072 2971
-# line transformed by clean_read
-#	read	begin-elapsed	fullpath	length
+# line transformed by clean_read_write
+#	read	begin-elapsed	fullpath	bytes_transfered
 #	read	1318539063447564-329	/proc/stat/	2971
-def clean_read(tokens):
-	recovered = False
-	unique_file_id = tokens[-3] + '-' + tokens[1]
-	length = tokens[-1]
-	if len(tokens) < 15:
-		global bad_format_read
-		bad_format_read += 1
-		fullpath = fdpid_to_fullpath.get(unique_file_id, None)
-		filetype = fullpath_to_filetype.get(fullpath, None)
-		recovered = True
-	else:
-		filetype = tokens[-5].split('|')[0]
-		if len(tokens) == 15:
-			fullpath = tokens[8]
-		else:
-			fullpath = remove_basedir_if_present(join(7, len(tokens) - 6, tokens))
 
-	if fullpath != None and filetype != None:
-		if recovered:
-			global recovered_read
-			recovered_read += 1
-		else:
-	 		fdpid_to_fullpath[unique_file_id] = fullpath
-			fullpath_to_filetype[fullpath] = filetype
-			fullpath_to_filesize[fullpath] = tokens[9]
+def clean_read_write(tokens):
+	if check_filetype(tokens):
+		begin_elapsed = check_get_begin_elapsed(tokens)
+		fullpath = check_get_fullpath(tokens)
+		bytes_transfered = check_get_bytes_transfered(tokens)
+		filesize = check_get_filesize(tokens)
 
-		if fullpath.startswith("/home") and filetype == 'S_IFREG':
-			return "\t".join(['read', tokens[5], fullpath, length])
-		else:
-			return None
-	else:
-		return None
+		if bytes_transfered >= 0 and fullpath.startswith("/home"):
+			if tokens[4] == 'sys_write':
+				return "\t".join(["write", begin_elapsed, fullpath, str(bytes_transfered), filesize])
+			elif tokens[4] == 'sys_read':
+				return "\t".join(["read", begin_elapsed, fullpath, str(bytes_transfered)])
+	
+	return None
 
 # line sample from the original trace: 
 #	uid pid tid exec_name sys_unlink begin-elapsed cwd pathname return
@@ -189,8 +189,6 @@ def main():
 	global fullpath_to_filetype
 	global fullpath_to_filesize
 	
-	very_bad_lines_count = 0
-	
 	if len(sys.argv) != 3:
 		print "Usage: " + sys.argv[0] + " <input maps file> <output maps file>"
 		sys.exit(1)
@@ -207,23 +205,22 @@ def main():
 	
 		try:
 			clean_line = None
+			
 			if tokens[4] == 'sys_open':
 				handle_sys_open(tokens)
 			elif tokens[4] == 'do_filp_open':
 				handle_do_filp_open(tokens)
 			elif tokens[4] == 'sys_close':
 				clean_line = clean_close(tokens)
-			elif tokens[4] == 'sys_write':
-				clean_line = clean_write(tokens)
-			elif tokens[4] == 'sys_read':
-				clean_line = clean_read(tokens)
+			elif tokens[4] == 'sys_write' or tokens[4] == 'sys_read':
+				clean_line = clean_read_write(tokens)
 			elif tokens[4] == 'sys_unlink':
 				clean_line = clean_unlink(tokens)
 	
 			if clean_line != None:
 				print clean_line
 		except:
-			very_bad_lines_count += 1
+			sys.stderr.write(" ".join(["ERROR:", line, "\n"]))
 	
 	map_of_maps = dict()
 	map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
@@ -232,15 +229,6 @@ def main():
 	
 	serialize_maps(map_of_maps, sys.argv[2])
 	
-	print '# number of bad formatted reads, writes, opens, closes and unlinks'
-	print '# reads:\t' + str(bad_format_read) + ' (recovered = ' + str(recovered_read) + ')'
-	print '# writes:\t' + str(bad_format_write) + ' (recovered = ' + str(recovered_write) + ')'
-	print '# opens:\t' + str(bad_format_open)
-	print '# do filp opens:\t' + str(bad_format_do_filp_open)
-	print '# closes:\t' + str(bad_format_close)
-	print '# unlinks:\t' + str(bad_format_unlink)
-	print '# very bad lines: \t' + str(very_bad_lines_count)
-
 ### Main ###
 if __name__ == "__main__":
 	main()
