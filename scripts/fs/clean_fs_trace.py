@@ -62,9 +62,9 @@ def check_get_fullpath(tokens):
 		
 		if fdpid_to_fullpath[fdpid] != fullpath:
 			if fdpid_to_fullpath[fdpid] == None:
-				sys.stderr.write(" ".join(["WARNING:", "Missing open to fd-pid:", fdpid, "Line:", line, "\n"]))
+				sys.stderr.write(" ".join(["WARNING:", "Missing open to fd-pid:", fdpid, "Path:", fullpath, "\n"]))
 			else:
-				sys.stderr.write(" ".join(["WARNING:", "Missing close to fd-pid:", fdpid, "Line:", line, "\n"]))
+				sys.stderr.write(" ".join(["WARNING:", "Missing close to fd-pid:", fdpid, "Path:", fullpath, "\n"]))
 
 		fdpid_to_fullpath[fdpid] = fullpath
 		fullpath_to_filetype[fullpath] = tokens[-5].split('|')[0]
@@ -210,9 +210,8 @@ def main():
 	
 			if clean_line != None:
 				print clean_line
-		except:
-			msg =  sys.exc_info()[0]
-			sys.stderr.write("->".join(["ERROR", msg, line]))
+		except Exception as e:
+			sys.stderr.write("-> ".join(["ERROR", e.args[0], line]))
 	
 	map_of_maps = dict()
 	map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
