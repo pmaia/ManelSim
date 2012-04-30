@@ -39,7 +39,7 @@ def check_get_filesize(tokens):
 		fdpid = "-".join([tokens[-3], tokens[1]])
 		if (fdpid in fdpid_to_fullpath) and (fdpid_to_fullpath[fdpid] in fullpath_to_filetype):
 			filesize = int(fullpath_to_filesize[fdpid_to_fullpath[fdpid]])
-		else
+		else:
 			filesize = -1;
 
 	if filesize < 0:
