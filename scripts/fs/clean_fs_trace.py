@@ -22,8 +22,7 @@ def check_filetype(tokens):
 	if filetype == 'sys_read' or filetype == 'sys_write': 
 	#so, it's missing all the stuff between parentheses and I'll try to recover it
 		fdpid = "-".join([tokens[-3], tokens[1]])
-		if fdpid in fdpid_to_fullpath:
-			filetype = fullpath_to_filetype[fdpid_to_fullpath[fdpid]]
+		filetype = fullpath_to_filetype[fdpid_to_fullpath[fdpid]]
 
 	return filetype == 'S_IFREG'
 	
@@ -35,8 +34,7 @@ def check_get_filesize(tokens):
 		filesize = int(tokens[-6])
 	except (ValueError):
 		fdpid = "-".join([tokens[-3], tokens[1]])
-		if fdpid in fdpid_to_fullpath:
-			filesize = int(fullpath_to_filesize[fdpid_to_fullpath[fdpid]])
+		filesize = int(fullpath_to_filesize[fdpid_to_fullpath[fdpid]])
 
 	if filesize < 0:
 		raise Exception("Invalid or missing filesize")
@@ -58,13 +56,13 @@ def check_get_fullpath(tokens):
 	
 	if len(tokens) >= 15:
 		# So, this is a well formed line or the universe is conspiring against me
-		fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-6]))
+		fullpath = remove_basedir_if_present(" ".join(tokens[7:len(tokens)-6]))
 		
-		if fdpid_to_fullpath[fdpid] != fullpath:
-			if fdpid_to_fullpath[fdpid] == None:
-				sys.stderr.write(" ".join(["WARNING:", "Missing open to fd-pid:", fdpid, "Path:", fullpath, "\n"]))
-			else:
-				sys.stderr.write(" ".join(["WARNING:", "Missing close to fd-pid:", fdpid, "Path:", fullpath, "\n"]))
+		if fdpid in fdpid_to_fullpath:
+			if fdpid_to_fullpath[fdpid] != fullpath:
+				sys.stderr.write(" ".join(["WARNING:", "Missing close detected.", fdpid, "Path:", fullpath, "\n"]))
+		else:
+			sys.stderr.write(" ".join(["WARNING:", "Missing open detected.", fdpid, "Path:", fullpath, "\n"]))
 
 		fdpid_to_fullpath[fdpid] = fullpath
 		fullpath_to_filetype[fullpath] = tokens[-5].split('|')[0]
@@ -88,7 +86,7 @@ def handle_do_filp_open(tokens):
 	if len(tokens) < 16:
 		raise Exception("missing tokens in do_filp_open")
 
-	fullpath = remove_basedir_if_present(" ".join(tokens[7:len(tokens)-6]))
+	fullpath = remove_basedir_if_present(" ".join(tokens[7:len(tokens)-7]))
 
 	fullpath_to_filetype[fullpath] = tokens[-6].split('|')[0]
 	fullpath_to_filesize[fullpath] = tokens[-7]
