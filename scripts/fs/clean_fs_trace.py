@@ -58,7 +58,7 @@ def check_get_fullpath(tokens):
 	
 	if len(tokens) >= 15:
 		# So, this is a well formed line or the universe is conspiring against me
-		fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-3]))
+		fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-6]))
 		
 		if fdpid_to_fullpath[fdpid] != fullpath:
 			if fdpid_to_fullpath[fdpid] == None:
@@ -101,7 +101,7 @@ def handle_sys_open(tokens):
 	if len(tokens) < 11:
 		raise Exception("missing tokens in sys_open")
 	
-	fullpath = remove_basedir_if_present(" ".join([tokens[6:len(tokens)-3]))
+	fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-3]))
 	unique_file_id = "-".join([tokens[-1], tokens[1]])
 	fdpid_to_fullpath[unique_file_id] = fullpath 
 
@@ -211,7 +211,7 @@ def main():
 			if clean_line != None:
 				print clean_line
 		except:
-			sys.stderr.write(" ".join(["ERROR:", line, "\n"]))
+			sys.stderr.write(" ".join(["ERROR:", line]))
 	
 	map_of_maps = dict()
 	map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
