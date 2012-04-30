@@ -211,7 +211,8 @@ def main():
 			if clean_line != None:
 				print clean_line
 		except:
-			sys.stderr.write(" ".join(["ERROR:", line]))
+			msg =  sys.exc_info()[0]
+			sys.stderr.write("->".join(["ERROR", msg, line]))
 	
 	map_of_maps = dict()
 	map_of_maps['fdpid_to_fullpath'] = fdpid_to_fullpath
