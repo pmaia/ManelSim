@@ -104,8 +104,6 @@ def handle_sys_open(tokens):
 	fullpath = remove_basedir_if_present(" ".join([tokens[6:len(tokens)-3]))
 	unique_file_id = "-".join([tokens[-1], tokens[1]])
 	fdpid_to_fullpath[unique_file_id] = fullpath 
-	fullpath_to_filetype[fullpath] = None
-	fullpath_to_filesize[fullpath] = None
 
 # line sample from the original trace
 #	uid pid tid exec_name sys_close begin-elapsed fd return
@@ -122,13 +120,12 @@ def clean_close(tokens):
 	filetype = fullpath_to_filetype.get(fullpath, None)
 	begin_elapsed = check_get_begin_elapsed(tokens)
 
-	if fullpath != None and filetype != None:
+	if fullpath != None:
 		del fdpid_to_fullpath[unique_file_id]
-
 		if fullpath.startswith("/home") and filetype == 'S_IFREG':
 			return "\t".join(['close', begin_elapsed, fullpath])
-		else:
-			return None
+	
+	return None
 
 # line sample from the original trace: 
 #	uid pid tid exec_name sys_write begin-elapsed (root pwd fullpath f_size f_type ino) fd count return
