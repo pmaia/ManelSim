@@ -22,7 +22,10 @@ def check_filetype(tokens):
 	if filetype == 'sys_read' or filetype == 'sys_write': 
 	#so, it's missing all the stuff between parentheses and I'll try to recover it
 		fdpid = "-".join([tokens[-3], tokens[1]])
-		filetype = fullpath_to_filetype[fdpid_to_fullpath[fdpid]]
+		if (fdpid in fdpid_to_fullpath) and (fdpid_to_fullpath[fdpid] in fullpath_to_filetype):
+			filetype = fullpath_to_filetype[fdpid_to_fullpath[fdpid]]
+		else:
+			raise Exception("Irrecoverable bad formed line. Couldn't get filetype")
 
 	return filetype == 'S_IFREG'
 	
@@ -34,7 +37,10 @@ def check_get_filesize(tokens):
 		filesize = int(tokens[-6])
 	except (ValueError):
 		fdpid = "-".join([tokens[-3], tokens[1]])
-		filesize = int(fullpath_to_filesize[fdpid_to_fullpath[fdpid]])
+		if (fdpid in fdpid_to_fullpath) and (fdpid_to_fullpath[fdpid] in fullpath_to_filetype):
+			filesize = int(fullpath_to_filesize[fdpid_to_fullpath[fdpid]])
+		else
+			filesize = -1;
 
 	if filesize < 0:
 		raise Exception("Invalid or missing filesize")
