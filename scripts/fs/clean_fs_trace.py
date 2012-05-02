@@ -172,7 +172,7 @@ def clean_unlink(tokens):
 	if len(tokens) != 9:
 		raise Exception("missing tokens in sys_unlink")
 
-	fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-2]))
+	fullpath = remove_basedir_if_present(" ".join(tokens[6:len(tokens)-1]))
 
 	if fullpath.startswith("/home"):
 		return "\t".join(['unlink', tokens[5], fullpath])
