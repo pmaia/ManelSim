@@ -12,9 +12,6 @@ public abstract class EventHandler {
 
 	private final PriorityQueue<Event> eventsGeneratedBySimulationQueue;
 	
-	/**
-	 * @param scheduler
-	 */
 	public EventHandler(PriorityQueue<Event> eventsGeneratedBySimulationQueue) {
 		this.eventsGeneratedBySimulationQueue = eventsGeneratedBySimulationQueue;
 	}
@@ -23,9 +20,6 @@ public abstract class EventHandler {
 		eventsGeneratedBySimulationQueue.add(event);
 	}
 	
-	/**
-	 * @param jeevent
-	 */
 	public abstract void handleEvent(Event jeevent);
 
 }

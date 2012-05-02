@@ -28,9 +28,9 @@ public class UserIdlenessEvent extends Event {
 	
 	public static final String EVENT_NAME = "user-idleness-start";
 	
-	public UserIdlenessEvent(Machine aHandler, Time aScheduledTime, Time userIdlenessDuration) {
+	public UserIdlenessEvent(Machine handler, Time scheduledTime, Time userIdlenessDuration) {
 		
-		super(EVENT_NAME, aHandler, aScheduledTime, userIdlenessDuration);
+		super(EVENT_NAME, handler, scheduledTime, userIdlenessDuration);
 	}
 
 	@Override

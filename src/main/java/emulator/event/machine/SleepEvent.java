@@ -27,8 +27,8 @@ public class SleepEvent extends Event {
 	
 	public static final String EVENT_NAME = "sleep";
 	
-	public SleepEvent(Machine aHandler, Time aScheduledTime, Time duration) {
-		super(EVENT_NAME, aHandler, aScheduledTime, duration);
+	public SleepEvent(Machine handler, Time scheduledTime, Time duration) {
+		super(EVENT_NAME, handler, scheduledTime, duration);
 	}
 	
 	@Override

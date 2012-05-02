@@ -15,41 +15,35 @@ public final class EventScheduler {
 	private Time theEmulationEnd;
 	private EventSource eventSource;
 
-	/**
-     * 
-     */
 	public EventScheduler(EventSource eventSource) {
 		this(null, eventSource);
 	}
 
-	/**
-	 * @param emulationEnd
+	/*
+	 * FIXME I think it would be good to have emulation start and end times
 	 */
 	public EventScheduler(Time emulationEnd, EventSource eventSource) {
 		theEmulationEnd = emulationEnd;
 		this.eventSource = eventSource;
 	}
 
-	/**
-     * 
-     */
 	public void start() {
 
-		Event aNextEvent;
+		Event nextEvent;
 		
-		while ((aNextEvent = eventSource.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
-			Time anEventTime = aNextEvent.getScheduledTime();
+		while ((nextEvent = eventSource.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
+			Time eventTime = nextEvent.getScheduledTime();
 
-			if (anEventTime.isEarlierThan(now())) {
+			if (eventTime.isEarlierThan(now())) {
 				throw new RuntimeException("ERROR: emulation time(" + now()
 						+ ") " + "already ahead of event time("
-						+ anEventTime
+						+ eventTime
 						+ "). Event is outdated and will not be processed.");
 			}
 
-			if (isEarlierThanEmulationEnd(anEventTime)) {
-				now = anEventTime;
-				processEvent(aNextEvent);
+			if (isEarlierThanEmulationEnd(eventTime)) {
+				now = eventTime;
+				processEvent(nextEvent);
 			} else {
 				now = theEmulationEnd;
 			}
@@ -57,20 +51,17 @@ public final class EventScheduler {
 
 	}
 
+	/* FIXME do I really need this method? If, by default I set theEmulationEnd = Time.THE_END_OF_THE_WORLD everything 
+	 * would work without this method, right?  
+	 */
 	private boolean isEarlierThanEmulationEnd(Time time) {
 		return (theEmulationEnd != null) ? time.isEarlierThan(theEmulationEnd) : true;
 	}
 
-	/**
-	 * @param aNextEvent
-	 */
-	private void processEvent(Event aNextEvent) {
-		aNextEvent.getHandler().handleEvent(aNextEvent); //
+	private void processEvent(Event nextEvent) {
+		nextEvent.getHandler().handleEvent(nextEvent); //FIXME what a bad smell. Maybe nextEvent.process() would be better
 	}
 
-	/**
-	 * @return
-	 */
 	public Time now() {
 		return now;
 	}

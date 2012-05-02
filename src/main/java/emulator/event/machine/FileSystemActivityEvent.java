@@ -15,9 +15,9 @@
  */
 package emulator.event.machine;
 
-import model.Machine;
 import kernel.Event;
 import kernel.Time;
+import model.Machine;
 
 /**
  * TODO make doc
@@ -30,13 +30,6 @@ public class FileSystemActivityEvent extends Event {
 	
 	private final boolean wakeOnLan;
 	
-	/**
-	 * 
-	 * @param handler the {@link Machine} that will handle this event
-	 * @param scheduledTime
-	 * @param duration
-	 * @param wakeOnLan true if this event should wake up a asleep machine
-	 */
 	public FileSystemActivityEvent(Machine handler, Time scheduledTime, Time duration, boolean wakeOnLan) {
 		super(EVENT_NAME, handler, scheduledTime, duration);
 		

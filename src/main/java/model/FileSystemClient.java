@@ -2,12 +2,10 @@ package model;
 
 import java.util.PriorityQueue;
 
-import model.data.ReplicationGroup;
-
 import kernel.Event;
 import kernel.EventHandler;
 import kernel.Time;
-
+import model.data.ReplicationGroup;
 import emulator.event.filesystem.CloseEvent;
 import emulator.event.filesystem.ReadEvent;
 import emulator.event.filesystem.UnlinkEvent;
@@ -21,12 +19,6 @@ public class FileSystemClient extends EventHandler {
 	private final Machine machine;
 	private final boolean wakeOnLan;
 
-	/**
-	 * 
-	 * @param scheduler
-	 * @param machine
-	 * @param metadataServer
-	 */
 	public FileSystemClient(PriorityQueue<Event> eventsGeneratedBySimulationQueue,
 			Machine machine, MetadataServer metadataServer, boolean wakeOnLan) {
 
@@ -104,16 +96,10 @@ public class FileSystemClient extends EventHandler {
 		metadataServer.deletePath(this, filePath, unlinkEvent.getScheduledTime());
 	}
 
-	/**
-	 * @return the machine
-	 */
 	public Machine getMachine() {
 		return machine;
 	}
 
-	/**
-	 * @return the id
-	 */
 	public String getId() {
 		return id;
 	}

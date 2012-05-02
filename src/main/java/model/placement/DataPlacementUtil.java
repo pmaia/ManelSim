@@ -20,9 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import util.RandomUtil;
-
 import model.data.DataServer;
+import util.RandomUtil;
 
 
 /**
@@ -32,11 +31,6 @@ import model.data.DataServer;
  */
 public class DataPlacementUtil {
 
-	/**
-	 * @param availableServers
-	 * @param numberOfWantedServers
-	 * @return
-	 */
 	public static Set<DataServer> chooseRandomDataServers(Set<DataServer> availableServers, int numberOfWantedServers) {
 		
 		List<DataServer> availableServersAsList = new ArrayList<DataServer>();

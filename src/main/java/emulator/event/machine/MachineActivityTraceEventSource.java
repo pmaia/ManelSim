@@ -20,33 +20,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import model.Machine;
-
 import kernel.Event;
 import kernel.Time;
 import kernel.Time.Unit;
-
+import model.Machine;
 import emulator.EventSource;
 
 /**
  * 
- * A parser for the trace of machine activity.
+ * A parser for traces of machine activity.
  * 
  * This parser expects that activity is logged in the format below:
  * <br><br>
- * &lt;idleness|shutdown&gt;\t&lt;start_timestamp&gt;\t&lt;duration&gt;
+ * &lt;idleness&gt;\t&lt;start_timestamp&gt;\t&lt;duration&gt;
  * <br><br>
  * where &lt;start_timestamp&gt; are the seconds since epoch in which the event 
  * started and &lt;duration&gt; is the time in seconds during which the event lasted.
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class MachineActivityEventParser implements EventSource {
+public class MachineActivityTraceEventSource implements EventSource {
 	
 	private final Machine machine;
 	private final BufferedReader eventReader;
 	
-	public MachineActivityEventParser(Machine machine, InputStream eventStream) {
+	public MachineActivityTraceEventSource(Machine machine, InputStream eventStream) {
 		this.machine = machine;
 		this.eventReader = new BufferedReader(new InputStreamReader(eventStream));
 	}

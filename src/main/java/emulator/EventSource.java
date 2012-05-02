@@ -18,14 +18,14 @@ package emulator;
 import kernel.Event;
 
 /**
- * TODO make doc
+ * A source of {@link Event}s that always deliveries {@link Event}s in time order.
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public interface EventSource {
 
 	/**
-	 * @return
+	 * @return the next {@link Event} in this source 
 	 */
 	Event getNextEvent();
 

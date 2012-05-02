@@ -77,12 +77,6 @@ public class Machine extends EventHandler {
 	private long fsActivityWhileIdleStartTime = -1;
 	private long fsActivityWhileIdleEndTime = -1;
 	
-	/**
-	 * 
-	 * @param eventsGeneratedBySimulationQueue
-	 * @param id
-	 * @param timeBeforeSleep
-	 */
 	public Machine(PriorityQueue<Event> eventsGeneratedBySimulationQueue, String id, long timeBeforeSleep) {
 		
 		super(eventsGeneratedBySimulationQueue);
@@ -106,46 +100,26 @@ public class Machine extends EventHandler {
 		return !(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME));
 	}
 	
-	/**
-	 * @return the id
-	 */
 	public String getId() {
 		return id;
 	}
 
-	/**
-	 * @return the deployedDataServers
-	 */
 	public Set<DataServer> getDeployedDataServers() {
 		return deployedDataServers;
 	}
 
-	/**
-	 * @return
-	 */
 	public Set<FileSystemClient> getDeployedClients() {
 		return clients;
 	}
 
-	/**
-	 * @param newClient
-	 * @return
-	 */
 	public boolean bindClient(FileSystemClient newClient) {
 		return clients.add(newClient);
 	}
 
-	/**
-	 * @param newDataServer
-	 * @return
-	 */
 	public boolean deploy(DataServer newDataServer) {
 		return deployedDataServers.add(newDataServer);
 	}
 
-	/**
-	 * @param newDataServer
-	 */
 	public boolean isDeployed(DataServer dataServer) {
 		return deployedDataServers.contains(dataServer);
 	}

@@ -18,9 +18,9 @@
 
 package emulator.event.filesystem;
 
-import model.FileSystemClient;
 import kernel.Event;
 import kernel.Time;
+import model.FileSystemClient;
 
 /**
  * 
@@ -33,13 +33,6 @@ public class ReadEvent extends Event {
 	private final long length;
 	private final String filePath;
 
-	/**
-	 * 
-	 * @param filePath
-	 * @param length
-	 * @param handler
-	 * @param scheduledTime
-	 */
 	public ReadEvent(FileSystemClient handler, Time scheduledTime, Time duration, String filePath, long length) {
 		super(EVENT_NAME, handler, scheduledTime, duration);
 		
@@ -47,16 +40,10 @@ public class ReadEvent extends Event {
 		this.length = length;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getFilePath() {
 		return filePath;
 	}
 
-	/**
-	 * @return
-	 */
 	public long getLength() {
 		return length;
 	}

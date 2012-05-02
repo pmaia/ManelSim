@@ -19,12 +19,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Random;
 
-import emulator.event.machine.MachineActivityEventParser;
+import emulator.event.machine.MachineActivityTraceEventSource;
 
 /**
  * 
  * An InputStream that simulates an InputStream over a trace file whose events are in the format expected by 
- * {@link MachineActivityEventParser}. <code>numberOfEvents</code> events will be generated.  
+ * {@link MachineActivityTraceEventSource}. <code>numberOfEvents</code> events will be generated.  
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */

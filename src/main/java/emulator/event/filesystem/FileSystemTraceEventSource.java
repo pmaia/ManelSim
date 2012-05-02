@@ -21,12 +21,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import model.FileSystemClient;
-
 import kernel.Event;
 import kernel.Time;
 import kernel.Time.Unit;
-
+import model.FileSystemClient;
 import emulator.EventSource;
 
 /**
@@ -35,17 +33,13 @@ import emulator.EventSource;
  * @author thiago - thiago@lsd.ufcg.edu.br
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class FileSystemEventParser implements EventSource {
+public class FileSystemTraceEventSource implements EventSource {
 
 	private final BufferedReader bufferedReader;
 
 	private final FileSystemClient client;
 
-	/**
-	 * @param traceStream
-	 * @throws IOException
-	 */
-	public FileSystemEventParser(FileSystemClient client, InputStream traceStream) {
+	public FileSystemTraceEventSource(FileSystemClient client, InputStream traceStream) {
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.client = client;
 	}

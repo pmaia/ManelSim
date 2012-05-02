@@ -32,7 +32,7 @@ import org.junit.Test;
 
 import emulator.EventSource;
 import emulator.MultipleEventSource;
-import emulator.event.filesystem.FileSystemEventParser;
+import emulator.event.filesystem.FileSystemTraceEventSource;
 
 /**
  * A suite of tests to the MultipleSourceEventParser class

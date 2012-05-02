@@ -18,10 +18,10 @@
 
 package emulator.event.filesystem;
 
-import model.FileSystemClient;
 import kernel.Event;
 import kernel.Time;
 import kernel.Time.Unit;
+import model.FileSystemClient;
 
 /**
  * 
@@ -35,11 +35,6 @@ public class CloseEvent extends Event {
 	
 	private static final Time CLOSE_DURATION = new Time(0, Unit.SECONDS);
 
-	/**
-	 * @param filePath
-	 * @param handler
-	 * @param scheduledTime
-	 */
 	public CloseEvent(FileSystemClient handler, Time scheduledTime, String filePath) {
 		super(EVENT_NAME, handler, scheduledTime, CLOSE_DURATION);
 		

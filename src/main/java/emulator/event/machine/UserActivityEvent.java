@@ -15,9 +15,9 @@
  */
 package emulator.event.machine;
 
-import model.Machine;
 import kernel.Event;
 import kernel.Time;
+import model.Machine;
 
 /**
  *
@@ -27,14 +27,8 @@ public class UserActivityEvent extends Event {
 	
 	public static final String EVENT_NAME = "activity";
 	
-	/**
-	 * 
-	 * @param aHandler
-	 * @param aScheduledTime
-	 * @param duration 
-	 */
-	public UserActivityEvent(Machine aHandler, Time aScheduledTime, Time duration) {
-		super(EVENT_NAME, aHandler, aScheduledTime, duration);
+	public UserActivityEvent(Machine handler, Time scheduledTime, Time duration) {
+		super(EVENT_NAME, handler, scheduledTime, duration);
 	}
 	
 	@Override

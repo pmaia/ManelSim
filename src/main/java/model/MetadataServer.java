@@ -6,15 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-import model.data.DataServer;
-import model.data.ReplicationGroup;
-import model.placement.DataPlacementAlgorithm;
-
 import kernel.Event;
 import kernel.EventHandler;
 import kernel.Time;
 import kernel.Time.Unit;
-
+import model.data.DataServer;
+import model.data.ReplicationGroup;
+import model.placement.DataPlacementAlgorithm;
 import emulator.event.filesystem.DeleteReplicationGroup;
 import emulator.event.filesystem.UpdateReplicationGroup;
 import emulator.event.machine.FileSystemActivityEvent;
@@ -34,14 +32,6 @@ public class MetadataServer extends EventHandler {
 	private final int replicationLevel;
 	private final boolean wakeOnLan;
 
-	/**
-	 * 
-	 * @param scheduler
-	 * @param dataPlacementAlgorithm
-	 * @param replicationLevel
-	 * @param timeBeforeDeleteData in seconds
-	 * @param timeBeforeUpdateReplicas in seconds
-	 */
 	public MetadataServer(PriorityQueue<Event> eventsGeneratedBySimulationQueue, 
 			DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
 			long timeBeforeDeleteData, long timeBeforeUpdateReplicas, boolean wakeOnLan) {

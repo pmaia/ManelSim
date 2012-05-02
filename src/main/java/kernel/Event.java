@@ -24,23 +24,14 @@ public abstract class Event implements Comparable<Event> {
 		this.duration = duration;
 	}
 
-	/**
-	 * @return
-	 */
 	public EventHandler getHandler() {
 		return handler;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @return
-	 */
 	public Time getScheduledTime() {
 		return scheduledTime;
 	}

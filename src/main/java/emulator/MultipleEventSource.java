@@ -29,6 +29,9 @@ import kernel.Time;
 public class MultipleEventSource implements EventSource {
 	
 	private final PushBackEventParser [] parsers;
+	/*
+	 * FIXME I think this PriorityQueue could also be an EventSource 
+	 */
 	private final PriorityQueue<Event> simulationGeneratedEventsQueue;
 
 	public MultipleEventSource(EventSource[] parsers, PriorityQueue<Event> simulationGeneratedEventsQueue) {

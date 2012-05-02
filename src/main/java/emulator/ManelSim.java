@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import kernel.Event;
+import kernel.EventScheduler;
 import model.Aggregator;
 import model.FileSystemClient;
 import model.Machine;
@@ -35,12 +37,8 @@ import model.data.DataServer;
 import model.placement.CoLocatedWithSecondaryRandomPlacement;
 import model.placement.DataPlacementAlgorithm;
 import model.placement.RandomDataPlacementAlgorithm;
-
-import kernel.Event;
-import kernel.EventScheduler;
-
-import emulator.event.filesystem.FileSystemEventParser;
-import emulator.event.machine.MachineActivityEventParser;
+import emulator.event.filesystem.FileSystemTraceEventSource;
+import emulator.event.machine.MachineActivityTraceEventSource;
 
 /**
  * 
@@ -83,7 +81,7 @@ public class ManelSim {
 	public static void main(String[] args) throws IOException {
 		
 		if(args.length != 7) {
-			System.out.println("Usage: ManelSim <traces dir> <data placement policement>" +
+			System.out.println("Usage: ManelSim <traces dir> <data placement police>" +
 					" <time before sleep> <replication level> <time before update replicas>" +
 					" <time before delete replicas> <wake on lan>");
 			System.exit(1);
@@ -140,12 +138,12 @@ public class ManelSim {
 			for(Machine machine : machines) {
 				traceStream = 
 					new FileInputStream(new File(tracesDir, "idleness-" + machine.getId()));
-				parsers[parserCount++] = new MachineActivityEventParser(machine, traceStream);
+				parsers[parserCount++] = new MachineActivityTraceEventSource(machine, traceStream);
 			}
 			for(FileSystemClient client : clients) {
 				traceStream = 
 					new FileInputStream(new File(tracesDir, "fs-" + client.getMachine().getId()));
-				parsers[parserCount++] = new FileSystemEventParser(client, traceStream);
+				parsers[parserCount++] = new FileSystemTraceEventSource(client, traceStream);
 			}
 			
 		} catch (FileNotFoundException e) {
@@ -167,15 +165,6 @@ public class ManelSim {
 
 	}
 
-	/**
-	 * It create all clients.
-	 * 
-	 * @param aPlaceForEventsGeneratedBySimulation
-	 * @param metadataServer
-	 * @param aggregator
-	 * @param machines2
-	 * @return
-	 */
 	private static Set<FileSystemClient> createClients(PriorityQueue<Event> aPlaceForEventsGeneratedBySimulation,
 			Set<Machine> machines, MetadataServer metadataServer, boolean wakeOnLan) {
 
@@ -188,7 +177,7 @@ public class ManelSim {
 		return newClients;
 	}
 
-	private static Set<Machine> createMachines(PriorityQueue<Event> aPlaceForEventsGeneratedBySimulation, 
+	private static Set<Machine> createMachines(PriorityQueue<Event> eventsGeneratedBySimulationQueue, 
 			File tracesDir, long timeBeforeSleep) {
 		Set<Machine> machines = new HashSet<Machine>();
 		List<String> fsTracesFiles = Arrays.asList(tracesDir.list(fsTracesFilter));
@@ -197,20 +186,13 @@ public class ManelSim {
 		for(String fsTraceFile : fsTracesFiles) {
 			String machineName = fsTraceFile.split("-")[1];
 			if(idlenessTracesFiles.contains("idleness-" + machineName)) {
-				machines.add(new Machine(aPlaceForEventsGeneratedBySimulation, machineName, timeBeforeSleep));
+				machines.add(new Machine(eventsGeneratedBySimulationQueue, machineName, timeBeforeSleep));
 			}
 		}
 
 		return machines;
 	}
 
-	/**
-	 * Create Data Servers.
-	 * 
-	 * @param aPlaceForEventsGeneratedBySimulation
-	 * @param machines
-	 * @return
-	 */
 	private static Set<DataServer> createDataServers(Set<Machine> machines) {
 
 		Set<DataServer> dataServers = new HashSet<DataServer>();

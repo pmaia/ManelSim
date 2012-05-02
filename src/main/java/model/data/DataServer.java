@@ -21,16 +21,10 @@ public class DataServer {
 		return this.id;
 	}
 
-	/**
-	 * @return the machine
-	 */
 	public Machine getMachine() {
 		return machine;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		return id;

@@ -21,11 +21,11 @@ import model.Machine;
 
 import org.junit.Test;
 
-import emulator.event.machine.MachineActivityEventParser;
+import emulator.event.machine.MachineActivityTraceEventSource;
 
 
 /**
- * A suite of tests to the {@link MachineActivityEventParser} class
+ * A suite of tests to the {@link MachineActivityTraceEventSource} class
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
