@@ -33,10 +33,8 @@ public class Machine extends EventHandler {
 	public static final double ACTIVE_POWER_IN_WATTS 		= 191.9;
 	public static final double IDLE_POWER_IN_WATTS 			= 53.54;
 	public static final double SLEEP_POWER_IN_WATTS 		= 2.71;
-	public static final double SHUTDOWN_POWER_IN_WATTS 		= .64;
 	public static final Time   SLEEP_TRANSITION_DURATION 	= new Time(2500, Unit.MILLISECONDS);
-	public static final Time   SHUTDOWN_TRANSITION_DURATION	= new Time(55, Unit.SECONDS);
-	
+		
 	private final Set<DataServer> deployedDataServers;
 	private final Set<FileSystemClient> clients;
 	
