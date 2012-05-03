@@ -44,10 +44,6 @@ public class Aggregator {
 		getMachineAvailability(machine).addSleepingDuration(sleepingDuration);
 	}
 	
-	public void aggregateShutdownDuration(String machine, Time shutdownDuration) {
-		getMachineAvailability(machine).addShutdownDuration(shutdownDuration);
-	}
-	
 	public MachineAvailability getMachineAvailability(String machine) {
 		MachineAvailability machineAvailability = availabilityTotalsPerMachine.get(machine);
 		if(machineAvailability == null) {

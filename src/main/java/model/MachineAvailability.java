@@ -28,9 +28,7 @@ public class MachineAvailability {
 	private Time totalActiveDuration = new Time(0, Unit.SECONDS);
 	private Time totalIdleDuration = new Time(0, Unit.SECONDS);
 	private Time totalSleepingDuration = new Time(0, Unit.SECONDS);
-	private Time totalShutdownDuration = new Time(0, Unit.SECONDS);
 	
-	private int shutdownCount = 0;
 	private int sleepCount = 0;
 
 	public void addActiveDuration(Time increment) {
@@ -46,11 +44,6 @@ public class MachineAvailability {
 		sleepCount++;
 	}
 	
-	public void addShutdownDuration(Time increment) {
-		totalShutdownDuration = totalShutdownDuration.plus(increment);
-		shutdownCount++;
-	}
-	
 	public Time getTotalActiveDuration() {
 		return totalActiveDuration;
 	}
@@ -63,16 +56,8 @@ public class MachineAvailability {
 		return totalSleepingDuration;
 	}
 	
-	public Time getTotalShutdownDuration() {
-		return totalShutdownDuration;
-	}
-	
 	public int getSleepCount() {
 		return sleepCount;
-	}
-	
-	public int getShutdownCount() {
-		return shutdownCount;
 	}
 	
 }

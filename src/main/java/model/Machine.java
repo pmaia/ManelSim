@@ -72,6 +72,9 @@ public class Machine extends EventHandler {
 	private long fsActivityWhileIdleStartTime = -1;
 	private long fsActivityWhileIdleEndTime = -1;
 	
+	/*
+	 * FIXME timeBeforeSleep must be of type Time
+	 */
 	public Machine(PriorityQueue<Event> eventsGeneratedBySimulationQueue, String id, long timeBeforeSleep) {
 		
 		super(eventsGeneratedBySimulationQueue);
@@ -81,12 +84,13 @@ public class Machine extends EventHandler {
 		this.clients = new HashSet<FileSystemClient>();
 		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
 
-		currentStateName = UserIdlenessEvent.EVENT_NAME;
+		currentStateName = UserActivityEvent.EVENT_NAME;
 		/*
 		 * FIXME IMPORTANT: the time hardcoded below is the start of the simulation considering just the traces used to SBRC 2012.
 		 * This makes the simulator useless for other set of traces.
 		 */
-		currentStateStartTime = new Time(1318967209, Unit.SECONDS);
+//		currentStateStartTime = new Time(1318967209, Unit.SECONDS); FIXME 
+		currentStateStartTime = new Time(0, Unit.SECONDS);
 		supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
 		pendingFSActivityEvents = new ArrayList<FileSystemActivityEvent>();
 	}
@@ -149,7 +153,7 @@ public class Machine extends EventHandler {
 		 */
 		Time oneSecond = new Time(1, Unit.SECONDS);
 		Time now = fsActivity.getScheduledTime();
-		//DEBUG
+		//DEBUG FIXME what is this?
 		if(supposedCurrentStateEndTime.minus(now).asMicroseconds() < 0)
 			supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
 		//DEBUG

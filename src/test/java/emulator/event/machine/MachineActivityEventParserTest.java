@@ -16,12 +16,15 @@
 package emulator.event.machine;
 
 import static org.junit.Assert.assertEquals;
-import kernel.EventScheduler;
+
+import java.util.PriorityQueue;
+
+import kernel.Event;
 import model.Machine;
 
 import org.junit.Test;
 
-import emulator.event.machine.MachineActivityTraceEventSource;
+import emulator.FakeUserIdlenessTraceStream;
 
 
 /**
@@ -31,23 +34,23 @@ import emulator.event.machine.MachineActivityTraceEventSource;
  */
 public class MachineActivityEventParserTest {
 	
-//	@Test
-//	public void eventCountTest() {
-//		int expectedEventCount = 10;
-//		FakeUserIdlenessTraceStream fakeEventStream = 
-//			new FakeUserIdlenessTraceStream(expectedEventCount);
-//		
-//		EventScheduler scheduler = new EventScheduler();
-//		Machine machine = new Machine(scheduler, "machine", 30 * 60);
-//		
-//		MachineActivityEventParser eventParser = new MachineActivityEventParser(machine, fakeEventStream);
-//		
-//		int eventCount = 0;
-//		while(eventParser.getNextEvent() != null) {
-//			eventCount++;
-//		}
-//		
-//		assertEquals(expectedEventCount, eventCount);
-//	}
+	@Test
+	public void eventCountTest() {
+		int expectedEventCount = 10;
+		FakeUserIdlenessTraceStream fakeEventStream = 
+			new FakeUserIdlenessTraceStream(expectedEventCount);
+		
+		PriorityQueue<Event> eventsGeneratedBySimulationQueue = new PriorityQueue<Event>();
+		Machine machine = new Machine(eventsGeneratedBySimulationQueue, "machine", 30 * 60);
+		
+		MachineActivityTraceEventSource eventParser = new MachineActivityTraceEventSource(machine, fakeEventStream);
+		
+		int eventCount = 0;
+		while(eventParser.getNextEvent() != null) {
+			eventCount++;
+		}
+		
+		assertEquals(expectedEventCount, eventCount);
+	}
 	
 }

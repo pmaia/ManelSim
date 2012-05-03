@@ -32,6 +32,7 @@ public class FakeUserIdlenessTraceStream extends FakeTraceStream {
 	
 	private final Random random = new Random();
 	private long nextTimeStamp = System.currentTimeMillis();
+	private int count = 0; 
 
 	public FakeUserIdlenessTraceStream(int numberOfEvents) {
 		super(numberOfEvents);
@@ -43,6 +44,8 @@ public class FakeUserIdlenessTraceStream extends FakeTraceStream {
 		
 		long idlenessDuration = Math.abs(random.nextInt());
 		
+		traceLine.append((count % 2 == 0)?"idleness":"activity");
+		traceLine.append("\t");
 		traceLine.append(nextTimeStamp);
 		traceLine.append("\t");
 		traceLine.append(idlenessDuration);

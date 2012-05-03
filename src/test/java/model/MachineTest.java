@@ -15,7 +15,21 @@
  */
 package model;
 
-import model.Machine;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.PriorityQueue;
+
+import kernel.Event;
+import kernel.Time;
+import kernel.Time.Unit;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import emulator.event.machine.SleepEvent;
+import emulator.event.machine.UserIdlenessEvent;
 
 /**
  * A suite of tests to {@link Machine} class
@@ -24,129 +38,60 @@ import model.Machine;
  */
 public class MachineTest {
 	
-//	private Machine machine;
-//	private String machineId =  "id";
-//	private EventScheduler scheduler;
-//	private long timeBeforeSleep; 
-//	
-//	@Before
-//	public void setup() {
-//		timeBeforeSleep = 30 * 60;
-//		scheduler = new EventScheduler();
-//		machine = new Machine(scheduler, machineId, timeBeforeSleep);
-//		Aggregator.getInstance().reset();
-//	}
-//
-//	@Test
-//	public void handleUserIdlenessStartTest() {
-//		IdlenessEvent idlenessEvent = new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), 10);
-//		
-//		scheduler.schedule(idlenessEvent);
-//		scheduler.start();
-//		assertFalse(machine.isSleeping());
-//		assertEquals(0, scheduler.now().asMilliseconds());
-//		
-//		idlenessEvent = new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), timeBeforeSleep + 10);
-//		scheduler.schedule(idlenessEvent);
-//		scheduler.start();
-//		assertFalse(machine.isSleeping()); // because a WakeUp event is automatically scheduled
-//		assertEquals((timeBeforeSleep + 10) * 1000, scheduler.now().asMilliseconds()); // time advances because of the scheduled WakeUp event
-//		
-//		MachineAvailability machineAvailability = 
-//			Aggregator.getInstance().getMachineAvailability(machineId);
-//		
-//		assertEquals(timeBeforeSleep * 1000, machineAvailability.getTotalActiveDuration());
-//		assertEquals(10 * 1000, machineAvailability.getTotalSleepingDuration());
-//		assertEquals(2, machineAvailability.getTransitionsCount());
-//	}
-//	
-//	@Test
-//	public void handleSleepTest() {
-//		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
-//		
-//		scheduler.schedule(sleepEvent);
-//		scheduler.start();
-//		assertTrue(machine.isSleeping());
-//		assertEquals(0, scheduler.now().asMilliseconds());
-//		
-//		MachineAvailability machineAvailability = 
-//			Aggregator.getInstance().getMachineAvailability(machineId);
-//		
-//		assertEquals(0, machineAvailability.getTotalActiveDuration());
-//		assertEquals(0, machineAvailability.getTotalSleepingDuration());
-//		assertEquals(1, machineAvailability.getTransitionsCount());
-//	}
-//	
-//	@Test
-//	public void handleSleepTest2() {
-//		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
-//		SleepEvent sleepEvent2 = new SleepEvent(machine, new Time(10L, Unit.MILLISECONDS));
-//		
-//		scheduler.schedule(sleepEvent);
-//		scheduler.schedule(sleepEvent2);
-//		scheduler.start();
-//		assertTrue(machine.isSleeping());
-//		assertEquals(10, scheduler.now().asMilliseconds());
-//		
-//		MachineAvailability machineAvailability = 
-//			Aggregator.getInstance().getMachineAvailability(machineId);
-//		
-//		assertEquals(0, machineAvailability.getTotalActiveDuration()); //machine is sleeping since time 0
-//		assertEquals(0, machineAvailability.getTotalSleepingDuration()); //because there is no event after the first sleep to advance the time
-//		assertEquals(1, machineAvailability.getTransitionsCount());
-//	}
-//	
-//	@Test
-//	public void handleWakeUpTest() {
-//		SleepEvent sleepEvent = new SleepEvent(machine, new Time(0L, Unit.MILLISECONDS));
-//		WakeUpEvent wakeUpEvent = new WakeUpEvent(machine, new Time(10L, Unit.MILLISECONDS), false);
-//		
-//		scheduler.schedule(sleepEvent);
-//		scheduler.schedule(wakeUpEvent);
-//		scheduler.start();
-//		assertFalse(machine.isSleeping());
-//		assertEquals(10, scheduler.now().asMilliseconds());
-//		
-//		MachineAvailability machineAvailability = 
-//			Aggregator.getInstance().getMachineAvailability(machineId);
-//		
-//		assertEquals(0, machineAvailability.getTotalActiveDuration());
-//		assertEquals(10, machineAvailability.getTotalSleepingDuration());
-//		assertEquals(2, machineAvailability.getTransitionsCount());
-//	}
-//	
-//	@Test
-//	public void handleWakeUpTest2() {
-//		IdlenessEvent userIdlenessStart = 
-//			new IdlenessEvent(machine, new Time(0L, Unit.MILLISECONDS), timeBeforeSleep * 3);
-//		WakeUpEvent wakeUpEvent = 
-//			new WakeUpEvent(machine, new Time((timeBeforeSleep + 10) * 1000, Unit.MILLISECONDS), true);
-//		
-//		scheduler.schedule(userIdlenessStart);
-//		scheduler.schedule(wakeUpEvent);
-//		scheduler.start();
-//		assertFalse(machine.isSleeping());
-//		assertEquals(timeBeforeSleep * 3000, scheduler.now().asMilliseconds());
-//		
-//		MachineAvailability machineAvailability = 
-//			Aggregator.getInstance().getMachineAvailability(machineId);
-//		
-//		assertEquals(4, machineAvailability.getTransitionsCount());
-//		
-//		long expectedActiveDuration = 2 * timeBeforeSleep * 1000;
-//		assertEquals(expectedActiveDuration, machineAvailability.getTotalActiveDuration());
-//		
-//		long expectedSleepingDuration = timeBeforeSleep * 1000;
-//		assertEquals(expectedSleepingDuration, machineAvailability.getTotalSleepingDuration());
-//	}
-//	
-//	@Test
-//	public void testEquals() {
-//		Machine machine1 = new Machine(scheduler, "id1", timeBeforeSleep);
-//		Machine machine2 = new Machine(scheduler, "id2", timeBeforeSleep);
-//		
-//		assertFalse(machine1.equals(machine2));
-//		assertTrue(machine1.equals(machine1));
-//		assertTrue(machine1.hashCode() != machine2.hashCode());
-//	}
+	private Machine machine;
+	private String machineId =  "id";
+	private PriorityQueue<Event> eventsGeneratedBySimulationQueue;
+	private long timeBeforeSleep; 
+	
+	@Before
+	public void setup() {
+		timeBeforeSleep = 30 * 60;
+		eventsGeneratedBySimulationQueue = new PriorityQueue<Event>();
+		machine = new Machine(eventsGeneratedBySimulationQueue, machineId, timeBeforeSleep);
+		Aggregator.getInstance().reset();
+	}
+
+	@Test
+	public void handleUserIdlenessStartTest() {
+		UserIdlenessEvent idlenessEvent = new UserIdlenessEvent(machine, new Time(0L, Unit.SECONDS), 
+				new Time(timeBeforeSleep - 10, Unit.SECONDS));
+		
+		machine.handleEvent(idlenessEvent);
+		assertTrue(machine.isAwake()); //it should be awake...
+		assertEquals(0, eventsGeneratedBySimulationQueue.size()); //and no event should be triggered
+	}
+	
+	@Test
+	public void handleUserIdlenessStartTest1() {
+		UserIdlenessEvent idlenessEvent = new UserIdlenessEvent(machine, new Time(0L, Unit.SECONDS), 
+				new Time(timeBeforeSleep + 10, Unit.SECONDS));
+		machine.handleEvent(idlenessEvent);
+		assertTrue(machine.isAwake()); // it must be awake...
+		assertEquals(1, eventsGeneratedBySimulationQueue.size()); // ...and a SleepEvent be triggered
+		
+		Event scheduledEvent = eventsGeneratedBySimulationQueue.poll();
+		assertTrue(scheduledEvent instanceof SleepEvent);
+		machine.handleEvent(scheduledEvent);
+		assertFalse(machine.isAwake());
+		assertEquals(0, eventsGeneratedBySimulationQueue.size());
+		
+		MachineAvailability machineAvailability = 
+			Aggregator.getInstance().getMachineAvailability(machineId);
+		
+		assertEquals(new Time(timeBeforeSleep, Unit.SECONDS), machineAvailability.getTotalIdleDuration());
+		// because the time spent sleeping is just counted when some state transition occurs, then...
+		assertEquals(new Time(0, Unit.SECONDS), machineAvailability.getTotalSleepingDuration());
+		// and
+		assertEquals(0, machineAvailability.getSleepCount());
+	}
+	
+	@Test
+	public void testEquals() {
+		Machine machine1 = new Machine(eventsGeneratedBySimulationQueue, "id1", timeBeforeSleep);
+		Machine machine2 = new Machine(eventsGeneratedBySimulationQueue, "id2", timeBeforeSleep);
+		
+		assertFalse(machine1.equals(machine2));
+		assertTrue(machine1.equals(machine1));
+		assertTrue(machine1.hashCode() != machine2.hashCode());
+	}
 }

@@ -22,16 +22,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.PriorityQueue;
 
 import kernel.Event;
-import kernel.EventScheduler;
 import model.FileSystemClient;
 import model.Machine;
 
 import org.junit.Test;
 
-import emulator.EventSource;
-import emulator.MultipleEventSource;
 import emulator.event.filesystem.FileSystemTraceEventSource;
 
 /**
@@ -41,77 +39,77 @@ import emulator.event.filesystem.FileSystemTraceEventSource;
  */
 public class MultipleEventParserTest {
 	
-//	@Test
-//	public void eventOrderingTest() {
-//		EventSource [] parsers = new EventSource[3];
-//		
-//		InputStream trace1 = new FakeFileSystemTraceStream(0);
-//		InputStream trace2 = new FakeFileSystemTraceStream(60);
-//		InputStream trace3 = new FakeFileSystemTraceStream(30);
-//		
-//		EventScheduler scheduler = new EventScheduler();
-//		
-//		Machine machine1 = new Machine(scheduler, "cherne", 30 * 60);
-//		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
-//		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
-//		
-//		FileSystemClient client1 = new FileSystemClient(scheduler, machine1, null);
-//		FileSystemClient client2 = new FileSystemClient(scheduler, machine2, null);
-//		FileSystemClient client3 = new FileSystemClient(scheduler, machine3, null);
-//		
-//		parsers[0] = new FileSystemEventParser(client1, trace1);
-//		parsers[1] = new FileSystemEventParser(client2, trace2);
-//		parsers[2] = new FileSystemEventParser(client3, trace3);
-//		
-//		EventSource multipleSourceParser = new MultipleEventSource(parsers);
-//		
-//		Event currentEvent = multipleSourceParser.getNextEvent();
-//		Event nextEvent = null;
-//		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
-//			assertTrue(currentEvent.getScheduledTime().compareTo(nextEvent.getScheduledTime()) <= 0);
-//			currentEvent = nextEvent;
-//		}
-//	}
-//	
-//	@Test
-//	public void eventsDeliveredCountTest() {
-//		EventSource [] parsers = new EventSource[3];
-//		
-//		InputStream trace1 = new FakeFileSystemTraceStream(50);
-//		InputStream trace2 = new FakeFileSystemTraceStream(1000);
-//		InputStream trace3 = new FakeFileSystemTraceStream(50);
-//		
-//		EventScheduler scheduler = new EventScheduler();
-//		
-//		Machine machine1 = new Machine(scheduler, "cherne", 30 * 60);
-//		Machine machine2 = new Machine(scheduler, "palhaco", 30 * 60);
-//		Machine machine3 = new Machine(scheduler, "abelhinha", 30 * 60);
-//		
-//		FileSystemClient client1 = new FileSystemClient(scheduler, machine1, null);
-//		FileSystemClient client2 = new FileSystemClient(scheduler, machine2, null);
-//		FileSystemClient client3 = new FileSystemClient(scheduler, machine3, null);
-//		
-//		parsers[0] = new FileSystemEventParser(client1, trace1);
-//		parsers[1] = new FileSystemEventParser(client2, trace2);
-//		parsers[2] = new FileSystemEventParser(client3, trace3);
-//		
-//		EventSource multipleSourceParser = new MultipleEventSource(parsers);
-//		
-//		int eventCount = 0;
-//		while(multipleSourceParser.getNextEvent() != null) {
-//			eventCount++;
-//		}
-//		
-//		assertEquals(1100, eventCount);
-//	}
-//	 
-//	public static void main(String[] args) throws IOException {
-//		FakeFileSystemTraceStream res = new FakeFileSystemTraceStream(1000000);
-//		BufferedReader br = new BufferedReader(new InputStreamReader(res));
-//		String line;
-//		while((line = br.readLine()) != null) {
-//			System.out.println(line);
-//		}
-//	}
+	@Test
+	public void eventOrderingTest() {
+		EventSource [] eventSources = new EventSource[3];
+		
+		InputStream trace1 = new FakeFileSystemTraceStream(0);
+		InputStream trace2 = new FakeFileSystemTraceStream(60);
+		InputStream trace3 = new FakeFileSystemTraceStream(30);
+		
+		PriorityQueue<Event> eventsGeneratedBySimulationQueue = new PriorityQueue<Event>();
+		
+		Machine machine1 = new Machine(eventsGeneratedBySimulationQueue, "cherne", 30 * 60);
+		Machine machine2 = new Machine(eventsGeneratedBySimulationQueue, "palhaco", 30 * 60);
+		Machine machine3 = new Machine(eventsGeneratedBySimulationQueue, "abelhinha", 30 * 60);
+		
+		FileSystemClient client1 = new FileSystemClient(eventsGeneratedBySimulationQueue, machine1, null, false);
+		FileSystemClient client2 = new FileSystemClient(eventsGeneratedBySimulationQueue, machine2, null, false);
+		FileSystemClient client3 = new FileSystemClient(eventsGeneratedBySimulationQueue, machine3, null, false);
+		
+		eventSources[0] = new FileSystemTraceEventSource(client1, trace1);
+		eventSources[1] = new FileSystemTraceEventSource(client2, trace2);
+		eventSources[2] = new FileSystemTraceEventSource(client3, trace3);
+		
+		EventSource multipleSourceParser = new MultipleEventSource(eventSources, eventsGeneratedBySimulationQueue);
+		
+		Event currentEvent = multipleSourceParser.getNextEvent();
+		Event nextEvent = null;
+		while((nextEvent = multipleSourceParser.getNextEvent()) != null) {
+			assertTrue(currentEvent.getScheduledTime().compareTo(nextEvent.getScheduledTime()) <= 0);
+			currentEvent = nextEvent;
+		}
+	}
+	
+	@Test
+	public void eventsDeliveredCountTest() {
+		EventSource [] parsers = new EventSource[3];
+		
+		InputStream trace1 = new FakeFileSystemTraceStream(50);
+		InputStream trace2 = new FakeFileSystemTraceStream(1000);
+		InputStream trace3 = new FakeFileSystemTraceStream(50);
+		
+		PriorityQueue<Event> eventsGeneratedBySimulationQueue = new PriorityQueue<Event>();
+		
+		Machine machine1 = new Machine(eventsGeneratedBySimulationQueue, "cherne", 30 * 60);
+		Machine machine2 = new Machine(eventsGeneratedBySimulationQueue, "palhaco", 30 * 60);
+		Machine machine3 = new Machine(eventsGeneratedBySimulationQueue, "abelhinha", 30 * 60);
+		
+		FileSystemClient client1 = new FileSystemClient(eventsGeneratedBySimulationQueue, machine1, null, false);
+		FileSystemClient client2 = new FileSystemClient(eventsGeneratedBySimulationQueue, machine2, null, false);
+		FileSystemClient client3 = new FileSystemClient(eventsGeneratedBySimulationQueue, machine3, null, false);
+		
+		parsers[0] = new FileSystemTraceEventSource(client1, trace1);
+		parsers[1] = new FileSystemTraceEventSource(client2, trace2);
+		parsers[2] = new FileSystemTraceEventSource(client3, trace3);
+		
+		EventSource multipleSourceParser = new MultipleEventSource(parsers, eventsGeneratedBySimulationQueue);
+		
+		int eventCount = 0;
+		while(multipleSourceParser.getNextEvent() != null) {
+			eventCount++;
+		}
+		
+		assertEquals(1100, eventCount);
+	}
+	 
+	public static void main(String[] args) throws IOException {
+		FakeFileSystemTraceStream res = new FakeFileSystemTraceStream(1000000);
+		BufferedReader br = new BufferedReader(new InputStreamReader(res));
+		String line;
+		while((line = br.readLine()) != null) {
+			System.out.println(line);
+		}
+	}
 	
 }
