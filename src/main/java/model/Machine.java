@@ -6,15 +6,12 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import model.data.DataServer;
-
 import kernel.Event;
 import kernel.EventHandler;
 import kernel.Time;
 import kernel.Time.Unit;
-
+import model.data.DataServer;
 import emulator.event.machine.FileSystemActivityEvent;
-import emulator.event.machine.ShutdownEvent;
 import emulator.event.machine.SleepEvent;
 import emulator.event.machine.UserActivityEvent;
 import emulator.event.machine.UserIdlenessEvent;
@@ -86,7 +83,7 @@ public class Machine extends EventHandler {
 		this.clients = new HashSet<FileSystemClient>();
 		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
 
-		currentStateName = ShutdownEvent.EVENT_NAME;
+		currentStateName = UserIdlenessEvent.EVENT_NAME;
 		/*
 		 * FIXME IMPORTANT: the time hardcoded below is the start of the simulation considering just the traces used to SBRC 2012.
 		 * This makes the simulator useless for other set of traces.
@@ -97,7 +94,7 @@ public class Machine extends EventHandler {
 	}
 	
 	public boolean isAwake() {
-		return !(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME));
+		return !(currentStateName.equals(SleepEvent.EVENT_NAME));
 	}
 	
 	public String getId() {
@@ -140,8 +137,6 @@ public class Machine extends EventHandler {
 			handleUserActivity((UserActivityEvent) event);
 		} else if(event instanceof SleepEvent) {
 			handleSleep((SleepEvent) event);
-		} else if(event instanceof ShutdownEvent) {
-			handleShutdown((ShutdownEvent) event);
 		} else if(event instanceof FileSystemActivityEvent) {
 			handleFileSystemActivityEvent((FileSystemActivityEvent) event);
 		} else {
@@ -161,18 +156,14 @@ public class Machine extends EventHandler {
 			supposedCurrentStateEndTime = Time.END_OF_THE_WORLD;
 		//DEBUG
 		
-		if(currentStateName.equals(ShutdownEvent.EVENT_NAME) || currentStateName.equals(SleepEvent.EVENT_NAME)) {
+		if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
 			if(!fsActivity.wakeOnLan()) {
 				pendingFSActivityEvents.add(fsActivity);
 			} else {
 				UserIdlenessEvent idlenessEvent = null;
 				
-				if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
-					idlenessEvent = buildUserIdlenessEventToWakeUp(now, SHUTDOWN_TRANSITION_DURATION);
-				} else {
-					idlenessEvent = buildUserIdlenessEventToWakeUp(now, SLEEP_TRANSITION_DURATION);
-				}
-				
+				idlenessEvent = buildUserIdlenessEventToWakeUp(now, SLEEP_TRANSITION_DURATION);
+								
 				Time fsActivityEventStartTime = supposedCurrentStateEndTime.plus(oneSecond);
 				if(idlenessEvent != null) {
 					send(idlenessEvent);
@@ -235,32 +226,6 @@ public class Machine extends EventHandler {
 		return idlenessEvent;
 	}
 
-	private void handleShutdown(ShutdownEvent event) {
-		Aggregator aggregator = Aggregator.getInstance();
-		Time now = event.getScheduledTime();		
-		
-		Time currentStateActualDuration = now.minus(currentStateStartTime);
-		
-		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
-			throw new IllegalStateException(String.format("The machine %s was already turned off.", getId()));
-			
-		} else if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
-			System.err.println(String.format("WARNING: A shutdown during a sleep time has occurred in machine %s at " +
-					"timestamp %d. We will keep the machine sleeping.", getId(), now.asMicroseconds()));
-			
-		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
-			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
-			
-		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {
-			aggregateIdlenessPeriod(currentStateActualDuration);
-			
-		}
-		
-		currentStateName = ShutdownEvent.EVENT_NAME;
-		currentStateStartTime = now;
-		supposedCurrentStateEndTime = currentStateStartTime.plus(event.getDuration());
-	}
-	
 	private void aggregateIdlenessPeriod(Time idlenessDuration) {
 		Aggregator aggregator = Aggregator.getInstance();
 		
@@ -281,10 +246,7 @@ public class Machine extends EventHandler {
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
-		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
-			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);
-
-		} else if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
+		if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
 			aggregator.aggregateSleepingDuration(getId(), currentStateActualDuration);
 			
 		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
@@ -309,10 +271,7 @@ public class Machine extends EventHandler {
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
-		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
-			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);
-
-		} else if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
+		if(currentStateName.equals(SleepEvent.EVENT_NAME)) {
 			aggregator.aggregateSleepingDuration(getId(), currentStateActualDuration);
 			
 		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
@@ -350,10 +309,7 @@ public class Machine extends EventHandler {
 		
 		Time currentStateActualDuration = now.minus(currentStateStartTime);
 		
-		if(currentStateName.equals(ShutdownEvent.EVENT_NAME)) {
-			aggregator.aggregateShutdownDuration(getId(), currentStateActualDuration);
-
-		} else if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
+		if(currentStateName.equals(UserActivityEvent.EVENT_NAME)) {
 			aggregator.aggregateActiveDuration(getId(), currentStateActualDuration);
 			
 		} else if(currentStateName.equals(UserIdlenessEvent.EVENT_NAME)) {

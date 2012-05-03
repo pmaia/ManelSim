@@ -69,8 +69,6 @@ public class MachineActivityTraceEventSource implements EventSource {
 				
 				if(eventType.equals("idleness")) {
 					event = new UserIdlenessEvent(machine, aScheduledTime, duration);
-				} else if(eventType.equals("shutdown")) {
-					event = new ShutdownEvent(machine, aScheduledTime, duration);
 				} else if(eventType.equals("activity")) {
 					event = new UserActivityEvent(machine, aScheduledTime, duration);
 				} else {
