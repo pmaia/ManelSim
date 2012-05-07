@@ -16,9 +16,9 @@ def main():
 
 			ts_diff = (timestamp - prev_timestamp) / 1000000
 			if ts_diff < -10:
-				print " ".join(["ERROR", str(ts_diff * -1), str(line_count), line])
+				print " ".join(["ERROR", str(ts_diff * -1), str(line_count), line.strip()])
 			elif ts_diff < 0:
-				print " ".join(["WARNING", str(ts_diff * -1), str(line_count), line])
+				print " ".join(["WARNING", str(ts_diff * -1), str(line_count), line.strip()])
 
 			prev_timestamp = timestamp
 
