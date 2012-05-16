@@ -25,14 +25,18 @@ import core.Time;
  */
 public class UpdateReplicationGroup extends Event {
 	
-	public static final String EVENT_NAME = "update-replication-group";
-	
 	private final String filePath;
+	private final MetadataServer metadataServer;
 
-	public UpdateReplicationGroup(MetadataServer aHandler, Time aScheduledTime, Time duration, String filePath) {
-		super(EVENT_NAME, aHandler, aScheduledTime, duration);
+	public UpdateReplicationGroup(MetadataServer metadataServer, Time aScheduledTime, String filePath) {
+		super(aScheduledTime);
 		
+		this.metadataServer = metadataServer;
 		this.filePath = filePath;
+	}
+	
+	public void process() {
+		//TODO implement
 	}
 	
 	public String getFilePath() {
@@ -41,7 +45,7 @@ public class UpdateReplicationGroup extends Event {
 	
 	@Override
 	public String toString() {
-		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath;
+		return metadataServer + "\tupdate replication group\t" + getScheduledTime() + "\t" + filePath;
 	}
 
 }

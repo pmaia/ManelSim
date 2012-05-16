@@ -21,24 +21,26 @@ package simulation.beefs.event.filesystem;
 import simulation.beefs.FileSystemClient;
 import core.Event;
 import core.Time;
-import core.Time.Unit;
 
 /**
  * 
+ * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class CloseEvent extends Event {
 
-	public static final String EVENT_NAME = "close";
-	
 	private final String filePath;
+	private final FileSystemClient client;
 	
-	private static final Time CLOSE_DURATION = new Time(0, Unit.SECONDS);
-
-	public CloseEvent(FileSystemClient handler, Time scheduledTime, String filePath) {
-		super(EVENT_NAME, handler, scheduledTime, CLOSE_DURATION);
+	public CloseEvent(FileSystemClient client, Time scheduledTime, String filePath) {
+		super(scheduledTime);
 		
+		this.client = client;
 		this.filePath = filePath;
+	}
+	
+	public void process() {
+		client.getMetadataServer().closePath(filePath, getScheduledTime());
 	}
 	
 	public String getFilePath() {
@@ -47,7 +49,7 @@ public class CloseEvent extends Event {
 	
 	@Override
 	public String toString() {
-		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + filePath;
+		return client + "\tclose\t" + getScheduledTime() + "\t" + filePath;
 	}
 
 }

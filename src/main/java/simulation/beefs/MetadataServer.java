@@ -10,7 +10,6 @@ import simulation.beefs.event.filesystem.DeleteReplicationGroup;
 import simulation.beefs.event.filesystem.UpdateReplicationGroup;
 import simulation.beefs.event.machine.FileSystemActivityEvent;
 import simulation.beefs.placement.DataPlacementAlgorithm;
-
 import core.Event;
 import core.EventHandler;
 import core.Time;
@@ -40,7 +39,7 @@ public class MetadataServer extends EventHandler {
 
 		if (dataPlacementAlgorithm == null)
 			throw new IllegalArgumentException();
-		if(replicationLevel < 1)
+		if(replicationLevel < 1) //FIXME replication level 0 must be possible
 			throw new IllegalArgumentException();
 		if(timeBeforeDeleteData < 0)
 			throw new IllegalArgumentException();
@@ -69,14 +68,13 @@ public class MetadataServer extends EventHandler {
 		return replicationGroup;
 	}
 	
-	public void closePath(FileSystemClient client, String filePath, Time now) {
+	public void closePath(String filePath, Time now) {
 		ReplicationGroup replicationGroup = openFiles.remove(filePath);
 		
 		if(replicationGroup != null && replicationGroup.isChanged()) {
 			Time time = now.plus(timeBeforeUpdateReplicas);
-			Time duration = new Time((int)(replicationGroup.getFileSize() / NETWORK_BANDWITH), 
-					Unit.MICROSECONDS);
-			send(new UpdateReplicationGroup(this, time, duration, filePath));
+			
+			send(new UpdateReplicationGroup(this, time, filePath));
 		}
 	}
 	

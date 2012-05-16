@@ -2,12 +2,10 @@ package simulation.beefs;
 
 import java.util.PriorityQueue;
 
-import simulation.beefs.event.filesystem.CloseEvent;
 import simulation.beefs.event.filesystem.ReadEvent;
 import simulation.beefs.event.filesystem.UnlinkEvent;
 import simulation.beefs.event.filesystem.WriteEvent;
 import simulation.beefs.event.machine.FileSystemActivityEvent;
-
 import core.Event;
 import core.EventHandler;
 import core.Time;
@@ -15,7 +13,6 @@ import core.Time;
 
 public class FileSystemClient extends EventHandler {
 
-	private final String id;
 	private final MetadataServer metadataServer;
 	private final Machine machine;
 	private final boolean wakeOnLan;
@@ -28,20 +25,21 @@ public class FileSystemClient extends EventHandler {
 		this.metadataServer = metadataServer;
 		this.machine = machine;
 		this.wakeOnLan = wakeOnLan;
-		this.id = "client" + machine.bindClient(this) + machine;
+	}
+	
+	public MetadataServer getMetadataServer() {
+		return metadataServer;
 	}
 
 	@Override
 	public void handleEvent(Event anEvent) {
 
-		String anEventName = anEvent.getName();
+		String anEventName = null;
 
 		if (anEventName.equals(ReadEvent.EVENT_NAME)) {
 			handleRead((ReadEvent) anEvent);
 		} else if (anEventName.equals(WriteEvent.EVENT_NAME)) {
 			handleWrite((WriteEvent) anEvent);
-		} else if(anEventName.equals(CloseEvent.EVENT_NAME)) {
-			handleClose((CloseEvent) anEvent);
 		} else if(anEventName.equals(UnlinkEvent.EVENT_NAME)) {
 			handleUnlink((UnlinkEvent) anEvent);
 		} else {
@@ -85,12 +83,6 @@ public class FileSystemClient extends EventHandler {
 		send(fsActivity);
 	}
 	
-	private void handleClose(CloseEvent closeEvent) {
-		String filePath = closeEvent.getFilePath();
-		
-		metadataServer.closePath(this, filePath, closeEvent.getScheduledTime());		
-	}
-	
 	private void handleUnlink(UnlinkEvent unlinkEvent) {
 		String filePath = unlinkEvent.getFilePath();
 		
@@ -101,46 +93,12 @@ public class FileSystemClient extends EventHandler {
 		return machine;
 	}
 
-	public String getId() {
-		return id;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public String toString() {
-		return id;
+		return "Client deployed on " + machine.getId();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FileSystemClient other = (FileSystemClient) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
 }

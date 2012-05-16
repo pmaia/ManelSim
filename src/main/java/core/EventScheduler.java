@@ -58,7 +58,7 @@ public final class EventScheduler {
 	}
 
 	private void processEvent(Event nextEvent) {
-		nextEvent.getHandler().handleEvent(nextEvent); //FIXME what a bad smell. Maybe nextEvent.process() would be better
+		nextEvent.process();
 	}
 
 	public Time now() {

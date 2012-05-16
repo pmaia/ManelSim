@@ -11,7 +11,6 @@ import simulation.beefs.event.machine.SleepEvent;
 import simulation.beefs.event.machine.UserActivityEvent;
 import simulation.beefs.event.machine.UserIdlenessEvent;
 import simulation.result.Aggregator;
-
 import core.Event;
 import core.EventHandler;
 import core.Time;
@@ -39,6 +38,12 @@ public class Machine extends EventHandler {
 		
 	private final Set<DataServer> deployedDataServers;
 	private final Set<FileSystemClient> clients;
+	
+	public enum State {
+		IDLE,
+		ACTIVE,
+		SLEEPING
+	}
 	
 	/**
 	 * The amount of time this machine must wait idle before sleep
@@ -77,14 +82,14 @@ public class Machine extends EventHandler {
 	/*
 	 * FIXME timeBeforeSleep must be of type Time
 	 */
-	public Machine(PriorityQueue<Event> eventsGeneratedBySimulationQueue, String id, long timeBeforeSleep) {
+	public Machine(PriorityQueue<Event> eventsGeneratedBySimulationQueue, String id, Time timeBeforeSleep) {
 		
 		super(eventsGeneratedBySimulationQueue);
 		
 		this.id = id;
 		this.deployedDataServers = new HashSet<DataServer>();
 		this.clients = new HashSet<FileSystemClient>();
-		this.timeBeforeSleep = new Time(timeBeforeSleep, Unit.SECONDS);
+		this.timeBeforeSleep = timeBeforeSleep;
 
 		currentStateName = UserActivityEvent.EVENT_NAME;
 		/*
@@ -107,14 +112,6 @@ public class Machine extends EventHandler {
 
 	public Set<DataServer> getDeployedDataServers() {
 		return deployedDataServers;
-	}
-
-	public Set<FileSystemClient> getDeployedClients() {
-		return clients;
-	}
-
-	public boolean bindClient(FileSystemClient newClient) {
-		return clients.add(newClient);
 	}
 
 	public boolean deploy(DataServer newDataServer) {

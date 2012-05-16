@@ -5,7 +5,7 @@ public class DataServer {
 
 	private final String id;
 	private final Machine machine;
-
+	
 	public DataServer(Machine machine) {
 		this.machine = machine;
 		this.id = "ds" + machine.deploy(this) + machine;

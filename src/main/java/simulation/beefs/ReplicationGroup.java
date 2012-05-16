@@ -47,7 +47,7 @@ public class ReplicationGroup {
 		return new HashSet<DataServer>(secondaries);
 	}
 	
-	public void setChanged(boolean changed) {
+	public void setChanged(boolean changed) { //FIXME eu realmente preciso do boolean? alguem seta false?
 		this.changed = changed;
 	}
 	
