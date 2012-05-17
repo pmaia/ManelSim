@@ -1,27 +1,20 @@
 package simulation.beefs;
 
-import java.util.PriorityQueue;
-
 import simulation.beefs.event.filesystem.ReadEvent;
 import simulation.beefs.event.filesystem.UnlinkEvent;
 import simulation.beefs.event.filesystem.WriteEvent;
 import simulation.beefs.event.machine.FileSystemActivityEvent;
 import core.Event;
-import core.EventHandler;
 import core.Time;
 
 
-public class FileSystemClient extends EventHandler {
+public class FileSystemClient {
 
 	private final MetadataServer metadataServer;
 	private final Machine machine;
 	private final boolean wakeOnLan;
 
-	public FileSystemClient(PriorityQueue<Event> eventsGeneratedBySimulationQueue,
-			Machine machine, MetadataServer metadataServer, boolean wakeOnLan) {
-
-		super(eventsGeneratedBySimulationQueue);
-
+	public FileSystemClient(Machine machine, MetadataServer metadataServer, boolean wakeOnLan) {
 		this.metadataServer = metadataServer;
 		this.machine = machine;
 		this.wakeOnLan = wakeOnLan;

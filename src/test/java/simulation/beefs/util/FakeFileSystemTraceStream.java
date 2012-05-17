@@ -19,7 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Random;
 
-import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
+import simulation.beefs.event.filesystem.source.FileSystemTraceEventSource;
 
 
 /**

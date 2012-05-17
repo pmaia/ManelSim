@@ -15,36 +15,18 @@
  */
 package simulation.beefs.event.filesystem;
 
+import org.junit.Test;
+
 import simulation.beefs.MetadataServer;
-import core.Event;
-import core.Time;
 
 /**
- *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class DeleteReplicationGroup extends Event {
+public class DeleteReplicationGroupTest {
 	
-	private final String filePath;
-	private final MetadataServer metadataServer; 
-	
-	public DeleteReplicationGroup(MetadataServer metadataServer, Time aScheduledTime, String filePath) {
-		super(aScheduledTime);
-		this.metadataServer = metadataServer;
-		this.filePath = filePath;
-	}
-	
-	public void process() {
-		throw new UnsupportedOperationException();
-	}
-	
-	public String getFilePath() { 
-		return this.filePath;
-	}
-	
-	@Override
-	public String toString() {
-		return metadataServer + "\tdelete-replication-group\t" + getScheduledTime() + "\t" + filePath;
+	@Test
+	public void deleteReplicationGroupTest() {
+		MetadataServer metadataServer = new MetadataServer();
 	}
 
 }

@@ -3,34 +3,45 @@ package core;
 import core.Time.Unit;
 
 /**
- * TODO make doc
- * 
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
- * @author thiago - thiago@lsd.ufcg.edu.br
  */
 public final class EventScheduler {
 
-	private Time now = new Time(0L, Unit.MILLISECONDS);
-	private Time theEmulationEnd;
-	private EventSource eventSource;
+	private static Time emulationStart = null;
+	private static Time emulationEnd = null;
+	private static EventSourceMultiplexer eventSourceMultiplexer = null;
+	private static long processCount = 0;
+	private static Time now = new Time(0L, Unit.MILLISECONDS);
 
-	public EventScheduler(EventSource eventSource) {
-		this(null, eventSource);
+	private EventScheduler() { }
+	
+	public static void reset() {
+		emulationStart = null;
+		emulationEnd = null;
+		eventSourceMultiplexer = null;
+		now = new Time(0L, Unit.MILLISECONDS);
 	}
-
-	/*
-	 * FIXME I think it would be good to have emulation start and end times
-	 */
-	public EventScheduler(Time emulationEnd, EventSource eventSource) {
-		theEmulationEnd = emulationEnd;
-		this.eventSource = eventSource;
+	
+	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource) {
+		EventScheduler.emulationStart = emulationStart;
+		EventScheduler.emulationEnd = emulationEnd;
+		EventScheduler.eventSourceMultiplexer = eventSource;
 	}
-
-	public void start() {
+	
+	private static boolean isConfigured() {
+		return !(emulationStart == null || emulationEnd == null || eventSourceMultiplexer == null);
+	}
+	
+	public static void start() {
+		
+		if(!isConfigured()) {
+			throw new IllegalStateException("EventScheduler is not configured. " +
+					"Are you sure you called EventScheduler.setup()?");
+		}
 
 		Event nextEvent;
 		
-		while ((nextEvent = eventSource.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
+		while ((nextEvent = eventSourceMultiplexer.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
 			Time eventTime = nextEvent.getScheduledTime();
 
 			if (eventTime.isEarlierThan(now())) {
@@ -41,27 +52,43 @@ public final class EventScheduler {
 			}
 
 			if (isEarlierThanEmulationEnd(eventTime)) {
-				now = eventTime;
-				processEvent(nextEvent);
+				if(isLaterThanEmulationStart(eventTime)) {
+					now = eventTime;
+					processEvent(nextEvent);
+					processCount++;
+				}
 			} else {
-				now = theEmulationEnd;
+				now = emulationEnd;
 			}
 		}
 
 	}
 
-	/* FIXME do I really need this method? If, by default I set theEmulationEnd = Time.THE_END_OF_THE_WORLD everything 
-	 * would work without this method, right?  
-	 */
-	private boolean isEarlierThanEmulationEnd(Time time) {
-		return (theEmulationEnd != null) ? time.isEarlierThan(theEmulationEnd) : true;
+	private static boolean isLaterThanEmulationStart(Time eventTime) {
+		return !eventTime.isEarlierThan(emulationStart);
 	}
 
-	private void processEvent(Event nextEvent) {
+	private static boolean isEarlierThanEmulationEnd(Time eventTime) {
+		return eventTime.isEarlierThan(emulationEnd);
+	}
+
+	private static void processEvent(Event nextEvent) {
 		nextEvent.process();
 	}
+	
+	public static void schedule(Event event) {
+		eventSourceMultiplexer.addNewEvent(event);
+	}
+	
+	/**
+	 * 
+	 * @return the number of {@link Event}s processed.
+	 */
+	public static long processCount() {
+		return processCount;
+	}
 
-	public Time now() {
+	public static Time now() {
 		return now;
 	}
 

@@ -29,12 +29,12 @@ import org.junit.Test;
 
 import simulation.beefs.FileSystemClient;
 import simulation.beefs.Machine;
-import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
+import simulation.beefs.event.filesystem.source.FileSystemTraceEventSource;
 import simulation.beefs.util.FakeFileSystemTraceStream;
 
 import core.Event;
 import core.EventSource;
-import core.MultipleEventSource;
+import core.EventSourceMultiplexer;
 
 
 /**
@@ -66,7 +66,7 @@ public class MultipleEventParserTest {
 		eventSources[1] = new FileSystemTraceEventSource(client2, trace2);
 		eventSources[2] = new FileSystemTraceEventSource(client3, trace3);
 		
-		EventSource multipleSourceParser = new MultipleEventSource(eventSources, eventsGeneratedBySimulationQueue);
+		EventSource multipleSourceParser = new EventSourceMultiplexer(eventSources, eventsGeneratedBySimulationQueue);
 		
 		Event currentEvent = multipleSourceParser.getNextEvent();
 		Event nextEvent = null;
@@ -98,7 +98,7 @@ public class MultipleEventParserTest {
 		parsers[1] = new FileSystemTraceEventSource(client2, trace2);
 		parsers[2] = new FileSystemTraceEventSource(client3, trace3);
 		
-		EventSource multipleSourceParser = new MultipleEventSource(parsers, eventsGeneratedBySimulationQueue);
+		EventSource multipleSourceParser = new EventSourceMultiplexer(parsers, eventsGeneratedBySimulationQueue);
 		
 		int eventCount = 0;
 		while(multipleSourceParser.getNextEvent() != null) {

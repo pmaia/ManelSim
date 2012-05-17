@@ -4,21 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 
 import simulation.beefs.event.filesystem.DeleteReplicationGroup;
 import simulation.beefs.event.filesystem.UpdateReplicationGroup;
 import simulation.beefs.event.machine.FileSystemActivityEvent;
 import simulation.beefs.placement.DataPlacementAlgorithm;
-import core.Event;
-import core.EventHandler;
+import core.EventScheduler;
 import core.Time;
 import core.Time.Unit;
 
 
-public class MetadataServer extends EventHandler {
-	
-	private static final double NETWORK_BANDWITH = 13.1072; // 13.1072 B/us == 100 Mbits/s 
+public class MetadataServer {
 	
 	private final DataPlacementAlgorithm dataPlacement;
 	private final Time timeBeforeDeleteData;
@@ -31,12 +27,9 @@ public class MetadataServer extends EventHandler {
 	private final int replicationLevel;
 	private final boolean wakeOnLan;
 
-	public MetadataServer(PriorityQueue<Event> eventsGeneratedBySimulationQueue, 
-			DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
+	public MetadataServer(DataPlacementAlgorithm dataPlacementAlgorithm, int replicationLevel, 
 			long timeBeforeDeleteData, long timeBeforeUpdateReplicas, boolean wakeOnLan) {
 		
-		super(eventsGeneratedBySimulationQueue);
-
 		if (dataPlacementAlgorithm == null)
 			throw new IllegalArgumentException();
 		if(replicationLevel < 1) //FIXME replication level 0 must be possible
@@ -74,7 +67,7 @@ public class MetadataServer extends EventHandler {
 		if(replicationGroup != null && replicationGroup.isChanged()) {
 			Time time = now.plus(timeBeforeUpdateReplicas);
 			
-			send(new UpdateReplicationGroup(this, time, filePath));
+			EventScheduler.schedule(new UpdateReplicationGroup(this, time, filePath));
 		}
 	}
 	
@@ -84,7 +77,7 @@ public class MetadataServer extends EventHandler {
 		if(replicationGroup != null) {
 			toDelete.put(filePath, replicationGroup);
 			Time time = now.plus(timeBeforeDeleteData);
-			send(new DeleteReplicationGroup(this, time, filePath));
+			EventScheduler.schedule(new DeleteReplicationGroup(this, time, filePath));
 		}
 		
 	}
@@ -103,20 +96,6 @@ public class MetadataServer extends EventHandler {
 		return replicationGroup;
 	}
 
-	@Override
-	public void handleEvent(Event anEvent) {
-		String anEventName = anEvent.getName();
-
-		if (anEventName.equals(DeleteReplicationGroup.EVENT_NAME)) {
-			handleDeleteReplicationGroup((DeleteReplicationGroup) anEvent);
-		} else if (anEventName.equals(UpdateReplicationGroup.EVENT_NAME)) {
-			handleUpdateReplicationGroup((UpdateReplicationGroup) anEvent);
-		} else {
-			throw new RuntimeException("Unknown event: " + anEvent);
-		} 
-
-	}
-	
 	private void sendFSActivity(Machine machine, Time now, Time duration, boolean wakeOnLan) {
 		FileSystemActivityEvent fsActivity = 
 			new FileSystemActivityEvent(machine, now, duration, wakeOnLan);

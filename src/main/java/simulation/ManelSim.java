@@ -31,17 +31,18 @@ import simulation.beefs.DataServer;
 import simulation.beefs.FileSystemClient;
 import simulation.beefs.Machine;
 import simulation.beefs.MetadataServer;
-import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
+import simulation.beefs.event.filesystem.source.FileSystemTraceEventSource;
 import simulation.beefs.event.machine.MachineActivityTraceEventSource;
 import simulation.beefs.placement.CoLocatedWithSecondaryRandomPlacement;
 import simulation.beefs.placement.DataPlacementAlgorithm;
 import simulation.beefs.placement.RandomDataPlacementAlgorithm;
 import simulation.result.Aggregator;
-
 import core.Event;
 import core.EventScheduler;
 import core.EventSource;
-import core.MultipleEventSource;
+import core.EventSourceMultiplexer;
+import core.Time;
+import core.Time.Unit;
 
 
 /**
@@ -122,17 +123,17 @@ public class ManelSim {
 		Set<FileSystemClient> clients = 
 			createClients(eventsGeneratedBySimulationQueue, machines, metadataServer, wakeOnLan);
 
-		MultipleEventSource multipleEventSource = 
+		EventSourceMultiplexer multipleEventSource = 
 			createMultipleEventParser(clients, machines, tracesDir, eventsGeneratedBySimulationQueue);
 
-		new EventScheduler(multipleEventSource).start();
-
+		EventScheduler.setup(emulationStart, emulationEnd, multipleEventSource);
+		EventScheduler.start();
+		
 		System.out.println(Aggregator.getInstance().summarize());
 	}
 
-	private static MultipleEventSource createMultipleEventParser(
-			Set<FileSystemClient> clients, Set<Machine> machines, File tracesDir,
-			PriorityQueue<Event> eventsGeneratedBySimulationQueue) {
+	private static EventSourceMultiplexer createMultipleEventParser(Set<FileSystemClient> clients, 
+			Set<Machine> machines, File tracesDir) {
 
 		EventSource []  parsers = new EventSource[machines.size() + clients.size()];
 
@@ -154,7 +155,7 @@ public class ManelSim {
 			throw new IllegalStateException(e);
 		}
 		
-		return new MultipleEventSource(parsers, eventsGeneratedBySimulationQueue);
+		return new EventSourceMultiplexer(parsers);
 	}
 
 	private static DataPlacementAlgorithm createPlacementPolice(String police, Set<DataServer> dataServers) {
@@ -181,8 +182,7 @@ public class ManelSim {
 		return newClients;
 	}
 
-	private static Set<Machine> createMachines(PriorityQueue<Event> eventsGeneratedBySimulationQueue, 
-			File tracesDir, long timeBeforeSleep) {
+	private static Set<Machine> createMachines(File tracesDir, long timeBeforeSleep) {
 		Set<Machine> machines = new HashSet<Machine>();
 		List<String> fsTracesFiles = Arrays.asList(tracesDir.list(fsTracesFilter));
 		List<String> idlenessTracesFiles = Arrays.asList(tracesDir.list(idlenessTracesFilter));
@@ -190,7 +190,7 @@ public class ManelSim {
 		for(String fsTraceFile : fsTracesFiles) {
 			String machineName = fsTraceFile.split("-")[1];
 			if(idlenessTracesFiles.contains("idleness-" + machineName)) {
-				machines.add(new Machine(eventsGeneratedBySimulationQueue, machineName, timeBeforeSleep));
+				machines.add(new Machine(machineName, new Time(timeBeforeSleep, Unit.SECONDS)));
 			}
 		}
 

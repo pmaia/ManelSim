@@ -3,7 +3,6 @@ package simulation.beefs;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Set;
 
 import simulation.beefs.event.machine.FileSystemActivityEvent;
@@ -12,7 +11,6 @@ import simulation.beefs.event.machine.UserActivityEvent;
 import simulation.beefs.event.machine.UserIdlenessEvent;
 import simulation.result.Aggregator;
 import core.Event;
-import core.EventHandler;
 import core.Time;
 import core.Time.Unit;
 
@@ -24,7 +22,7 @@ import core.Time.Unit;
  * @author Ricardo Araujo Santos - ricardo@lsd.ufcg.edu.br
  * @author Thiago Emmanuel Pereira da Cunha Silva - thiagoepdc@lsd.ufcg.edu.br
  */
-public class Machine extends EventHandler {
+public class Machine {
 	
 	/*
 	 * Source: Line 563 of the following spreadsheet:
@@ -82,9 +80,7 @@ public class Machine extends EventHandler {
 	/*
 	 * FIXME timeBeforeSleep must be of type Time
 	 */
-	public Machine(PriorityQueue<Event> eventsGeneratedBySimulationQueue, String id, Time timeBeforeSleep) {
-		
-		super(eventsGeneratedBySimulationQueue);
+	public Machine(String id, Time timeBeforeSleep) {
 		
 		this.id = id;
 		this.deployedDataServers = new HashSet<DataServer>();
