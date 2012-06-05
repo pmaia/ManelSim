@@ -8,7 +8,7 @@ O experimento:
 	1.4- Criei um script para capturar informações do estado da bateria, além de frequencia e utilização de CPU
 	1.5- Criei um cliente para iniciar copyFroms de X bytes em algum Honeycomb a cada Y min
 
-2- Ensaio 01:
+2- Ensaio 01 (commit: 8aa0e0a3b2d67efe47bd5b2f70d5860f2f3b195d):
 
 	2.1- Mudei as opções de gerencia de energia do meu laptop para não mudar o brilho da tela, nem desligá-la após momentos de ociosidade e fechei todas janelas exceto a de um terminal
 	2.2- Iniciei o script criado em 1.4 para começar a logar a frequencia, utilização e estado da bateria
