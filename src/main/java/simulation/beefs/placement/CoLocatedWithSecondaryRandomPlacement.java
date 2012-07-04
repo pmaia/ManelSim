@@ -18,57 +18,45 @@ package simulation.beefs.placement;
 import static simulation.beefs.placement.DataPlacementUtil.chooseRandomDataServers;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
-import simulation.beefs.DataServer;
-import simulation.beefs.FileSystemClient;
-import simulation.beefs.ReplicationGroup;
-
-
-
+import simulation.beefs.model.DataServer;
+import simulation.beefs.model.FileSystemClient;
+import simulation.beefs.model.ReplicatedFile;
 
 /**
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgorithm {
-	
-	private Set<DataServer> dataServers;
+public class CoLocatedWithSecondaryRandomPlacement extends DataPlacementAlgorithm {
 	
 	public CoLocatedWithSecondaryRandomPlacement(Set<DataServer> dataServers) {
-		this.dataServers = dataServers;
+		super(dataServers);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReplicationGroup createFile(FileSystemClient client, String fileName, int replicationLevel) {
+	public ReplicatedFile createFile(FileSystemClient client, String fileName, int replicationLevel) {
 		
 		DataServer primary = null;
 		Set<DataServer> secondaries;
 		
-		Set<DataServer> colocatedDataServers = 
-			client.getMachine().getDeployedDataServers();
+		DataServer colocatedDataServer = 
+			client.getMetadataServer().getDataServer(client.getHost());
 		
-		if(!colocatedDataServers.isEmpty()) {
+		if(colocatedDataServer != null) {
 			Set<DataServer> copyOfAvailableDataServers = 
 				new HashSet<DataServer>(dataServers);
 			
-			copyOfAvailableDataServers.removeAll(colocatedDataServers);
+			copyOfAvailableDataServers.remove(colocatedDataServer);
 
+			primary = colocatedDataServer;
+			
 			secondaries = 
-				chooseRandomDataServers(copyOfAvailableDataServers, replicationLevel - 1);
-			// choose one of the co-located data servers
-			int theOne = new Random().nextInt(colocatedDataServers.size());
-			int i = 1;
-			for(DataServer dataServer : colocatedDataServers) {
-				if(i++ >= theOne) {
-					primary = dataServer;
-				}
-			}
+				chooseRandomDataServers(copyOfAvailableDataServers, replicationLevel);
+			
 		} else {
 			
 			secondaries = new HashSet<DataServer>();
@@ -83,20 +71,7 @@ public class CoLocatedWithSecondaryRandomPlacement implements DataPlacementAlgor
 			
 		}
 
-		return new ReplicationGroup(fileName, primary, secondaries);
-	}
-
-	@Override
-	public DataServer giveMeASingleDataServer(List<DataServer> exceptions) {
-		Set<DataServer> copyOfAvailableDataServers = new HashSet<DataServer>(dataServers);
-		copyOfAvailableDataServers.removeAll(exceptions);
-		
-		for(DataServer dataServer : copyOfAvailableDataServers) {
-			if(dataServer.getMachine().isAwake())
-				return dataServer;
-		}
-		
-		return null;
+		return new ReplicatedFile(fileName, primary, secondaries);
 	}
 
 }

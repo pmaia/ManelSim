@@ -8,7 +8,6 @@ package core;
 public final class Time implements Comparable<Time> {
 	
 	public static final Time GENESIS = new Time(0, Unit.MICROSECONDS);
-	public static final Time END_OF_THE_WORLD = new Time(Long.MAX_VALUE, Unit.MICROSECONDS); 
 
 	public enum Unit {SECONDS, MILLISECONDS, MICROSECONDS}
 	

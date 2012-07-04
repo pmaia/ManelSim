@@ -18,34 +18,27 @@ package simulation.beefs.placement;
 import static simulation.beefs.placement.DataPlacementUtil.chooseRandomDataServers;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import simulation.beefs.DataServer;
-import simulation.beefs.FileSystemClient;
-import simulation.beefs.ReplicationGroup;
-
-
-
+import simulation.beefs.model.DataServer;
+import simulation.beefs.model.FileSystemClient;
+import simulation.beefs.model.ReplicatedFile;
 
 /**
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
-	
-	private final Set<DataServer> dataServers;
+public class RandomDataPlacementAlgorithm extends DataPlacementAlgorithm {
 	
 	public RandomDataPlacementAlgorithm(Set<DataServer> dataServers) {
-		this.dataServers = dataServers;
+		super(dataServers);
 	}
 
 	@Override
-	public ReplicationGroup createFile(FileSystemClient client, String fileName,
-			int replicationLevel) {
+	public ReplicatedFile createFile(FileSystemClient client, String fileName, int replicationLevel) {
 		
 		Set<DataServer> choosenDataServes = 
-			chooseRandomDataServers(dataServers, replicationLevel);
+			chooseRandomDataServers(dataServers, replicationLevel + 1);
 		
 		DataServer primary = null;
 		Set<DataServer> secondaries = new HashSet<DataServer>();
@@ -58,13 +51,8 @@ public class RandomDataPlacementAlgorithm implements DataPlacementAlgorithm {
 			}
 		}
 		
-		return new ReplicationGroup(fileName, primary, secondaries);
+		return new ReplicatedFile(fileName, primary, secondaries);
 		
 	}
 
-	@Override
-	public DataServer giveMeASingleDataServer(List<DataServer> exceptions) {
-		throw new UnsupportedOperationException("When this explodes in someone's face it's time to become supported");
-	}
-	
 }

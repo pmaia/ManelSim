@@ -15,14 +15,11 @@
  */
 package simulation.beefs.placement;
 
-import java.util.List;
+import java.util.Set;
 
-import simulation.beefs.DataServer;
-import simulation.beefs.FileSystemClient;
-import simulation.beefs.ReplicationGroup;
-
-
-
+import simulation.beefs.model.DataServer;
+import simulation.beefs.model.FileSystemClient;
+import simulation.beefs.model.ReplicatedFile;
 
 /**
  * Encapsulates the logic of {@link ReplicationGroup} creation, deciding where primary
@@ -30,15 +27,24 @@ import simulation.beefs.ReplicationGroup;
  * 
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
-public interface DataPlacementAlgorithm {
-
-	ReplicationGroup createFile(FileSystemClient client, String fileName, int replicationLevel);
+public abstract class DataPlacementAlgorithm {
 	
-	/**
-	 * 
-	 * @param exceptions
-	 * @return one of the {@link DataServer}s known that is not in exceptions  
-	 */
-	DataServer giveMeASingleDataServer(List<DataServer> exceptions);
+	protected Set<DataServer> dataServers;
+	
+	public DataPlacementAlgorithm(Set<DataServer> dataServers) {
+		this.dataServers = dataServers;
+	}
+	
+	public static DataPlacementAlgorithm newDataPlacementAlgorithm(String type, Set<DataServer> dataServers) {
+		if("co-random".equals(type)) {
+			return new CoLocatedWithSecondaryRandomPlacement(dataServers);
+		} else if("random".equals(type)) {
+			return new RandomDataPlacementAlgorithm(dataServers);
+		} else {
+			throw new IllegalArgumentException(type + " is not a valid DataPlacementAlgorithm type.");
+		}
+	}
+
+	public abstract ReplicatedFile createFile(FileSystemClient client, String fullpath, int replicationLevel);
 	
 }

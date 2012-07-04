@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import simulation.beefs.DataServer;
+import simulation.beefs.model.DataServer;
 
 
 /**
