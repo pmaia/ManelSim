@@ -18,8 +18,8 @@ public class Write extends Event {
 	private final Time duration;
 	private final FileSystemClient client;
 
-	public Write(FileSystemClient client, Time scheduledTime, long bytesTransfered, long fileSize, 
-			Time duration, String filePath) {
+	public Write(FileSystemClient client, Time scheduledTime, Time duration, String filePath, 
+			long bytesTransfered, long fileSize) {
 		
 		super(scheduledTime);
 		
@@ -28,14 +28,6 @@ public class Write extends Event {
 		this.fileSize = fileSize;
 		this.duration = duration;
 		this.filePath = filePath;
-	}
-
-	public long getFileSize() {
-		return bytesTransfered;
-	}
-	
-	public String getFilePath() {
-		return filePath;
 	}
 
 	@Override

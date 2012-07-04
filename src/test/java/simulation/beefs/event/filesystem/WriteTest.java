@@ -36,7 +36,7 @@ public class WriteTest {
 		Time eventStart = Time.GENESIS;
 		Time duration = new Time(3, Unit.MILLISECONDS);
 		Write write = 
-				new Write(client, eventStart, 15, 1024, duration , "/home/josebiades/texto.txt");
+				new Write(client, eventStart, duration, "/home/josebiades/texto.txt", 15 , 1024);
 		
 		write.process();
 		
@@ -55,12 +55,12 @@ public class WriteTest {
 		Time event1Start = Time.GENESIS;
 		Time event1Duration = new Time(5, Unit.MILLISECONDS);
 		Write write = 
-				new Write(client, event1Start, 15, 1024, event1Duration , "/home/josebiades/texto.txt");
+				new Write(client, event1Start, event1Duration, "/home/josebiades/texto.txt", 15 , 1024);
 		write.process();
 		
 		Time event2Start = new Time(6, Unit.MILLISECONDS);
 		Time event2Duration = new Time(5, Unit.MILLISECONDS);
-		write =	new Write(client, event2Start, 15, 1024, event2Duration , "/home/josebiades/texto.txt");
+		write =	new Write(client, event2Start, event2Duration, "/home/josebiades/texto.txt", 15 , 1024);
 		write.process();
 		
 		ReplicatedFile file = client.createOrOpen("/home/josebiades/texto.txt");
@@ -81,12 +81,12 @@ public class WriteTest {
 		Time event1Start = Time.GENESIS;
 		Time event1Duration = new Time(5, Unit.MILLISECONDS);
 		Write write = 
-				new Write(client, event1Start, 15, 1024, event1Duration , "/home/josebiades/texto.txt");
+				new Write(client, event1Start, event1Duration, "/home/josebiades/texto.txt", 15 , 1024);
 		write.process();
 		
 		Time event2Start = new Time(2, Unit.MILLISECONDS);
 		Time event2Duration = new Time(5, Unit.MILLISECONDS);
-		write =	new Write(client, event2Start, 15, 1024, event2Duration , "/home/josebiades/texto.txt");
+		write =	new Write(client, event2Start, event2Duration, "/home/josebiades/texto.txt", 15 , 1024);
 		write.process();
 		
 		ReplicatedFile file = client.createOrOpen("/home/josebiades/texto.txt");
@@ -108,13 +108,13 @@ public class WriteTest {
 		Time ten = new Time(10, Unit.MILLISECONDS);
 		Time fifteen = new Time(15, Unit.MILLISECONDS);
 		
-		Write write = new Write(client, zero, 15, 1024, five, filePath);
+		Write write = new Write(client, zero, five, filePath, 15, 1024);
 		write.process();
 		
-		write = new Write(client, ten, 15, 1024, five, filePath);
+		write = new Write(client, ten, five, filePath, 15, 1024);
 		write.process();
 		
-		write = new Write(client, zero, 15, 1024, five, filePath);
+		write = new Write(client, zero, five, filePath, 15, 1024);
 		write.process();
 		
 		ReplicatedFile file = client.createOrOpen(filePath);
@@ -136,10 +136,10 @@ public class WriteTest {
 		Time five = new Time(5, Unit.MILLISECONDS);
 		Time ten = new Time(10, Unit.MILLISECONDS);
 
-		Write write = new Write(client, zero, 15, 1024, five, filePath);
+		Write write = new Write(client, zero, five, filePath, 15, 1024);
 		write.process();
 		
-		write = new Write(client, five, 1024, 2048, five, filePath);
+		write = new Write(client, five, five, filePath, 1024, 2048);
 		write.process();
 		
 		ReplicatedFile file = client.createOrOpen(filePath);
