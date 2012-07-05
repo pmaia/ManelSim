@@ -33,4 +33,8 @@ public class FileSystemClient {
 		metadataServer.close(filePath);		
 	}
 
+	public void delete(String filePath) {
+		metadataServer.delete(filePath);		
+	}
+
 }

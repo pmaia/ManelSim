@@ -19,16 +19,12 @@ import core.EventSourceMultiplexer;
 import core.Time;
 import core.Time.Unit;
 
-/**
- * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
- */
-public class CloseTest {
-
+public class UnlinkTest {
 	private String filePath = "/home/patrick/zerooo.txt";
 	private EventSourceMultiplexer eventSourceMock;
-	private Time closeTime = Time.GENESIS;
+	private Time unlinkTime = Time.GENESIS;
 	private Time timeToCoherence = new Time(5 * 60, Unit.SECONDS);
-	private Time timeToDelete  = new Time(5 * 60, Unit.SECONDS);
+	private Time timeToDelete = new Time(5 * 60, Unit.SECONDS);
 	
 	@Before
 	public void setup() {
@@ -37,7 +33,7 @@ public class CloseTest {
 	}
 	
 	@Test
-	public void testCloseNonModifiedFile() {
+	public void testUnlinkNonReplicatedFile() {
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 		dataServers.add(new DataServer());
 		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, timeToCoherence, timeToDelete);
@@ -46,56 +42,45 @@ public class CloseTest {
 		client.createOrOpen(filePath);
 		
 		replay(eventSourceMock);
-		Close close = new Close(client, closeTime, filePath);
-		close.process();
-	}
-	
-	@Test
-	public void testCloseNonModifiedFileWithReplicas() {
-		Set<DataServer> dataServers = new HashSet<DataServer>();
-		dataServers.add(new DataServer());
-		dataServers.add(new DataServer());
-		dataServers.add(new DataServer());
-		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 2, timeToCoherence, timeToDelete);
-		FileSystemClient client = new FileSystemClient("jurupoca", metadataServer );
 		
-		client.createOrOpen(filePath);
-		
-		replay(eventSourceMock);
-		Close close = new Close(client, closeTime, filePath);
-		close.process();
-	}
-	
-	@Test
-	public void testCloseModifiedFileWithReplicas() {
-		Set<DataServer> dataServers = new HashSet<DataServer>();
-		dataServers.add(new DataServer());
-		dataServers.add(new DataServer());
-		dataServers.add(new DataServer());
-		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 2, timeToCoherence, timeToDelete);
-		FileSystemClient client = new FileSystemClient("jurupoca", metadataServer);
-		
-		ReplicatedFile file = client.createOrOpen(filePath);
-		file.setReplicasAreConsistent(false);
-		
-		eventSourceMock.addNewEvent(new UpdateFileReplicas(closeTime.plus(timeToCoherence), filePath));
-		replay(eventSourceMock);
-		
-		Close close = new Close(client, closeTime, filePath);
-		close.process();
+		Unlink unlink = new Unlink(client, unlinkTime, filePath);
+		unlink.process();
 		
 		verify(eventSourceMock);
 	}
 	
 	@Test
-	public void testCloseNonExistentFile() {
+	public void testUnlinkNonExistentFile() {
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 		dataServers.add(new DataServer());
 		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, timeToCoherence, timeToDelete);
 		FileSystemClient client = new FileSystemClient("jurupoca", metadataServer );
 		
 		replay(eventSourceMock);
-		Close close = new Close(client, closeTime, filePath);
-		close.process();
+		
+		Unlink unlink = new Unlink(client, unlinkTime, filePath);
+		unlink.process();
+		
+		verify(eventSourceMock);
+	}
+	
+	@Test
+	public void testUnlinkReplicatedFile() {
+		Set<DataServer> dataServers = new HashSet<DataServer>();
+		dataServers.add(new DataServer());
+		dataServers.add(new DataServer());
+		dataServers.add(new DataServer());
+		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 2, timeToCoherence, timeToDelete);
+		FileSystemClient client = new FileSystemClient("jurupoca", metadataServer );
+		
+		ReplicatedFile file = client.createOrOpen(filePath);
+		
+		eventSourceMock.addNewEvent(new DeleteFileReplicas(unlinkTime.plus(timeToDelete), file));
+		replay(eventSourceMock);
+		
+		Unlink unlink = new Unlink(client, unlinkTime, filePath);
+		unlink.process();
+		
+		verify(eventSourceMock);
 	}
 }

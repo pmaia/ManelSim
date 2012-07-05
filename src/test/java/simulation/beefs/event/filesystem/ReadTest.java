@@ -30,9 +30,10 @@ public class ReadTest {
 	@Before
 	public void setup() {
 		Time timeToCoherence = new Time(5 * 60, Unit.SECONDS);
+		Time timeToDelete = new Time(5 * 60, Unit.SECONDS);
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 		dataServers.add(new DataServer());
-		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, timeToCoherence);
+		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, timeToCoherence, timeToDelete);
 		client = new FileSystemClient("jurupoca", metadataServer);
 	}
 	

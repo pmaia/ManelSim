@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import simulation.beefs.event.filesystem.DeleteFileReplicas;
 import simulation.beefs.event.filesystem.UpdateFileReplicas;
 import simulation.beefs.placement.DataPlacementAlgorithm;
 import core.EventScheduler;
@@ -19,6 +20,8 @@ public class MetadataServer {
 	private final int replicationLevel;
 	
 	private final Time timeToCoherence;
+	
+	private final Time timeToDelete;
 
 	private final Map<String, ReplicatedFile> files = new HashMap<String, ReplicatedFile>();
 
@@ -26,7 +29,7 @@ public class MetadataServer {
 	private final Map<String, DataServer> dataServerByHost = new HashMap<String, DataServer>();
 
 	public MetadataServer(Set<DataServer> dataServers, String dataPlacementStrategy, 
-			int replicationLevel, Time timeToCoherence) {
+			int replicationLevel, Time timeToCoherence, Time timeToDelete) {
 		
 		for(DataServer dataServer : dataServers) {
 			dataServerByHost.put(dataServer.getHost(), dataServer);
@@ -35,6 +38,7 @@ public class MetadataServer {
 		this.dataPlacement = DataPlacementAlgorithm.newDataPlacementAlgorithm(dataPlacementStrategy, dataServers);
 		this.replicationLevel = replicationLevel;
 		this.timeToCoherence = timeToCoherence;
+		this.timeToDelete = timeToDelete;
 	}
 	
 	public void close(String filePath) {
@@ -43,6 +47,15 @@ public class MetadataServer {
 		if(file != null && !file.areReplicasConsistent() && file.getSecondaries().size() > 0) {
 			Time now = EventScheduler.now();
 			EventScheduler.schedule(new UpdateFileReplicas(now.plus(timeToCoherence), filePath));
+		}
+	}
+	
+	public void delete(String filePath) {
+		ReplicatedFile file = files.remove(filePath);
+		//FIXME Patrick: tenho que fazer aqui em file.getPrimary() o mesmo que eu fizer em DeleteFileReplicas.process()
+		if(file != null && file.getSecondaries().size() > 0) {
+			Time now = EventScheduler.now();
+			EventScheduler.schedule(new DeleteFileReplicas(now.plus(timeToDelete), file));
 		}
 	}
 
