@@ -29,9 +29,10 @@ public class ReadTest {
 	
 	@Before
 	public void setup() {
+		Time timeToCoherence = new Time(5 * 60, Unit.SECONDS);
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 		dataServers.add(new DataServer());
-		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0);
+		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, timeToCoherence);
 		client = new FileSystemClient("jurupoca", metadataServer);
 	}
 	
@@ -52,15 +53,15 @@ public class ReadTest {
 		String filePath = "/home/patrick/cruzeiro.txt";
 		ReplicatedFile file = client.createOrOpen(filePath);
 		file.setSize(1024);
-		file.setReplicasCoherenceStatus(true);
+		file.setReplicasAreConsistent(true);
 		
 		Read read = new Read(client, Time.GENESIS, new Time(5, Unit.MILLISECONDS), filePath, 10);
 		read.process();
-		assertEquals(true, file.areReplicasCoherent());
+		assertEquals(true, file.areReplicasConsistent());
 		
-		file.setReplicasCoherenceStatus(false);
+		file.setReplicasAreConsistent(false);
 		read.process();
-		assertEquals(false, file.areReplicasCoherent());
+		assertEquals(false, file.areReplicasConsistent());
 	}
 	
 	@Test

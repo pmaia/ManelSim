@@ -18,14 +18,12 @@ package core;
 import java.util.PriorityQueue;
 
 
-
-
 /**
  * Aggregates a bunch of {@link EventSource}s and delivery their events in order.  
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public final class EventSourceMultiplexer {
+public class EventSourceMultiplexer {
 	
 	private final PushBackEventSource [] eventSources;
 	

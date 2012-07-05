@@ -15,7 +15,7 @@ public class ReplicatedFile {
 	private final Set<DataServer> secondaries;
 	
 	private long size = 0;
-	private boolean replicasAreCoherent = true;
+	private boolean replicasAreConsistent = true;
 	
 	public ReplicatedFile(String fullpath, DataServer primary, Set<DataServer> secondaries) {
 		this.fullpath = fullpath;
@@ -43,12 +43,12 @@ public class ReplicatedFile {
 		this.size = size;
 	}
 	
-	public boolean areReplicasCoherent() {
-		return replicasAreCoherent;
+	public boolean areReplicasConsistent() {
+		return replicasAreConsistent;
 	}
 	
-	public void setReplicasCoherenceStatus(boolean replicasStatus) {
-		this.replicasAreCoherent = replicasStatus;
+	public void setReplicasAreConsistent(boolean replicasAreConsistent) {
+		this.replicasAreConsistent = replicasAreConsistent;
 	}
 
 }

@@ -39,7 +39,7 @@ public class Write extends Event {
 	public void process() {
 		ReplicatedFile replicatedFile = client.createOrOpen(filePath);
 		replicatedFile.setSize(fileSize);
-		replicatedFile.setReplicasCoherenceStatus(false);
+		replicatedFile.setReplicasAreConsistent(false);
 		
 		DataServer primary = replicatedFile.getPrimary();
 		primary.reportWrite(getScheduledTime(), duration);

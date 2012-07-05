@@ -19,7 +19,6 @@ package core;
 /**
  * A source of {@link Event}s that always deliveries {@link Event}s in time order.
  * 
- * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public interface EventSource {
 

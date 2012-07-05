@@ -25,9 +25,10 @@ public class WriteTest {
 	
 	@Before
 	public void setup() {
+		Time timeToCoherence = new Time(5 * 60, Unit.SECONDS);
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 		dataServers.add(new DataServer());
-		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0);
+		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, timeToCoherence);
 		client = new FileSystemClient("jurupoca", metadataServer);		
 	}
 	
@@ -45,7 +46,7 @@ public class WriteTest {
 		List<TimeInterval> writeIntervals = ds.getWriteIntervals();
 		
 		assertEquals(1024L, file.getSize());
-		assertFalse(file.areReplicasCoherent());
+		assertFalse(file.areReplicasConsistent());
 		assertEquals(1, writeIntervals.size());
 		assertEquals(new TimeInterval(eventStart, eventStart.plus(duration)), writeIntervals.get(0));
 	}
@@ -68,7 +69,7 @@ public class WriteTest {
 		List<TimeInterval> writeIntervals = ds.getWriteIntervals();
 		
 		assertEquals(1024L, file.getSize());
-		assertFalse(file.areReplicasCoherent());
+		assertFalse(file.areReplicasConsistent());
 		assertEquals(2, writeIntervals.size());
 		TimeInterval expectedTimeInterval = new TimeInterval(event1Start, event1Start.plus(event1Duration));
 		assertTrue(writeIntervals.contains(expectedTimeInterval));
@@ -94,7 +95,7 @@ public class WriteTest {
 		List<TimeInterval> writeIntervals = ds.getWriteIntervals();
 		
 		assertEquals(1024L, file.getSize());
-		assertFalse(file.areReplicasCoherent());
+		assertFalse(file.areReplicasConsistent());
 		assertEquals(1, writeIntervals.size());
 		TimeInterval expectedTimeInterval = new TimeInterval(Time.GENESIS, event2Start.plus(event2Duration));
 		assertTrue(writeIntervals.contains(expectedTimeInterval));
@@ -121,7 +122,7 @@ public class WriteTest {
 		List<TimeInterval> writeIntervals = file.getPrimary().getWriteIntervals();
 		
 		assertEquals(1024L, file.getSize());
-		assertFalse(file.areReplicasCoherent());
+		assertFalse(file.areReplicasConsistent());
 		assertEquals(2, writeIntervals.size());
 		TimeInterval expectedTimeInterval = new TimeInterval(Time.GENESIS, five);
 		assertTrue(writeIntervals.contains(expectedTimeInterval));
@@ -146,7 +147,7 @@ public class WriteTest {
 		List<TimeInterval> writeIntervals = file.getPrimary().getWriteIntervals();
 		
 		assertEquals(2048L, file.getSize());
-		assertFalse(file.areReplicasCoherent());
+		assertFalse(file.areReplicasConsistent());
 		assertEquals(1, writeIntervals.size());
 		TimeInterval expectedTimeInterval = new TimeInterval(Time.GENESIS, ten);
 		assertTrue(writeIntervals.contains(expectedTimeInterval));
