@@ -1,18 +1,3 @@
-/**
- * Copyright (C) 2009 Universidade Federal de Campina Grande
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package simulation.beefs.event.filesystem.source;
 
 import java.io.BufferedReader;
@@ -21,22 +6,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import simulation.beefs.FileSystemClient;
-import simulation.beefs.event.filesystem.CloseEvent;
-import simulation.beefs.event.filesystem.ReadEvent;
-import simulation.beefs.event.filesystem.UnlinkEvent;
-import simulation.beefs.event.filesystem.WriteEvent;
-
+import simulation.beefs.event.filesystem.Close;
+import simulation.beefs.event.filesystem.Read;
+import simulation.beefs.event.filesystem.Unlink;
+import simulation.beefs.event.filesystem.Write;
+import simulation.beefs.model.FileSystemClient;
 import core.Event;
 import core.EventSource;
 import core.Time;
 import core.Time.Unit;
 
-
 /**
  * A parser for the trace of calls to the file system.
  * 
- * @author thiago - thiago@lsd.ufcg.edu.br
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
 public class FileSystemTraceEventSource implements EventSource {
@@ -103,43 +85,44 @@ public class FileSystemTraceEventSource implements EventSource {
 		return readLine;
 	}
 	
-	private UnlinkEvent parseUnlinkEvent(StringTokenizer tokenizer) {
+	private Unlink parseUnlinkEvent(StringTokenizer tokenizer) {
 		// unlink  begin-elapsed   fullpath
 		
 		Time time = parseTime(tokenizer.nextToken())[0];
 		String targetPath = tokenizer.nextToken();
 		
-		return new UnlinkEvent(client, time, targetPath);
+		return new Unlink(client, time, targetPath);
 	}
 
-	private CloseEvent parseCloseEvent(StringTokenizer tokenizer) {
+	private Close parseCloseEvent(StringTokenizer tokenizer) {
 		// close   begin-elapsed   fullpath
 
 		Time time = parseTime(tokenizer.nextToken())[0];
 		String targetPath = tokenizer.nextToken();
 
-		return new CloseEvent(client, time, targetPath);
+		return new Close(client, time, targetPath);
 	}
 
-	private ReadEvent parseReadEvent(StringTokenizer tokenizer) {
+	private Read parseReadEvent(StringTokenizer tokenizer) {
 		// read    begin-elapsed   fullpath        length
 		
 		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
 		String filePath = tokenizer.nextToken();
 		long length = Long.parseLong(tokenizer.nextToken());
 
-		return new ReadEvent(client, timestampAndDuration[0], timestampAndDuration[1], filePath, length);
+		return new Read(client, timestampAndDuration[0], timestampAndDuration[1], filePath, length);
 	}
 
-	private Event parseWriteEvent(StringTokenizer tokenizer) {
-		// write   begin-elapsed   fullpath        length
+	private Write parseWriteEvent(StringTokenizer tokenizer) {
+		// write   begin-elapsed   fullpath        bytes_transfered	file_size
 		
 		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
 		String filePath = tokenizer.nextToken();
+		long bytesTransfered = Long.parseLong(tokenizer.nextToken());
 		long fileSize = Long.parseLong(tokenizer.nextToken());
 
-		return new WriteEvent(client, timestampAndDuration[0], fileSize, 
-				timestampAndDuration[1], filePath); 
+		return new Write(client, timestampAndDuration[0], timestampAndDuration[1], filePath,
+				bytesTransfered, fileSize); 
 	}
 	
 	private Time [] parseTime(String traceTimestamp) {
