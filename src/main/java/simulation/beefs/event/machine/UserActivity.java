@@ -20,30 +20,20 @@ import core.Event;
 import core.Time;
 
 /**
- * TODO make doc
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class FileSystemActivityEvent extends Event {
+public class UserActivity extends Event {
 	
-	public static final String EVENT_NAME = "fs-activity";
+	public static final String EVENT_NAME = "activity";
 	
-	private final boolean wakeOnLan;
-	
-	public FileSystemActivityEvent(Machine handler, Time scheduledTime, Time duration, boolean wakeOnLan) {
+	public UserActivity(Machine handler, Time scheduledTime, Time duration) {
 		super(EVENT_NAME, handler, scheduledTime, duration);
-		
-		this.wakeOnLan = wakeOnLan;
-	}
-
-	public boolean wakeOnLan() {
-		return wakeOnLan;
 	}
 	
 	@Override
 	public String toString() {
-		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" +
-				getDuration() + "\t" + wakeOnLan;
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime();
 	}
 
 }

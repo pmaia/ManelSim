@@ -20,20 +20,22 @@ import core.Event;
 import core.Time;
 
 /**
+ * An {@link Event} representing an idleness period.
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class UserActivityEvent extends Event {
+public class UserIdleness extends Event {
 	
-	public static final String EVENT_NAME = "activity";
+	public static final String EVENT_NAME = "user-idleness-start";
 	
-	public UserActivityEvent(Machine handler, Time scheduledTime, Time duration) {
-		super(EVENT_NAME, handler, scheduledTime, duration);
+	public UserIdleness(Machine handler, Time scheduledTime, Time userIdlenessDuration) {
+		
+		super(EVENT_NAME, handler, scheduledTime, userIdlenessDuration);
 	}
-	
+
 	@Override
 	public String toString() {
-		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime();
+		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime() + "\t" + getDuration();
 	}
 
 }

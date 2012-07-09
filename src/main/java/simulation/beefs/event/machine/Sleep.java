@@ -23,11 +23,11 @@ import core.Time;
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class SleepEvent extends Event {
+public class Sleep extends Event {
 	
 	public static final String EVENT_NAME = "sleep";
 	
-	public SleepEvent(Machine handler, Time scheduledTime, Time duration) {
+	public Sleep(Machine handler, Time scheduledTime, Time duration) {
 		super(EVENT_NAME, handler, scheduledTime, duration);
 	}
 	

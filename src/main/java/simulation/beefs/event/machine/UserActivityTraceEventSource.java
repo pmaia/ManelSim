@@ -41,12 +41,12 @@ import core.Time.Unit;
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class MachineActivityTraceEventSource implements EventSource {
+public class UserActivityTraceEventSource implements EventSource {
 	
 	private final Machine machine;
 	private final BufferedReader eventReader;
 	
-	public MachineActivityTraceEventSource(Machine machine, InputStream eventStream) {
+	public UserActivityTraceEventSource(Machine machine, InputStream eventStream) {
 		this.machine = machine;
 		this.eventReader = new BufferedReader(new InputStreamReader(eventStream));
 	}

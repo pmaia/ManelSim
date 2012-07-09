@@ -19,13 +19,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Random;
 
-import simulation.beefs.event.machine.MachineActivityTraceEventSource;
-
 
 /**
  * 
  * An InputStream that simulates an InputStream over a trace file whose events are in the format expected by 
- * {@link MachineActivityTraceEventSource}. <code>numberOfEvents</code> events will be generated.  
+ * {@link UserActivityTraceEventSource}. <code>numberOfEvents</code> events will be generated.  
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */

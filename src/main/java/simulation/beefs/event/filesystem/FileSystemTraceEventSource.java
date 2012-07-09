@@ -1,4 +1,4 @@
-package simulation.beefs.event.filesystem.source;
+package simulation.beefs.event.filesystem;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,10 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import simulation.beefs.event.filesystem.Close;
-import simulation.beefs.event.filesystem.Read;
-import simulation.beefs.event.filesystem.Unlink;
-import simulation.beefs.event.filesystem.Write;
 import simulation.beefs.model.FileSystemClient;
 import core.Event;
 import core.EventSource;
