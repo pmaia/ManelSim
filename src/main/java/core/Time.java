@@ -22,6 +22,14 @@ public final class Time implements Comparable<Time> {
 			throw new IllegalArgumentException("Impossible argument exception");
 		}
 	}
+	
+	public static Time max(Time a, Time b) {
+		if(a.timeMicroSeconds >= b.timeMicroSeconds) {
+			return a;
+		} else {
+			return b;
+		}
+	}
 
 	/**
 	 * @param otherETime

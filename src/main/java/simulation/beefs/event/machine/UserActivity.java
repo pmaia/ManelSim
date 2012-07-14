@@ -1,39 +1,28 @@
-/**
- * Copyright (C) 2009 Universidade Federal de Campina Grande
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package simulation.beefs.event.machine;
 
-import simulation.beefs.Machine;
+import simulation.beefs.model.Machine;
 import core.Event;
 import core.Time;
 
 /**
  *
- * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
+ * @author Patrick Maia
  */
 public class UserActivity extends Event {
 	
-	public static final String EVENT_NAME = "activity";
+	private final Machine host;
+	private final Time duration;
 	
-	public UserActivity(Machine handler, Time scheduledTime, Time duration) {
-		super(EVENT_NAME, handler, scheduledTime, duration);
+	public UserActivity(Machine host, Time scheduledTime, Time duration) {
+		super(scheduledTime);
+		
+		this.host = host;
+		this.duration = duration;
 	}
 	
 	@Override
-	public String toString() {
-		return getHandler() + "\t" + EVENT_NAME + "\t" + getScheduledTime();
+	public void process() {
+		host.setActive(getScheduledTime(), duration);
 	}
 
 }

@@ -1,18 +1,3 @@
-/**
- * Copyright (C) 2009 Universidade Federal de Campina Grande
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package simulation.beefs.event.machine;
 
 import java.io.BufferedReader;
@@ -20,8 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import simulation.beefs.Machine;
-
+import simulation.beefs.model.Machine;
 import core.Event;
 import core.EventSource;
 import core.Time;
@@ -70,9 +54,9 @@ public class UserActivityTraceEventSource implements EventSource {
 				Time duration = new Time(Long.parseLong(tokens[2]), Unit.SECONDS);
 				
 				if(eventType.equals("idleness")) {
-					event = new UserIdlenessEvent(machine, aScheduledTime, duration);
+					event = new UserIdleness(machine, aScheduledTime, duration);
 				} else if(eventType.equals("activity")) {
-					event = new UserActivityEvent(machine, aScheduledTime, duration);
+					event = new UserActivity(machine, aScheduledTime, duration);
 				} else {
 					throw new RuntimeException(eventType + " is not recognized by this parser as a valid event type.");
 				}
