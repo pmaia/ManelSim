@@ -18,6 +18,14 @@ public class TimeInterval {
 		this.end = end;
 	}
 	
+	public Time begin() {
+		return begin;
+	}
+
+	public Time end() {
+		return end;
+	}
+
 	public boolean overlaps(TimeInterval otherInterval) {
 		if(begin.compareTo(otherInterval.begin) <= 0 ) {
 			return contains(otherInterval.begin);
@@ -25,11 +33,15 @@ public class TimeInterval {
 			return otherInterval.contains(begin);
 		}
 	}
+	
+	public boolean isContiguous(TimeInterval otherInterval) {
+		return true; //TODO implementar
+	}
 
 	private boolean contains(Time time) {
 		return (begin.compareTo(time) <= 0) && (time.compareTo(end) <= 0);
 	}
-
+	
 	public TimeInterval merge(TimeInterval otherInterval) {
 		if(!overlaps(otherInterval))
 			throw new IllegalArgumentException("It is not possible to merge non overlapping intervals.");
@@ -39,7 +51,11 @@ public class TimeInterval {
 		
 		return new TimeInterval(resultBegin, resultEnd);
 	}
-
+	
+	public Time delta() {
+		return end.minus(begin);
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
