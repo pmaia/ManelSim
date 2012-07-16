@@ -19,10 +19,12 @@ public final class EventScheduler {
 		emulationStart = null;
 		emulationEnd = null;
 		eventSourceMultiplexer = null;
+		processCount = 0;
 		now = new Time(0L, Unit.MILLISECONDS);
 	}
 	
 	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource) {
+		reset();
 		EventScheduler.emulationStart = emulationStart;
 		EventScheduler.emulationEnd = emulationEnd;
 		EventScheduler.eventSourceMultiplexer = eventSource;
