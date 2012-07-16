@@ -1,4 +1,4 @@
-package simulation.beefs.event.filesystem.source;
+package simulation.beefs.event.filesystem;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
 import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.model.MetadataServer;

@@ -107,7 +107,7 @@ public class Machine {
 		}
 	}
 	
-	// the next four methods are used by the state implementation to schedule new events
+	// the next four methods are used by State implementations to schedule new events
 	private void scheduleSleep(Time begin, Time duration) {
 		EventScheduler.schedule(new Sleep(this, begin, duration));
 	}
