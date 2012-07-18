@@ -34,8 +34,12 @@ public class TimeInterval {
 		}
 	}
 	
+	/**
+	 * Returns true if otherInterval is contiguous to this one. 
+	 * Two {@link TimeInterval}s are contiguous if the end of one is equal to the begin of the other.
+	 */
 	public boolean isContiguous(TimeInterval otherInterval) {
-		return true; //TODO implementar
+		return (end.equals(otherInterval.begin) || begin.equals(otherInterval.end));
 	}
 
 	private boolean contains(Time time) {
