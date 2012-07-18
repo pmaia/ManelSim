@@ -41,6 +41,11 @@ public class MachineTransitionsFromIdleTest {
 		machine.setIdle(IDLENESS_DURATION, IDLENESS_DURATION);
 	}
 	
+	@Test(expected=IllegalStateException.class)
+	public void testWakeOnLan() {
+		machine.wakeOnLan();
+	}
+	
 	@Test
 	public void testTransitionFromIdleToActive() {
 		Time activityDuration = new Time(2, Unit.SECONDS);

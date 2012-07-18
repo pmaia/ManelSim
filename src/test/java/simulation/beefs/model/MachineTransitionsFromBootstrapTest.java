@@ -31,8 +31,6 @@ public class MachineTransitionsFromBootstrapTest {
 		EventScheduler.setup(Time.GENESIS, Time.THE_FINAL_JUDGMENT, eventsMultiplexer);
 	}
 	
-	//test transitions from bootstrap
-	
 	@Test(expected=IllegalStateException.class)
 	public void testTransitionFromBootstrapToActive() {
 		machine.setActive(Time.GENESIS, new Time(5, Unit.SECONDS));
@@ -41,6 +39,11 @@ public class MachineTransitionsFromBootstrapTest {
 	@Test(expected=IllegalStateException.class)
 	public void testTransitionsFromBootstrapToSleeping() {
 		machine.setSleeping(Time.GENESIS, new Time(5, Unit.SECONDS));
+	}
+	
+	@Test(expected=IllegalStateException.class) 
+	public void testWakeOnLan() {
+		machine.wakeOnLan();
 	}
 	
 	@Test
