@@ -15,6 +15,8 @@ import core.Time.Unit;
 import core.TimeInterval;
 
 /**
+ * The only possible transition from BOOTSTRAP is to IDLE. This is because the way we collected our traces.
+ * 
  * @author Patrick Maia
  */
 public class MachineTransitionsFromBootstrapTest {

@@ -22,7 +22,7 @@ public class Machine {
 		ACTIVE,
 		SLEEPING,
 		TRANSITION,
-		NONE
+		BOOTSTRAP
 	}
 	
 	private interface State {
@@ -144,7 +144,7 @@ public class Machine {
 		}
 		@Override
 		public Status status() {
-			return Status.NONE;
+			return Status.BOOTSTRAP;
 		}
 	}
 	
@@ -153,7 +153,7 @@ public class Machine {
 		private boolean sleepIsExpected = false;
 		
 		public Idle(TimeInterval interval) {
-			if(toSleepTimeout.isEarlierThan(interval.delta())) {
+			if(toSleepTimeout.isEarlierThan(interval.delta())) { // then, schedule a sleep event on now + toSleepTimeout
 				Time sleepBegin = interval.begin().plus(toSleepTimeout);
 				scheduleSleep(sleepBegin, interval.end().minus(sleepBegin));
 				sleepIsExpected = true;
@@ -179,12 +179,11 @@ public class Machine {
 				throw new IllegalStateException("transition to ACTIVE is expected");
 			}
 			checkContinuity(userIdlenessIntervals, interval);
-			TimeInterval transitionInterval = new TimeInterval(interval.begin(), interval.begin().plus(transitionDuration));
 			
 			Time sleepDuration =  Time.max(interval.delta().minus(transitionDuration), Time.GENESIS);
-			scheduleSleep(transitionInterval.end(), sleepDuration);
+			scheduleSleep(interval.begin().plus(transitionDuration), sleepDuration);
 			
-			return new Transitioning(transitionInterval);
+			return new Transitioning(interval.begin());
 		}
 		@Override
 		public State wakeOnLan() {
@@ -231,10 +230,9 @@ public class Machine {
 		public State toActive(TimeInterval interval) {
 			checkContinuity(sleepIntervals, interval);
 			
-			TimeInterval transitionInterval = new TimeInterval(interval.begin(), interval.begin().plus(transitionDuration));
-			scheduleUserActivity(transitionInterval.end(), interval.delta());
+			scheduleUserActivity(interval.begin().plus(transitionDuration), interval.delta());
 			
-			return new Transitioning(transitionInterval);
+			return new Transitioning(interval.begin());
 		}
 		@Override
 		public State toIdle(TimeInterval interval) {
@@ -258,8 +256,8 @@ public class Machine {
 			sleepIntervals.remove(lastElementIndex);
 			sleepIntervals.add(new TimeInterval(shouldSleepInterval.begin(), now));
 			/* 
-			 * schedules a new UserIdleness starting after the transition ends and lasting the same time this machine 
-			 * should remain sleeping before being disturbed, minus the transition duration (or zero if negative)
+			 * schedules a new UserIdleness event starting after the transition ends and lasting the same time this 
+			 * machine should remain sleeping (before being disturbed) minus the transition duration (or zero if negative)
 			 */
 			Time idlenessDuration = Time.max(shouldSleepInterval.end().minus(now).minus(transitionDuration), 
 					Time.GENESIS);
@@ -267,8 +265,7 @@ public class Machine {
 			/*
 			 * returns a Transitioning state
 			 */
-			TimeInterval transitionInterval = new TimeInterval(now, now.plus(transitionDuration));
-			return new Transitioning(transitionInterval);
+			return new Transitioning(now);
 		}
 		@Override
 		public Status status() {
@@ -280,7 +277,8 @@ public class Machine {
 		
 		private final Time transitionEnd;
 		
-		public Transitioning(TimeInterval interval) { 
+		public Transitioning(Time time) {
+			TimeInterval interval = new TimeInterval(time, time.plus(transitionDuration));
 			transitionIntervals.add(interval);
 			transitionEnd = interval.end();
 		}

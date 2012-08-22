@@ -7,8 +7,13 @@ package core;
  */
 public final class Time implements Comparable<Time> {
 	
+	/**
+	 * Zero. The beginning of this simulated world.
+	 */
 	public static final Time GENESIS = new Time(0, Unit.MICROSECONDS);
-	
+	/**
+	 * The greatest possible {@link Time}. The end of this simulated world. 
+	 */
 	public static final Time THE_FINAL_JUDGMENT = new Time(Long.MAX_VALUE, Unit.MICROSECONDS);
 
 	public enum Unit {SECONDS, MILLISECONDS, MICROSECONDS}
