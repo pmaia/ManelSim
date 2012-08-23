@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import simulation.beefs.model.Machine.Status;
+import simulation.beefs.model.Machine.State;
 import core.EventScheduler;
 import core.EventSource;
 import core.EventSourceMultiplexer;
@@ -51,7 +51,7 @@ public class MachineTransitionsFromIdleTest {
 		Time activityDuration = new Time(2, Unit.SECONDS);
 		machine.setActive(IDLENESS_DURATION, activityDuration);
 		
-		assertEquals(Status.ACTIVE, machine.getStatus());
+		assertEquals(State.ACTIVE, machine.getState());
 		assertEquals(0, machine.getSleepIntervals().size());
 		assertEquals(0, machine.getTransitionIntervals().size());
 		assertEquals(1, machine.getUserActivityIntervals().size());
@@ -84,7 +84,7 @@ public class MachineTransitionsFromIdleTest {
 		//this transition is legal because the machine current idleness duration is greater than TO_SLEEP_TIMEOUT
 		machine.setSleeping(TO_SLEEP_TIMEOUT, new Time(5*60, Unit.SECONDS));
 		
-		assertEquals(Status.TRANSITION, machine.getStatus());
+		assertEquals(State.GOING_SLEEP, machine.getState());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

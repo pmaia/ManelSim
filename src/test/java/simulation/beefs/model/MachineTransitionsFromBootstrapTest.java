@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import simulation.beefs.model.Machine.Status;
+import simulation.beefs.model.Machine.State;
 import core.EventScheduler;
 import core.EventSource;
 import core.EventSourceMultiplexer;
@@ -53,7 +53,7 @@ public class MachineTransitionsFromBootstrapTest {
 		Time idlenessDuration = new Time(10*60, Unit.SECONDS);
 		machine.setIdle(Time.GENESIS, idlenessDuration );
 
-		assertEquals(Status.IDLE, machine.getStatus());
+		assertEquals(State.IDLE, machine.getState());
 		assertEquals(0, machine.getUserActivityIntervals().size());
 		assertEquals(0, machine.getSleepIntervals().size());
 		assertEquals(0, machine.getTransitionIntervals().size());
@@ -67,7 +67,7 @@ public class MachineTransitionsFromBootstrapTest {
 		Time idlenessDuration = new Time(20*60, Unit.SECONDS);
 		machine.setIdle(Time.GENESIS, idlenessDuration);
 
-		assertEquals(Status.IDLE, machine.getStatus());
+		assertEquals(State.IDLE, machine.getState());
 		assertEquals(0, machine.getUserActivityIntervals().size());
 		assertEquals(0, machine.getSleepIntervals().size());
 		assertEquals(0, machine.getTransitionIntervals().size());
@@ -78,7 +78,7 @@ public class MachineTransitionsFromBootstrapTest {
 		EventScheduler.start();
 		
 		assertEquals(2, EventScheduler.processCount());
-		assertEquals(Status.SLEEPING, machine.getStatus());
+		assertEquals(State.SLEEPING, machine.getState());
 		assertEquals(0, machine.getUserActivityIntervals().size());
 		assertEquals(1, machine.getSleepIntervals().size());
 		assertEquals(1, machine.getTransitionIntervals().size());
@@ -102,7 +102,7 @@ public class MachineTransitionsFromBootstrapTest {
 		Time idlenessDuration = TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION.minus(new Time(1, Unit.MICROSECONDS)));
 		machine.setIdle(Time.GENESIS, idlenessDuration);
 		
-		assertEquals(Status.IDLE, machine.getStatus());
+		assertEquals(State.IDLE, machine.getState());
 		assertEquals(0, machine.getUserActivityIntervals().size());
 		assertEquals(0, machine.getSleepIntervals().size());
 		assertEquals(0, machine.getTransitionIntervals().size());
@@ -113,7 +113,7 @@ public class MachineTransitionsFromBootstrapTest {
 		EventScheduler.start();
 		
 		assertEquals(2, EventScheduler.processCount());
-		assertEquals(Status.SLEEPING, machine.getStatus());
+		assertEquals(State.SLEEPING, machine.getState());
 		assertEquals(0, machine.getUserActivityIntervals().size());
 		assertEquals(1, machine.getSleepIntervals().size());
 		assertEquals(1, machine.getTransitionIntervals().size());

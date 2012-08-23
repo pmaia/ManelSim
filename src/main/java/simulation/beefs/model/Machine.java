@@ -17,23 +17,26 @@ import core.TimeInterval;
  */
 public class Machine {
 	
-	public enum Status {
+	public enum State {
 		IDLE,
 		ACTIVE,
 		SLEEPING,
-		TRANSITION,
+		GOING_SLEEP,
+		WAKING_UP,
 		BOOTSTRAP
 	}
 	
-	private interface State {
-		State toActive(TimeInterval interval);
-		State toIdle(TimeInterval interval);
-		State toSleep(TimeInterval interval);
-		State wakeOnLan();
-		Status status();
+	private interface MachineState {
+		MachineState toActive(TimeInterval interval);
+		MachineState toIdle(TimeInterval interval);
+		MachineState toSleep(TimeInterval interval);
+		MachineState wakeOnLan();
+		State state();
 	}
 
-	private State currentState;
+	private MachineState currentState;
+	
+	private Time currentDelay = Time.GENESIS;
 	
 	private final String hostname;
 	
@@ -75,6 +78,10 @@ public class Machine {
 	public List<TimeInterval> getSleepIntervals() {
 		return new ArrayList<TimeInterval>(sleepIntervals);
 	}
+	
+	public Time currentDelay() {
+		return currentDelay;
+	}
 
 	public void setActive(Time begin, Time duration) {
 		TimeInterval interval = new TimeInterval(begin, begin.plus(duration));
@@ -95,8 +102,8 @@ public class Machine {
 		currentState = currentState.wakeOnLan();
 	}
 	
-	public Status getStatus() {
-		return currentState.status();
+	public State getState() {
+		return currentState.state();
 	}
 	
 	private void checkContinuity(List<TimeInterval> currentStateIntervals, TimeInterval next) {
@@ -125,30 +132,30 @@ public class Machine {
 	}
 	//
 	
-	private class Bootstrap implements State {
+	private class Bootstrap implements MachineState {
 		@Override
-		public State toActive(TimeInterval interval) {
+		public MachineState toActive(TimeInterval interval) {
 			throw new IllegalStateException("transition to IDLE is expected.");
 		}
 		@Override
-		public State toIdle(TimeInterval interval) {
+		public MachineState toIdle(TimeInterval interval) {
 			return new Idle(interval);
 		}
 		@Override
-		public State toSleep(TimeInterval interval) {
+		public MachineState toSleep(TimeInterval interval) {
 			throw new IllegalStateException("transition to IDLE is expected.");
 		}
 		@Override
-		public State wakeOnLan() {
+		public MachineState wakeOnLan() {
 			throw new IllegalStateException("transition to IDLE is expected.");
 		}
 		@Override
-		public Status status() {
-			return Status.BOOTSTRAP;
+		public State state() {
+			return State.BOOTSTRAP;
 		}
 	}
 	
-	private class Idle implements State {
+	private class Idle implements MachineState {
 		
 		private boolean sleepIsExpected = false;
 		
@@ -162,7 +169,7 @@ public class Machine {
 			userIdlenessIntervals.add(interval);
 		}
 		@Override
-		public State toActive(TimeInterval interval) {
+		public MachineState toActive(TimeInterval interval) {
 			if(sleepIsExpected) {
 				throw new IllegalStateException("transition to SLEEP is expected.");
 			}
@@ -170,11 +177,11 @@ public class Machine {
 			return new Active(interval);
 		}
 		@Override
-		public State toIdle(TimeInterval interval) {
+		public MachineState toIdle(TimeInterval interval) {
 			throw new IllegalStateException("This machine is already IDLE.");
 		}
 		@Override
-		public State toSleep(TimeInterval interval) {
+		public MachineState toSleep(TimeInterval interval) {
 			if(!sleepIsExpected) {
 				throw new IllegalStateException("transition to ACTIVE is expected");
 			}
@@ -183,67 +190,67 @@ public class Machine {
 			Time sleepDuration =  Time.max(interval.delta().minus(transitionDuration), Time.GENESIS);
 			scheduleSleep(interval.begin().plus(transitionDuration), sleepDuration);
 			
-			return new Transitioning(interval.begin());
+			return new GoingSleep(interval.begin());
 		}
 		@Override
-		public State wakeOnLan() {
+		public MachineState wakeOnLan() {
 			throw new IllegalStateException("This machine is not sleeping.");
 		}
 		@Override
-		public Status status() {
-			return Status.IDLE;
+		public State state() {
+			return State.IDLE;
 		}
 	}
 	
-	private class Active implements State {
+	private class Active implements MachineState {
 		public Active(TimeInterval interval) {
 			userActivityIntervals.add(interval);
 		}
 		@Override
-		public State toActive(TimeInterval interval) {
+		public MachineState toActive(TimeInterval interval) {
 			throw new IllegalStateException("This machine is already ACTIVE.");
 		}
 		@Override
-		public State toIdle(TimeInterval interval) {
+		public MachineState toIdle(TimeInterval interval) {
 			checkContinuity(userActivityIntervals, interval);
 			return new Idle(interval);
 		}
 		@Override
-		public State toSleep(TimeInterval interval) {
+		public MachineState toSleep(TimeInterval interval) {
 			throw new IllegalStateException("Transition to IDLE is expected.");
 		}
 		@Override
-		public State wakeOnLan() {
+		public MachineState wakeOnLan() {
 			throw new IllegalStateException("This machine is not sleeping.");
 		}
 		@Override
-		public Status status() {
-			return Status.ACTIVE;
+		public State state() {
+			return State.ACTIVE;
 		}
 	}
 	
-	private class Sleeping implements State {
+	private class Sleeping implements MachineState {
 		public Sleeping(TimeInterval interval) {
 			sleepIntervals.add(interval);
 		}
 		@Override
-		public State toActive(TimeInterval interval) {
+		public MachineState toActive(TimeInterval interval) {
 			checkContinuity(sleepIntervals, interval);
 			
 			scheduleUserActivity(interval.begin().plus(transitionDuration), interval.delta());
 			
-			return new Transitioning(interval.begin());
+			return new WakingUp(interval.begin());
 		}
 		@Override
-		public State toIdle(TimeInterval interval) {
+		public MachineState toIdle(TimeInterval interval) {
 			throw new IllegalStateException("Transition to ACTIVE or WakeOnLan are expected.");
 		}
 		@Override
-		public State toSleep(TimeInterval interval) {
+		public MachineState toSleep(TimeInterval interval) {
 			throw new IllegalStateException("Transition to ACTIVE or WakeOnLan are expected.");
 		}
 		@Override
-		public State wakeOnLan() {
+		public MachineState wakeOnLan() {
 			/*
 			 *  adjusts the time interval the machine really slept
 			 */
@@ -262,49 +269,96 @@ public class Machine {
 			Time idlenessDuration = Time.max(shouldSleepInterval.end().minus(now).minus(transitionDuration), 
 					Time.GENESIS);
 			scheduleUserIdleness(now.plus(transitionDuration), idlenessDuration);
-			/*
-			 * returns a Transitioning state
-			 */
-			return new Transitioning(now);
+		
+			return new WakingUp(now);
 		}
 		@Override
-		public Status status() {
-			return Status.SLEEPING;
+		public State state() {
+			return State.SLEEPING;
 		}
 	}
 	
-	private class Transitioning implements State {
+	private class GoingSleep implements MachineState {
 		
 		private final Time transitionEnd;
+		private boolean transitionToActiveMayOccur = true;
+		private boolean wakeOnLanScheduled = false;
 		
-		public Transitioning(Time time) {
+		public GoingSleep(Time time) {
 			TimeInterval interval = new TimeInterval(time, time.plus(transitionDuration));
 			transitionIntervals.add(interval);
 			transitionEnd = interval.end();
 		}
 		@Override
-		public State toActive(TimeInterval interval) {
-			checkContinuity(transitionIntervals, interval);
-			return new Active(interval);
+		public MachineState toActive(TimeInterval interval) {
+			if(!transitionToActiveMayOccur) {
+				throw new IllegalStateException("Transition to ACTIVE already occured.");
+			}
+			if(!interval.begin().isEarlierThan(transitionEnd) || 
+					interval.begin().isEarlierThan(transitionEnd.minus(transitionDuration))) {
+				throw new IllegalArgumentException("I could accept this transition at another time.");
+			}
+			currentDelay = currentDelay.plus(transitionEnd.minus(interval.begin()));
+			scheduleUserActivity(transitionEnd, interval.delta());
+			transitionToActiveMayOccur = false;
+
+			return this;
 		}
 		@Override
-		public State toIdle(TimeInterval interval) {
-			checkContinuity(transitionIntervals, interval);
-			return new Idle(interval);
+		public MachineState toIdle(TimeInterval interval) {
+			throw new IllegalStateException("Transition to ACTIVE, WakeOnLan or SLEEPING are expected.");
 		}
 		@Override
-		public State toSleep(TimeInterval interval) {
+		public MachineState toSleep(TimeInterval interval) {
 			checkContinuity(transitionIntervals, interval);
 			return new Sleeping(interval);
 		}
 		@Override
-		public State wakeOnLan() {
+		public MachineState wakeOnLan() {
+			if(!wakeOnLanScheduled) {
+				scheduleWakeOnLan(transitionEnd);
+				wakeOnLanScheduled = true;
+			}
+			return this;
+		}
+		@Override
+		public State state() {
+			return State.GOING_SLEEP;
+		}
+	}
+	
+	private class WakingUp implements MachineState {
+		// FIXME implement this correctly
+		private final Time transitionEnd;
+		
+		public WakingUp(Time time) {
+			TimeInterval interval = new TimeInterval(time, time.plus(transitionDuration));
+			transitionIntervals.add(interval);
+			transitionEnd = interval.end();
+		}
+		@Override
+		public MachineState toActive(TimeInterval interval) {
+			checkContinuity(transitionIntervals, interval);
+			return new Active(interval);
+		}
+		@Override
+		public MachineState toIdle(TimeInterval interval) {
+			checkContinuity(transitionIntervals, interval);
+			return new Idle(interval);
+		}
+		@Override
+		public MachineState toSleep(TimeInterval interval) {
+			checkContinuity(transitionIntervals, interval);
+			return new Sleeping(interval);
+		}
+		@Override
+		public MachineState wakeOnLan() {
 			scheduleWakeOnLan(transitionEnd);
 			return this;
 		}
 		@Override
-		public Status status() {
-			return Status.TRANSITION;
+		public State state() {
+			return State.WAKING_UP;
 		}
 	}
 	

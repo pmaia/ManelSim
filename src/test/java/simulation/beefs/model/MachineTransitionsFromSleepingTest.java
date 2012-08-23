@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import simulation.beefs.model.Machine.Status;
+import simulation.beefs.model.Machine.State;
 import core.EventScheduler;
 import core.EventSource;
 import core.EventSourceMultiplexer;
@@ -52,7 +52,7 @@ public class MachineTransitionsFromSleepingTest {
 	public void testTransitionToActive() {
 		machine.setActive(TO_SLEEP_TIMEOUT.plus(TEN_MINUTES), TEN_MINUTES);
 		
-		assertEquals(Status.TRANSITION, machine.getStatus());
+		assertEquals(State.WAKING_UP, machine.getState());
 		assertEquals(1, machine.getSleepIntervals().size());
 		assertEquals(2, machine.getTransitionIntervals().size()); // remember that there was a transition to sleep
 		assertEquals(0, machine.getUserActivityIntervals().size());
@@ -62,7 +62,7 @@ public class MachineTransitionsFromSleepingTest {
 		
 		assertEquals(3, EventScheduler.processCount()); // IDLE -> SLEEP, TRANSITION -> SLEEP, TRANSITION -> ACTIVE
 		
-		assertEquals(Status.ACTIVE, machine.getStatus());
+		assertEquals(State.ACTIVE, machine.getState());
 		assertEquals(1, machine.getSleepIntervals().size());
 		assertEquals(2, machine.getTransitionIntervals().size());
 		assertEquals(1, machine.getUserActivityIntervals().size());
@@ -87,7 +87,7 @@ public class MachineTransitionsFromSleepingTest {
 	public void testWakeOnLan() {
 		machine.wakeOnLan();
 		
-		assertEquals(Status.TRANSITION, machine.getStatus());
+		assertEquals(State.WAKING_UP, machine.getState());
 		assertEquals(1, machine.getSleepIntervals().size());
 		assertEquals(2, machine.getTransitionIntervals().size());
 		assertEquals(0, machine.getUserActivityIntervals().size());
@@ -96,7 +96,7 @@ public class MachineTransitionsFromSleepingTest {
 		EventScheduler.start();
 		assertEquals(3, EventScheduler.processCount()); //IDLE -> SLEEP, TRANSITION -> SLEEP, SLEEP -> IDLE
 		
-		assertEquals(Status.IDLE, machine.getStatus());
+		assertEquals(State.IDLE, machine.getState());
 		assertEquals(1, machine.getSleepIntervals().size());
 		assertEquals(2, machine.getTransitionIntervals().size());
 		assertEquals(0, machine.getUserActivityIntervals().size());
