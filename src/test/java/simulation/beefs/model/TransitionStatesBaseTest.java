@@ -36,6 +36,9 @@ public class TransitionStatesBaseTest {
 		public boolean contains(Event event) {
 			return eventsList.contains(event);
 		}
+		public int queueSize() {
+			return eventsList.size();
+		}
 		public int howManyOf(Event event) {
 			int count = 0;
 			for(Event anEvent : eventsList) {
