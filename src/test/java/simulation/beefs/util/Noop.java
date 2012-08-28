@@ -10,7 +10,6 @@ import core.Time;
  * @author Patrick Maia
  *
  */
-@Deprecated
 public class Noop extends Event {
 
 	public Noop(Time scheduledTime) {
