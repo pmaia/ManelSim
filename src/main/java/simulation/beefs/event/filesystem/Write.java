@@ -1,8 +1,6 @@
 package simulation.beefs.event.filesystem;
 
-import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
-import simulation.beefs.model.ReplicatedFile;
 import core.Event;
 import core.Time;
 
@@ -37,11 +35,6 @@ public class Write extends Event {
 
 	@Override
 	public void process() {
-		ReplicatedFile replicatedFile = client.createOrOpen(filePath);
-		replicatedFile.setSize(fileSize);
-		replicatedFile.setReplicasAreConsistent(false);
-		
-		DataServer primary = replicatedFile.getPrimary();
-		primary.reportWrite(getScheduledTime(), duration);
+		client.write(filePath, fileSize, getScheduledTime(), duration);
 	}
 }

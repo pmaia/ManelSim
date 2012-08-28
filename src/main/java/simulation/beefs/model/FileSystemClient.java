@@ -1,5 +1,7 @@
 package simulation.beefs.model;
 
+import core.Time;
+
 
 /**
  * 
@@ -19,6 +21,22 @@ public class FileSystemClient {
 	
 	public ReplicatedFile createOrOpen(String fullpath) {
 		return metadataServer.createOrOpen(this, fullpath);
+	}
+	
+	public void read(String filePath, Time begin, Time duration) {
+		ReplicatedFile file = createOrOpen(filePath);
+		
+		DataServer primary = file.getPrimary();
+		primary.reportRead(begin, duration);
+	}
+	
+	public void write(String filePath, long fileSize, Time begin, Time duration) {
+		ReplicatedFile replicatedFile = createOrOpen(filePath);
+		replicatedFile.setSize(fileSize);
+		replicatedFile.setReplicasAreConsistent(false);
+		
+		DataServer primary = replicatedFile.getPrimary();
+		primary.reportWrite(begin, duration);
 	}
 	
 	public MetadataServer getMetadataServer() {

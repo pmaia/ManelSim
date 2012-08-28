@@ -1,8 +1,6 @@
 package simulation.beefs.event.filesystem;
 
-import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
-import simulation.beefs.model.ReplicatedFile;
 import core.Event;
 import core.Time;
 
@@ -34,10 +32,7 @@ public class Read extends Event {
 
 	@Override
 	public void process() {
-		ReplicatedFile file = client.createOrOpen(filePath);
-		
-		DataServer primary = file.getPrimary();
-		primary.reportRead(getScheduledTime(), duration);
+		client.read(filePath, getScheduledTime(), duration);
 	}
 
 }
