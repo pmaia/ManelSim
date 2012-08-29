@@ -32,7 +32,7 @@ public class MetadataServer {
 			int replicationLevel, Time timeToCoherence, Time timeToDelete) {
 		
 		for(DataServer dataServer : dataServers) {
-			dataServerByHost.put(dataServer.getHost(), dataServer);
+			dataServerByHost.put(dataServer.getHost().getName(), dataServer);
 		}
 		
 		this.dataPlacement = DataPlacementAlgorithm.newDataPlacementAlgorithm(dataPlacementStrategy, dataServers);

@@ -45,7 +45,7 @@ public class MachineTransitionsFromBootstrapTest {
 	
 	@Test(expected=IllegalStateException.class) 
 	public void testWakeOnLan() {
-		machine.wakeOnLan();
+		machine.wakeOnLan(Time.GENESIS);
 	}
 	
 	@Test

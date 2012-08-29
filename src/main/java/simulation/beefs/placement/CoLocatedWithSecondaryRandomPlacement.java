@@ -44,7 +44,7 @@ public class CoLocatedWithSecondaryRandomPlacement extends DataPlacementAlgorith
 		Set<DataServer> secondaries;
 		
 		DataServer colocatedDataServer = 
-			client.getMetadataServer().getDataServer(client.getHost());
+			client.getMetadataServer().getDataServer(client.getHost().getName());
 		
 		if(colocatedDataServer != null) {
 			Set<DataServer> copyOfAvailableDataServers = 

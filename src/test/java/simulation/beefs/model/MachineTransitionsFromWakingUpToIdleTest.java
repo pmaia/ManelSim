@@ -6,18 +6,25 @@ import org.junit.Before;
 import org.junit.Test;
 
 import simulation.beefs.model.Machine.State;
-import simulation.beefs.util.Noop;
+import simulation.beefs.util.ObservableEventSourceMultiplexer;
 import core.EventScheduler;
 import core.EventSource;
-import core.EventSourceMultiplexer;
 import core.Time;
+import core.Time.Unit;
 
 /**
  * 
  * @author Patrick Maia
  *
  */
-public class MachineTransitionsFromWakingUpToIdleTest extends TransitionStatesBaseTest {
+public class MachineTransitionsFromWakingUpToIdleTest {
+	
+	private final Time TO_SLEEP_TIMEOUT = new Time(15*60, Unit.SECONDS);
+	private final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
+	private final Time ONE_MINUTE = new Time(60, Unit.SECONDS);
+	private final Time ONE_SECOND = new Time(1, Unit.SECONDS);
+
+	private ObservableEventSourceMultiplexer eventsMultiplexer;
 	
 	private Machine machineWakingUpToIdle;
 
@@ -31,16 +38,8 @@ public class MachineTransitionsFromWakingUpToIdleTest extends TransitionStatesBa
 		machineWakingUpToIdle.setSleeping(TO_SLEEP_TIMEOUT, ONE_MINUTE);
 		machineWakingUpToIdle.setSleeping(TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION), 
 				ONE_MINUTE.minus(TRANSITION_DURATION));
-		advanceSimulationTime(TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION));
-		machineWakingUpToIdle.wakeOnLan();
+		machineWakingUpToIdle.wakeOnLan(TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION));
 		assertEquals(State.WAKING_UP, machineWakingUpToIdle.getState());
-	}
-	
-	private void advanceSimulationTime(Time time) {
-		EventSourceMultiplexer eventsMultiplexer = new EventSourceMultiplexer(new EventSource[0]);
-		EventScheduler.setup(Time.GENESIS, Time.THE_FINAL_JUDGMENT, eventsMultiplexer);
-		EventScheduler.schedule(new Noop(time));
-		EventScheduler.start();
 	}
 	
 	@Test(expected=IllegalStateException.class)
@@ -56,7 +55,7 @@ public class MachineTransitionsFromWakingUpToIdleTest extends TransitionStatesBa
 	@Test
 	public void testWakeOnLan() {
 		int before = eventsMultiplexer.queueSize();
-		machineWakingUpToIdle.wakeOnLan(); // this must be innocuous
+		machineWakingUpToIdle.wakeOnLan(TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION).plus(ONE_SECOND)); // this must be innocuous
 		assertEquals(before, eventsMultiplexer.queueSize());
 		assertEquals(State.WAKING_UP, machineWakingUpToIdle.getState());
 	}

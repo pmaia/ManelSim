@@ -18,7 +18,7 @@ public class WakeOnLan extends Event {
 
 	@Override
 	public void process() {
-		machine.wakeOnLan();
+		machine.wakeOnLan(getScheduledTime());
 	}
 
 }

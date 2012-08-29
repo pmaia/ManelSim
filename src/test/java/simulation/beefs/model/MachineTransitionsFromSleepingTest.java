@@ -85,7 +85,7 @@ public class MachineTransitionsFromSleepingTest {
 	
 	@Test
 	public void testWakeOnLan() {
-		machine.wakeOnLan();
+		machine.wakeOnLan(TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION));
 		
 		assertEquals(State.WAKING_UP, machine.getState());
 		assertEquals(1, machine.getSleepIntervals().size());

@@ -49,7 +49,7 @@ public class MachineTransitionsFromActiveTest {
 	
 	@Test(expected=IllegalStateException.class)
 	public void testWakeOnLan() {
-		machine.wakeOnLan();
+		machine.wakeOnLan(Time.GENESIS);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

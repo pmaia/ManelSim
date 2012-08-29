@@ -12,9 +12,15 @@ import core.TimeInterval;
  *
  */
 public class DataServer {
+	
+	private final Machine host;
 
 	private List<TimeInterval> writeIntervals = new ArrayList<TimeInterval>();
 	private List<TimeInterval> readIntervals = new ArrayList<TimeInterval>();
+	
+	public DataServer(Machine host) {
+		this.host = host;
+	}
 
 	public List<TimeInterval> getWriteIntervals() {
 		return new ArrayList<TimeInterval>(writeIntervals);
@@ -24,9 +30,8 @@ public class DataServer {
 		return new ArrayList<TimeInterval>(readIntervals);
 	}
 
-	public String getHost() {
-		// TODO Auto-generated method stub
-		return null;
+	public Machine getHost() {
+		return host;
 	}
 
 	public void reportWrite(Time start, Time duration) {

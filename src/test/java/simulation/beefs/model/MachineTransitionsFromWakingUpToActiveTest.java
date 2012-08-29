@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import simulation.beefs.event.machine.UserActivity;
 import simulation.beefs.model.Machine.State;
-import simulation.beefs.util.Noop;
+import simulation.beefs.util.ObservableEventSourceMultiplexer;
 import core.EventScheduler;
 import core.EventSource;
 import core.Time;
@@ -19,7 +19,14 @@ import core.Time.Unit;
  * @author Patrick Maia
  *
  */
-public class MachineTransitionsFromWakingUpToActiveTest extends TransitionStatesBaseTest {
+public class MachineTransitionsFromWakingUpToActiveTest {
+	
+	private final Time TO_SLEEP_TIMEOUT = new Time(15*60, Unit.SECONDS);
+	private final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
+	private final Time ONE_MINUTE = new Time(60, Unit.SECONDS);
+	private final Time ONE_SECOND = new Time(1, Unit.SECONDS);
+
+	private ObservableEventSourceMultiplexer eventsMultiplexer;
 	
 	private Machine machineWakingUpToActive;
 	
@@ -67,7 +74,7 @@ public class MachineTransitionsFromWakingUpToActiveTest extends TransitionStates
 	@Test
 	public void testWakeOnLan() {
 		int before = eventsMultiplexer.queueSize();
-		machineWakingUpToActive.wakeOnLan(); // this must be innocuous
+		machineWakingUpToActive.wakeOnLan(TO_SLEEP_TIMEOUT.plus(ONE_MINUTE).plus(ONE_SECOND)); // this must be innocuous
 		assertEquals(before, eventsMultiplexer.queueSize());
 		assertEquals(State.WAKING_UP, machineWakingUpToActive.getState());
 	}
@@ -88,10 +95,7 @@ public class MachineTransitionsFromWakingUpToActiveTest extends TransitionStates
 		
 		Time wakeOnLanTime = TO_SLEEP_TIMEOUT.plus(ONE_MINUTE.minus(ONE_SECOND.times(2))); // two seconds before the sleeping end
 		
-		Noop noop = new Noop(wakeOnLanTime);
-		EventScheduler.schedule(noop);
-		EventScheduler.start();
-		machineWakingUpToActive.wakeOnLan();
+		machineWakingUpToActive.wakeOnLan(wakeOnLanTime);
 		assertEquals(State.WAKING_UP, machineWakingUpToActive.getState());
 		
 		// setActive 0.5 seconds before the waking up end (this is the time the original sleeping would end if the wakeOnLan never happened)
@@ -118,10 +122,7 @@ public class MachineTransitionsFromWakingUpToActiveTest extends TransitionStates
 		
 		Time wakeOnLanTime = TO_SLEEP_TIMEOUT.plus(ONE_MINUTE.minus(ONE_SECOND.times(2))); // two seconds before the sleeping end
 		
-		Noop noop = new Noop(wakeOnLanTime);
-		EventScheduler.schedule(noop);
-		EventScheduler.start();
-		machineWakingUpToActive.wakeOnLan();
+		machineWakingUpToActive.wakeOnLan(wakeOnLanTime);
 		assertEquals(State.WAKING_UP, machineWakingUpToActive.getState());
 		
 		// setActive 0.5 seconds before the waking up end (this is the time the original sleeping would end if the wakeOnLan never happened)

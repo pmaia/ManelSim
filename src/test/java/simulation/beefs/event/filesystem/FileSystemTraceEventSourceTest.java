@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
+import simulation.beefs.model.Machine;
 import simulation.beefs.model.MetadataServer;
 import simulation.beefs.util.FakeFileSystemTraceStream;
 import core.Event;
@@ -26,14 +27,19 @@ import core.Time.Unit;
  */
 public class FileSystemTraceEventSourceTest {
 	
+	private static final Time TO_SLEEP_TIMEOUT = new Time(15*60, Unit.SECONDS);
+	private static final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
+	
 	private FileSystemClient client;
 	
 	@Before
 	public void setup() {
+		Machine jurupoca = new Machine("jurupoca", TO_SLEEP_TIMEOUT, TRANSITION_DURATION);
+		
 		Set<DataServer> dataServers = new HashSet<DataServer>();
-		dataServers.add(new DataServer());
+		dataServers.add(new DataServer(jurupoca));
 		MetadataServer metadataServer = new MetadataServer(dataServers, "random", 0, Time.GENESIS, Time.GENESIS);
-		client = new FileSystemClient("jurupoca", metadataServer);
+		client = new FileSystemClient(jurupoca, metadataServer, true);
 	}
 
 	@Test

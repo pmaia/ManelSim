@@ -10,16 +10,25 @@ import org.junit.Test;
 import simulation.beefs.event.machine.UserActivity;
 import simulation.beefs.event.machine.WakeOnLan;
 import simulation.beefs.model.Machine.State;
+import simulation.beefs.util.ObservableEventSourceMultiplexer;
 import core.EventScheduler;
 import core.EventSource;
 import core.Time;
+import core.Time.Unit;
 
 /**
  * 
  * @author Patrick Maia
  *
  */
-public class MachineTransitionsFromGoingSleepTest extends TransitionStatesBaseTest {
+public class MachineTransitionsFromGoingSleepTest {
+	
+	private final Time TO_SLEEP_TIMEOUT = new Time(15*60, Unit.SECONDS);
+	private final Time TRANSITION_DURATION = new Time(2500, Unit.MILLISECONDS);
+	private final Time ONE_MINUTE = new Time(60, Unit.SECONDS);
+	private final Time ONE_SECOND = new Time(1, Unit.SECONDS);
+
+	private ObservableEventSourceMultiplexer eventsMultiplexer;
 
 	private Machine machineGoingSleep;
 	
@@ -87,13 +96,13 @@ public class MachineTransitionsFromGoingSleepTest extends TransitionStatesBaseTe
 	
 	@Test
 	public void testWakeOnLan() {
-		machineGoingSleep.wakeOnLan();
+		machineGoingSleep.wakeOnLan(TO_SLEEP_TIMEOUT.plus(ONE_SECOND));
 		
 		Time transitionEnd = TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION);
 		WakeOnLan wakeOnLan = new WakeOnLan(machineGoingSleep, transitionEnd);
 		assertTrue(eventsMultiplexer.contains(wakeOnLan));
 		
-		machineGoingSleep.wakeOnLan();
+		machineGoingSleep.wakeOnLan(TO_SLEEP_TIMEOUT.plus(ONE_SECOND));
 		assertEquals(1, eventsMultiplexer.howManyOf(wakeOnLan));
 	}
 }

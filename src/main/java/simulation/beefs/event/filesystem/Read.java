@@ -32,7 +32,7 @@ public class Read extends Event {
 
 	@Override
 	public void process() {
-		client.read(filePath, getScheduledTime(), duration);
+		client.read(filePath, bytesTransfered, getScheduledTime(), duration);
 	}
 
 }

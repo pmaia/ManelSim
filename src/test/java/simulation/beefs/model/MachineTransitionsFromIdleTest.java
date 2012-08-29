@@ -43,7 +43,7 @@ public class MachineTransitionsFromIdleTest {
 	
 	@Test(expected=IllegalStateException.class)
 	public void testWakeOnLan() {
-		machine.wakeOnLan();
+		machine.wakeOnLan(Time.GENESIS);
 	}
 	
 	@Test
