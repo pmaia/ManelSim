@@ -1,6 +1,7 @@
 package simulation.beefs.model;
 
 import simulation.beefs.event.filesystem.Read;
+import simulation.beefs.event.filesystem.Write;
 import core.EventScheduler;
 import core.Time;
 import core.Time.Unit;
@@ -24,6 +25,10 @@ public class FileSystemClient {
 	private long readsWhileClientSleeping = 0;
 	
 	private long readsWhileDataServerSleeping = 0;
+	
+	private long writesWhileClientSleeping = 0;
+	
+	private long writesWhileDataServerSleeping = 0;
 	
 	/**
 	 * 
@@ -53,22 +58,37 @@ public class FileSystemClient {
 			} else if(wakeOnLan){
 				primary.getHost().wakeOnLan(begin);
 				
-				Time newAttemptTime = primary.getHost().getTransitionDuration().plus(ONE_SECOND);
+				Time delta = primary.getHost().getTransitionDuration().plus(ONE_SECOND);
 				EventScheduler.schedule(
-						new Read(this, begin.plus(newAttemptTime), duration, filePath, bytesTransfered));
+						new Read(this, begin.plus(delta), duration, filePath, bytesTransfered));
 			} else {
 				readsWhileDataServerSleeping++;
 			}
 		}
 	}
 	
-	public void write(String filePath, long fileSize, Time begin, Time duration) {
-		ReplicatedFile replicatedFile = createOrOpen(filePath);
-		replicatedFile.setSize(fileSize);
-		replicatedFile.setReplicasAreConsistent(false);
-		
-		DataServer primary = replicatedFile.getPrimary();
-		primary.reportWrite(begin, duration);
+	public void write(String filePath, long fileSize, long bytesTransfered, Time begin, Time duration) {
+		if(!host.isReachable()) {
+			writesWhileClientSleeping++;
+		} else {
+			ReplicatedFile replicatedFile = createOrOpen(filePath);
+			
+			DataServer primary = replicatedFile.getPrimary();
+			if(primary.getHost().isReachable()) {
+				replicatedFile.setSize(fileSize);
+				replicatedFile.setReplicasAreConsistent(false);
+
+				primary.reportWrite(begin, duration);
+			} else if(wakeOnLan) {
+				primary.getHost().wakeOnLan(begin);
+				
+				Time delta = primary.getHost().getTransitionDuration().plus(ONE_SECOND);
+				EventScheduler.schedule(
+						new Write(this, begin.plus(delta), duration, filePath, bytesTransfered, fileSize));
+			} else {
+				writesWhileDataServerSleeping++;
+			}
+		}
 	}
 	
 	public MetadataServer getMetadataServer() {
@@ -93,6 +113,14 @@ public class FileSystemClient {
 
 	public long readsWhileDataServerSleeping() {
 		return readsWhileDataServerSleeping;
+	}
+
+	public long writesWhileDataServerSleeping() {
+		return writesWhileDataServerSleeping;
+	}
+
+	public long writesWhileClientSleeping() {
+		return writesWhileClientSleeping;
 	}
 
 }

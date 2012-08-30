@@ -35,6 +35,6 @@ public class Write extends Event {
 
 	@Override
 	public void process() {
-		client.write(filePath, fileSize, getScheduledTime(), duration);
+		client.write(filePath, fileSize, bytesTransfered, getScheduledTime(), duration);
 	}
 }
