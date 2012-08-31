@@ -8,5 +8,5 @@ import java.util.Properties;
  *
  */
 public interface Initializer {
-	Object initialize(Properties config);
+	Context initialize(Properties config);
 }

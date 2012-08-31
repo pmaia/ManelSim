@@ -19,10 +19,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import core.Time.Unit;
+
 
 /**
  * 
- * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
+ * @author Patrick Maia
  */
 public class ManelSim {
 
@@ -37,9 +39,10 @@ public class ManelSim {
 		Properties config = new Properties();
 		config.load(new FileInputStream(args[0]));
 		
-		if(!config.containsKey("initializer") || !config.containsKey("summarizer")) {
-			throw new IllegalArgumentException("You must specify the keys \"initializer\" and \"summarizer\" " +
-					"in the configuration file.");
+		if(!config.containsKey("initializer") || !config.containsKey("summarizer") ||
+						!config.containsKey("simulation_start") || !config.containsKey("simulation_end")) {
+			throw new IllegalArgumentException("The keys \"initializer\", \"summarizer\", \"simulation_start\" and " +
+					"\"simulation_end\" are mandatory.");
 		}
 		
 		String initializerClassName = config.getProperty("initializer");
@@ -48,7 +51,14 @@ public class ManelSim {
 		Initializer initializer = (Initializer)Class.forName(initializerClassName).newInstance();
 		Summarizer summarizer = (Summarizer)Class.forName(summarizerClassName).newInstance();
 		
-		Object context = initializer.initialize(config);
+		Context context = initializer.initialize(config);
+		
+		Time simulationStart = new Time(Long.parseLong(config.getProperty("simulation_start")), Unit.SECONDS);
+		Time simulationEnd = new Time(Long.parseLong(config.getProperty("simulation_end")), Unit.SECONDS);
+		
+		EventScheduler.setup(simulationStart, simulationEnd, context.getEventSourceMultiplexer());
+		EventScheduler.start();
+		
 		System.out.println(summarizer.summarize(context));
 		
 	}		
