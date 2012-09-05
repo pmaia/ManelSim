@@ -1,0 +1,14 @@
+package simulation.beefs.energy;
+
+enum EnergyState {
+	READ_ACTIVE,
+	READ_IDLE,
+	WRITE_ACTIVE,
+	WRITE_IDLE,
+	READ_WRITE_ACTIVE,
+	READ_WRITE_IDLE,
+	ACTIVE,
+	IDLE,
+	SLEEPING,
+	TRANSITIONING
+}

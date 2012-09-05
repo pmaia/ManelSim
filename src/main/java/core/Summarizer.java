@@ -6,5 +6,5 @@ package core;
  *
  */
 public interface Summarizer {
-	String summarize(Object context);
+	String summarize(Context context);
 }

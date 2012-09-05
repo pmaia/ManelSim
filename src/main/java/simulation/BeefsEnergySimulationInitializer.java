@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import simulation.beefs.energy.EnergyConsumptionModel;
 import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
 import simulation.beefs.event.machine.UserActivityTraceEventSource;
 import simulation.beefs.model.DataServer;
@@ -24,6 +25,11 @@ import core.Initializer;
 import core.Time;
 import core.Time.Unit;
 
+/**
+ * 
+ * @author Patrick Maia
+ *
+ */
 public class BeefsEnergySimulationInitializer implements Initializer {
 	
 	private static final FilenameFilter fsTracesFilter = new FilenameFilter() {
@@ -43,16 +49,16 @@ public class BeefsEnergySimulationInitializer implements Initializer {
 	@Override
 	public Context initialize(Properties config) {
 		
-		String tracesDirPath = config.getProperty(ConfigurationKeys.TRACES_DIR);
+		String tracesDirPath = config.getProperty(BeefsEnergySimulationConstants.TRACES_DIR);
 		File tracesDir = new File(tracesDirPath);
 		if(!tracesDir.exists() || !tracesDir.isDirectory())
 			throw new IllegalArgumentException(tracesDirPath + " doesn't exist or is not a directory");
 
 		// create machines
 		Time toSleepTimeout = 
-				new Time(Long.valueOf(config.getProperty(ConfigurationKeys.TO_SLEEP_TIMEOUT)), Unit.SECONDS);
+				new Time(Long.valueOf(config.getProperty(BeefsEnergySimulationConstants.TO_SLEEP_TIMEOUT)), Unit.SECONDS);
 		Time transitionDuration = 
-				new Time(Long.valueOf(config.getProperty(ConfigurationKeys.TRANSITION_DURATION)), Unit.MILLISECONDS);
+				new Time(Long.valueOf(config.getProperty(BeefsEnergySimulationConstants.TRANSITION_DURATION)), Unit.MILLISECONDS);
 		Set<Machine> machines = 
 				createMachines(tracesDir, toSleepTimeout, transitionDuration);
 
@@ -60,28 +66,40 @@ public class BeefsEnergySimulationInitializer implements Initializer {
 		Set<DataServer> dataServers = createDataServers(machines);
 
 		//create metadata server
-		String placementPoliceName = config.getProperty(ConfigurationKeys.PLACEMENT_POLICE);
-		Integer replicationLevel = Integer.valueOf(config.getProperty(ConfigurationKeys.REPLICATION_LEVEL));
+		String placementPoliceName = config.getProperty(BeefsEnergySimulationConstants.PLACEMENT_POLICE);
+		Integer replicationLevel = Integer.valueOf(config.getProperty(BeefsEnergySimulationConstants.REPLICATION_LEVEL));
 		Time timeToCoherence = 
-				new Time(Long.valueOf(config.getProperty(ConfigurationKeys.TIME_TO_COHERENCE)), Unit.SECONDS);
+				new Time(Long.valueOf(config.getProperty(BeefsEnergySimulationConstants.TIME_TO_COHERENCE)), Unit.SECONDS);
 		Time timeToDelete = 
-				new Time(Long.valueOf(config.getProperty(ConfigurationKeys.TIME_TO_DELETE_REPLICAS)), Unit.SECONDS);
+				new Time(Long.valueOf(config.getProperty(BeefsEnergySimulationConstants.TIME_TO_DELETE_REPLICAS)), Unit.SECONDS);
 		MetadataServer metadataServer = 
 				new MetadataServer(dataServers, placementPoliceName, replicationLevel, timeToCoherence, timeToDelete); 
 
 		// create clients
-		Boolean wakeOnLan = Boolean.valueOf(config.getProperty(ConfigurationKeys.WAKE_ON_LAN));
+		Boolean wakeOnLan = Boolean.valueOf(config.getProperty(BeefsEnergySimulationConstants.WAKE_ON_LAN));
 		Set<FileSystemClient> clients = createClients(machines, metadataServer, wakeOnLan);
+		
+		// instantiate energy consumption model
+		String energyConsumptionModelClassName = 
+				config.getProperty(BeefsEnergySimulationConstants.ENERGY_CONSUMPTION_MODEL); 
+		
+		EnergyConsumptionModel energyConsumptionModel;
+		try {
+			energyConsumptionModel = (EnergyConsumptionModel)Class.forName(energyConsumptionModelClassName).newInstance();
+		} catch (Throwable t) {
+			throw new RuntimeException("Could not instantiate EnergyConsumptionModel", t);
+		}
 		
 		// setup context
 		EventSourceMultiplexer eventSourceMultiplexer = 
 				createEventSourceMultiplexer(clients, machines, tracesDir);
 		
 		Context context = new Context(eventSourceMultiplexer);
-		context.add("machines", machines);
-		context.add("data_serves", dataServers);
-		context.add("metadata_server", metadataServer);
-		context.add("clients", clients);
+		context.add(BeefsEnergySimulationConstants.MACHINES, machines);
+		context.add(BeefsEnergySimulationConstants.DATA_SERVERS, dataServers);
+		context.add(BeefsEnergySimulationConstants.METADATA_SERVER, metadataServer);
+		context.add(BeefsEnergySimulationConstants.CLIENTS, clients);
+		context.add(BeefsEnergySimulationConstants.ENERGY_CONSUMPTION_MODEL, energyConsumptionModel);
 
 		return context;
 	}
