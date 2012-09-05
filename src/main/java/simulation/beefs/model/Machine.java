@@ -26,6 +26,21 @@ public class Machine {
 		BOOTSTRAP
 	}
 	
+	public static class MachineStateInterval {
+		private final State state;
+		private final TimeInterval interval;
+		public MachineStateInterval(State state, TimeInterval interval) {
+			this.state = state;
+			this.interval = interval;
+		}
+		public State getState() {
+			return state;
+		}
+		public TimeInterval getInterval() {
+			return interval;
+		}
+	}
+	
 	private interface MachineState {
 		MachineState toActive(TimeInterval interval);
 		MachineState toIdle(TimeInterval interval);
@@ -44,13 +59,7 @@ public class Machine {
 
 	private final Time transitionDuration;
 	
-	private final List<TimeInterval> userActivityIntervals = new ArrayList<TimeInterval>();
-	
-	private final List<TimeInterval> userIdlenessIntervals = new ArrayList<TimeInterval>();
-	
-	private final List<TimeInterval> transitionIntervals = new ArrayList<TimeInterval>();
-	
-	private final List<TimeInterval> sleepIntervals = new ArrayList<TimeInterval>();
+	private final List<MachineStateInterval> stateIntervals = new ArrayList<MachineStateInterval>();
 	
 	public Machine(String hostname, Time toSleepTimeout, Time transitionDuration) {
 		this.hostname = hostname;
@@ -64,19 +73,40 @@ public class Machine {
 	}
 
 	public List<TimeInterval> getUserActivityIntervals() {
-		return new ArrayList<TimeInterval>(userActivityIntervals);
+		State [] states = {State.ACTIVE};
+		return getIntervals(states);
 	}
 	
 	public List<TimeInterval> getUserIdlenessIntervals() {
-		return new ArrayList<TimeInterval>(userIdlenessIntervals);
+		State [] states = {State.IDLE};
+		return getIntervals(states);
 	}
 
 	public List<TimeInterval> getTransitionIntervals() {
-		return new ArrayList<TimeInterval>(transitionIntervals);
+		State [] states = {State.GOING_SLEEP, State.WAKING_UP};
+		return getIntervals(states);
 	}
 
 	public List<TimeInterval> getSleepIntervals() {
-		return new ArrayList<TimeInterval>(sleepIntervals);
+		State [] states = {State.SLEEPING};
+		return getIntervals(states);
+	}
+	
+	public List<MachineStateInterval> getStateIntervals() {
+		return new ArrayList<MachineStateInterval>(stateIntervals);
+	}
+	
+	private List<TimeInterval> getIntervals(State [] states) {
+		List<TimeInterval> intervals = new ArrayList<TimeInterval>();
+		for(MachineStateInterval stateInterval : stateIntervals) {
+			for(State state : states) {
+				if(stateInterval.getState() == state) {
+					intervals.add(stateInterval.getInterval());
+					break;
+				}
+			}
+		}
+		return intervals;
 	}
 	
 	public boolean isReachable() {
@@ -114,8 +144,8 @@ public class Machine {
 		return currentState.state();
 	}
 	
-	private void checkContinuity(List<TimeInterval> currentStateIntervals, TimeInterval next) {
-		TimeInterval last = currentStateIntervals.get(currentStateIntervals.size() - 1);
+	private void checkContinuity(TimeInterval next) {
+		TimeInterval last = stateIntervals.get(stateIntervals.size() - 1).getInterval();
 		if(!last.isContiguous(next)) {
 			throw new IllegalArgumentException("The interval duration of the next state must be contiguous to the " +
 					"interval duration of the current state.");
@@ -174,14 +204,14 @@ public class Machine {
 				sleepIsExpected = true;
 				interval = new TimeInterval(interval.begin(), interval.begin().plus(toSleepTimeout));
 			}
-			userIdlenessIntervals.add(interval);
+			stateIntervals.add(new MachineStateInterval(State.IDLE, interval));
 		}
 		@Override
 		public MachineState toActive(TimeInterval interval) {
 			if(sleepIsExpected) {
 				throw new IllegalStateException("transition to SLEEP is expected.");
 			}
-			checkContinuity(userIdlenessIntervals, interval); 
+			checkContinuity(interval); 
 			return new Active(interval);
 		}
 		@Override
@@ -193,7 +223,7 @@ public class Machine {
 			if(!sleepIsExpected) {
 				throw new IllegalStateException("transition to ACTIVE is expected");
 			}
-			checkContinuity(userIdlenessIntervals, interval);
+			checkContinuity(interval);
 			
 			Time sleepDuration =  Time.max(interval.delta().minus(transitionDuration), Time.GENESIS);
 			scheduleSleep(interval.begin().plus(transitionDuration), sleepDuration);
@@ -212,7 +242,7 @@ public class Machine {
 	
 	private class Active implements MachineState {
 		public Active(TimeInterval interval) {
-			userActivityIntervals.add(interval);
+			stateIntervals.add(new MachineStateInterval(State.ACTIVE, interval));
 		}
 		@Override
 		public MachineState toActive(TimeInterval interval) {
@@ -220,7 +250,7 @@ public class Machine {
 		}
 		@Override
 		public MachineState toIdle(TimeInterval interval) {
-			checkContinuity(userActivityIntervals, interval);
+			checkContinuity(interval);
 			return new Idle(interval);
 		}
 		@Override
@@ -239,11 +269,11 @@ public class Machine {
 	
 	private class Sleeping implements MachineState {
 		public Sleeping(TimeInterval interval) {
-			sleepIntervals.add(interval);
+			stateIntervals.add(new MachineStateInterval(State.SLEEPING, interval));
 		}
 		@Override
 		public MachineState toActive(TimeInterval interval) {
-			checkContinuity(sleepIntervals, interval);
+			checkContinuity(interval);
 			
 			scheduleUserActivity(interval.begin().plus(transitionDuration), interval.delta());
 			
@@ -262,13 +292,14 @@ public class Machine {
 			/*
 			 *  adjusts the time interval the machine really slept
 			 */
-			int lastElementIndex = sleepIntervals.size() - 1;
-			TimeInterval shouldSleepInterval = sleepIntervals.get(lastElementIndex);
+			int lastElementIndex = stateIntervals.size() - 1;
+			TimeInterval shouldSleepInterval = stateIntervals.get(lastElementIndex).getInterval();
 			if(shouldSleepInterval.end().isEarlierThan(when)) {
 				throw new IllegalStateException("This machine should already be awake.");
 			}
-			sleepIntervals.remove(lastElementIndex);
-			sleepIntervals.add(new TimeInterval(shouldSleepInterval.begin(), when));
+			stateIntervals.remove(lastElementIndex);
+			TimeInterval interval = new TimeInterval(shouldSleepInterval.begin(), when);
+			stateIntervals.add(new MachineStateInterval(State.SLEEPING, interval));
 
 			Time idlenessDuration = Time.max(shouldSleepInterval.end().minus(when).minus(transitionDuration), 
 					Time.GENESIS);
@@ -298,7 +329,7 @@ public class Machine {
 		
 		public GoingSleep(Time time) {
 			TimeInterval interval = new TimeInterval(time, time.plus(transitionDuration));
-			transitionIntervals.add(interval);
+			stateIntervals.add(new MachineStateInterval(State.GOING_SLEEP, interval));
 			transitionEnd = interval.end();
 		}
 		@Override
@@ -322,7 +353,7 @@ public class Machine {
 		}
 		@Override
 		public MachineState toSleep(TimeInterval interval) {
-			checkContinuity(transitionIntervals, interval);
+			checkContinuity(interval);
 			return new Sleeping(interval);
 		}
 		@Override
@@ -349,7 +380,7 @@ public class Machine {
 				
 		public WakingUp(Time time, boolean expectTransitionToIdle) {
 			transitionInterval = new TimeInterval(time, time.plus(transitionDuration));
-			transitionIntervals.add(transitionInterval);
+			stateIntervals.add(new MachineStateInterval(State.WAKING_UP, transitionInterval));
 			
 			this.expectTransitionToIdle = expectTransitionToIdle;
 		}
@@ -371,7 +402,7 @@ public class Machine {
 				neverEnteredHereBefore = false;
 				return this;
 			} else {
-				checkContinuity(transitionIntervals, interval);
+				checkContinuity(interval);
 				currentDelay = currentDelay.plus(delay);
 				return new Active(interval);
 			}
@@ -381,7 +412,7 @@ public class Machine {
 			if(!expectTransitionToIdle) {
 				throw new IllegalStateException("Transition to ACTIVE is expected.");
 			}
-			checkContinuity(transitionIntervals, interval);
+			checkContinuity(interval);
 			return new Idle(interval);
 		}
 		@Override
