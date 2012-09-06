@@ -22,130 +22,34 @@ import core.TimeInterval;
  */
 public class BeefsEnergySimulationSummarizer implements Summarizer {
 	
+	/*
+	 * TODO add javadoc explaining what the heck this method do. add ascii arts with examples of possible combinations
+	 */
 	private List<EnergyStateInterval> combine(DataServer dataServer) { 
-		List<EnergyStateInterval> combinedEnergyStatesIntervals;
+		// convert MachineStateIntervals to EnergyStateIntervals
+		List<EnergyStateInterval> combinedEnergyStatesIntervals = 
+				convertStates(dataServer.getHost().getStateIntervals());
 		
 		// combine writes
-		Iterator<MachineStateInterval> stateIntervalsIterator = dataServer.getHost().getStateIntervals().iterator();
 		Iterator<TimeInterval> writesIterator = dataServer.getWriteIntervals().iterator();
-		combinedEnergyStatesIntervals = combineWrites(stateIntervalsIterator, writesIterator);
+		combinedEnergyStatesIntervals = combine(combinedEnergyStatesIntervals.iterator(), writesIterator, false);
 
 		// combine reads 
 		Iterator<TimeInterval> readsIterator = dataServer.getReadIntervals().iterator();
-		combinedEnergyStatesIntervals = combineReads(combinedEnergyStatesIntervals.iterator(), readsIterator);
+		combinedEnergyStatesIntervals = combine(combinedEnergyStatesIntervals.iterator(), readsIterator, true);
 		
 		return combinedEnergyStatesIntervals;
 	}
 	
-	private List<EnergyStateInterval> combineWrites(Iterator<MachineStateInterval> stateIntervalsIterator, 
-			Iterator<TimeInterval> writesIterator) {
+	private List<EnergyStateInterval> convertStates(List<MachineStateInterval> stateIntervals) {
+		List<EnergyStateInterval> energyStatesIntervals = new ArrayList<EnergyStateInterval>();
 		
-		TimeInterval nextWriteInterval = getNext(writesIterator);
-		MachineStateInterval stateInterval = getNext(stateIntervalsIterator);
-		List<EnergyStateInterval> energyStatesIntervals = new ArrayList<EnergyStateInterval>();		
-		
-		while(stateInterval != null && nextWriteInterval != null) {
-			if(!stateInterval.getInterval().overlaps(nextWriteInterval)) { 
-				energyStatesIntervals.add(new EnergyStateInterval(convertState(stateInterval.getState()), 
-						stateInterval.getInterval()));
-				stateInterval = getNext(stateIntervalsIterator);
-			} else {
-				TimeInterval intersection = stateInterval.getInterval().intersection(nextWriteInterval);
-				TimeInterval [] stateIntervalMinusWriteInterval = stateInterval.getInterval().diff(nextWriteInterval);
-
-				EnergyState convertedState = convertState(stateInterval.getState());
-				energyStatesIntervals.add(new EnergyStateInterval(convertedState, 
-						stateIntervalMinusWriteInterval[0]));
-				energyStatesIntervals.add(new EnergyStateInterval(addWrite(convertedState), intersection));
-
-				if(stateIntervalMinusWriteInterval[1] != null) {
-					stateInterval = 
-							new MachineStateInterval(stateInterval.getState(), stateIntervalMinusWriteInterval[1]);
-					nextWriteInterval = getNext(writesIterator);
-				} else {
-					nextWriteInterval = nextWriteInterval.diff(stateInterval.getInterval())[0];
-					if(nextWriteInterval == null) {
-						nextWriteInterval = getNext(writesIterator);
-					}
-					stateInterval = getNext(stateIntervalsIterator);
-				}
-			}
-		}
-		
-		if(stateInterval != null) {
-			energyStatesIntervals.add(new EnergyStateInterval(convertState(stateInterval.getState()), 
-					stateInterval.getInterval()));
+		for(MachineStateInterval machineStateInterval : stateIntervals) {
+			energyStatesIntervals.add(new EnergyStateInterval(convertState(machineStateInterval.getState()), 
+					machineStateInterval.getInterval()));
 		}
 		
 		return energyStatesIntervals;
-	}
-	
-	private EnergyState addWrite(EnergyState state) {
-		EnergyState statePlusRead;
-		switch(state) {
-		case READ_ACTIVE: statePlusRead = EnergyState.READ_WRITE_ACTIVE; break;
-		case READ_IDLE: statePlusRead = EnergyState.READ_WRITE_IDLE; break;
-		case ACTIVE: statePlusRead = EnergyState.WRITE_ACTIVE; break;
-		case IDLE: statePlusRead = EnergyState.WRITE_IDLE; break;
-		default: 
-			throw new IllegalArgumentException("Could not add " + state + " and WRITE");
-		}
-		return statePlusRead;
-	}
-	
-	private List<EnergyStateInterval> combineReads(Iterator<EnergyStateInterval> partiallyCombinedIntervalsIterator, 
-			Iterator<TimeInterval> readsIterator) {
-		
-		List<EnergyStateInterval> combinedStates = new ArrayList<EnergyStateInterval>();
-		
-		TimeInterval nextReadInterval = getNext(readsIterator);
-		EnergyStateInterval energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
-		
-		while(energyStateInterval != null && nextReadInterval != null) {
-			if(!energyStateInterval.getInterval().overlaps(nextReadInterval)) { 
-				combinedStates.add(energyStateInterval);
-				energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
-			} else {
-				TimeInterval intersection = energyStateInterval.getInterval().intersection(nextReadInterval);
-				TimeInterval [] stateIntervalMinusReadInterval = energyStateInterval.getInterval().diff(nextReadInterval);
-
-				EnergyState energyState = energyStateInterval.getEnergyState();
-				combinedStates.add(new EnergyStateInterval(energyState, 
-						stateIntervalMinusReadInterval[0]));
-				combinedStates.add(new EnergyStateInterval(addRead(energyState), intersection));
-
-				if(stateIntervalMinusReadInterval[1] != null) {
-					energyStateInterval = new EnergyStateInterval(energyStateInterval.getEnergyState(), 
-							stateIntervalMinusReadInterval[1]);
-					nextReadInterval = getNext(readsIterator);
-				} else {
-					nextReadInterval = nextReadInterval.diff(energyStateInterval.getInterval())[0];
-					if(nextReadInterval == null) {
-						nextReadInterval = getNext(readsIterator);
-					}
-					energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
-				}
-			}
-		}
-		
-		if(energyStateInterval != null) {
-			combinedStates.add(energyStateInterval);
-		}
-		
-		return combinedStates;
-	}
-
-	private EnergyState addRead(EnergyState state) {
-		EnergyState statePlusRead;
-		switch(state) {
-		case WRITE_ACTIVE: statePlusRead = EnergyState.READ_WRITE_ACTIVE; break;
-		case WRITE_IDLE: statePlusRead = EnergyState.READ_WRITE_IDLE; break;
-		case ACTIVE: statePlusRead = EnergyState.READ_ACTIVE; break;
-		case IDLE: statePlusRead = EnergyState.READ_IDLE; break;
-		default: 
-			throw new IllegalArgumentException("Could not add " + state + " and READ");
-		}
-		return statePlusRead;
 	}
 
 	private EnergyState convertState(State state) {
@@ -161,6 +65,50 @@ public class BeefsEnergySimulationSummarizer implements Summarizer {
 				throw new IllegalArgumentException("Could not convert " + state);
 		}
 		return converted;
+	}
+	
+	private List<EnergyStateInterval> combine(Iterator<EnergyStateInterval> partiallyCombinedIntervalsIterator, 
+			Iterator<TimeInterval> operationIntervalsIterator, boolean areReadIntervals) {
+		
+		List<EnergyStateInterval> combinedStates = new ArrayList<EnergyStateInterval>();
+		
+		TimeInterval nextOperationInterval = getNext(operationIntervalsIterator);
+		EnergyStateInterval energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
+		
+		while(energyStateInterval != null && nextOperationInterval != null) {
+			if(!energyStateInterval.getInterval().overlaps(nextOperationInterval)) { 
+				combinedStates.add(energyStateInterval);
+				energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
+			} else {
+				TimeInterval intersection = energyStateInterval.getInterval().intersection(nextOperationInterval);
+				TimeInterval [] stateIntervalMinusReadInterval = energyStateInterval.getInterval().diff(nextOperationInterval);
+
+				EnergyState energyState = energyStateInterval.getEnergyState();
+				combinedStates.add(new EnergyStateInterval(energyState, 
+						stateIntervalMinusReadInterval[0]));
+				
+				EnergyState newEnergyState = areReadIntervals ? energyState.addRead() : energyState.addWrite();
+				combinedStates.add(new EnergyStateInterval(newEnergyState, intersection));
+
+				if(stateIntervalMinusReadInterval[1] != null) {
+					energyStateInterval = new EnergyStateInterval(energyStateInterval.getEnergyState(), 
+							stateIntervalMinusReadInterval[1]);
+					nextOperationInterval = getNext(operationIntervalsIterator);
+				} else {
+					nextOperationInterval = nextOperationInterval.diff(energyStateInterval.getInterval())[0];
+					if(nextOperationInterval == null) {
+						nextOperationInterval = getNext(operationIntervalsIterator);
+					}
+					energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
+				}
+			}
+		}
+		
+		if(energyStateInterval != null) {
+			combinedStates.add(energyStateInterval);
+		}
+		
+		return combinedStates;
 	}
 
 	private <T> T getNext(Iterator<T> iterator) {
