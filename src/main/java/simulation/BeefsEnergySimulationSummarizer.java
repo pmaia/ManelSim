@@ -81,18 +81,18 @@ public class BeefsEnergySimulationSummarizer implements Summarizer {
 				energyStateInterval = getNext(partiallyCombinedIntervalsIterator);
 			} else {
 				TimeInterval intersection = energyStateInterval.getInterval().intersection(nextOperationInterval);
-				TimeInterval [] stateIntervalMinusReadInterval = energyStateInterval.getInterval().diff(nextOperationInterval);
+				TimeInterval [] stateIntervalMinusOperationInterval = energyStateInterval.getInterval().diff(nextOperationInterval);
 
 				EnergyState energyState = energyStateInterval.getEnergyState();
 				combinedStates.add(new EnergyStateInterval(energyState, 
-						stateIntervalMinusReadInterval[0]));
+						stateIntervalMinusOperationInterval[0]));
 				
 				EnergyState newEnergyState = areReadIntervals ? energyState.addRead() : energyState.addWrite();
 				combinedStates.add(new EnergyStateInterval(newEnergyState, intersection));
 
-				if(stateIntervalMinusReadInterval[1] != null) {
+				if(stateIntervalMinusOperationInterval[1] != null) {
 					energyStateInterval = new EnergyStateInterval(energyStateInterval.getEnergyState(), 
-							stateIntervalMinusReadInterval[1]);
+							stateIntervalMinusOperationInterval[1]);
 					nextOperationInterval = getNext(operationIntervalsIterator);
 				} else {
 					nextOperationInterval = nextOperationInterval.diff(energyStateInterval.getInterval())[0];
