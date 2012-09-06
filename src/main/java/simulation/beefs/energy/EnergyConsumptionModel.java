@@ -13,5 +13,5 @@ public interface EnergyConsumptionModel {
 	 * @param intervals
 	 * @return the total energy consumption in kilowatts-hour 
 	 */
-	long getConsumption(List<EnergyStateInterval> intervals);
+	double getConsumption(List<EnergyStateInterval> intervals);
 }
