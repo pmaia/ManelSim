@@ -1,6 +1,6 @@
 package simulation.beefs.energy;
 
-enum EnergyState {
+public enum EnergyState {
 	READ_ACTIVE,
 	READ_IDLE,
 	WRITE_ACTIVE,

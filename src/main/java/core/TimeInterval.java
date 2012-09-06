@@ -46,6 +46,12 @@ public class TimeInterval {
 		return (begin.compareTo(time) <= 0) && (time.compareTo(end) <= 0);
 	}
 	
+	/**
+	 * Merge two overlapping intervals.
+	 * 
+	 * @param otherInterval
+	 * @return the intervals merged
+	 */
 	public TimeInterval merge(TimeInterval otherInterval) {
 		if(!overlaps(otherInterval))
 			throw new IllegalArgumentException("It is not possible to merge non overlapping intervals.");
@@ -56,8 +62,43 @@ public class TimeInterval {
 		return new TimeInterval(resultBegin, resultEnd);
 	}
 	
+	public TimeInterval intersection(TimeInterval otherInterval) {
+		TimeInterval interval = null;
+		if(overlaps(otherInterval)) {
+			Time begin = this.begin.isEarlierThan(otherInterval.begin) ? otherInterval.begin : this.begin;
+			Time end = this.end.isEarlierThan(otherInterval.end) ? this.end : otherInterval.end;
+			interval = new TimeInterval(begin, end);
+		}
+		return interval;
+	}
+	
+	public TimeInterval [] diff(TimeInterval otherInterval) {
+		TimeInterval [] result = new TimeInterval[2];
+		int i = 0;
+		if(overlaps(otherInterval)) {
+			TimeInterval intersection = intersection(otherInterval);
+			if(!equals(intersection)) { 
+				// if this interval were equal to intersection then this interval is a subset of otherInterval and the diff is an empty set
+				if(begin.isEarlierThan(intersection.begin)) {
+					result[i++] = new TimeInterval(begin, intersection.begin); // part 1
+				}
+				if(intersection.end.isEarlierThan(end)) {
+					result[i] = new TimeInterval(intersection.end, end); // part 2
+				}
+			}
+		} else {
+			result[i] = this;
+		}
+		return result;
+	}
+	
 	public Time delta() {
 		return end.minus(begin);
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("[%s, %s]", begin, end);
 	}
 	
 	@Override
