@@ -1,20 +1,20 @@
 package simulation.beefs.event.filesystem;
 
+import simulation.beefs.event.MachineDelaybleEvent;
 import simulation.beefs.model.FileSystemClient;
-import core.Event;
 import core.Time;
 
 /**
  *
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class Unlink extends Event {
+public class Unlink extends MachineDelaybleEvent {
 	
 	private final String filePath;
 	private final FileSystemClient client;
 	
 	public Unlink(FileSystemClient client, Time aScheduledTime, String filePath) {
-		super(aScheduledTime);
+		super(client.getHost(), aScheduledTime);
 		
 		this.client = client;
 		this.filePath = filePath;

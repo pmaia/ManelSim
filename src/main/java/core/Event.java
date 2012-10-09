@@ -36,7 +36,7 @@ public abstract class Event implements Comparable<Event> {
 
 	@Override
 	public int compareTo(Event o) {
-		return this.scheduledTime.compareTo(o.scheduledTime);
+		return this.getScheduledTime().compareTo(o.getScheduledTime());
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public abstract class Event implements Comparable<Event> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((scheduledTime == null) ? 0 : scheduledTime.hashCode());
+				+ ((getScheduledTime() == null) ? 0 : getScheduledTime().hashCode());
 		return result;
 	}
 
@@ -57,10 +57,10 @@ public abstract class Event implements Comparable<Event> {
 		if (getClass() != obj.getClass())
 			return false;
 		Event other = (Event) obj;
-		if (scheduledTime == null) {
-			if (other.scheduledTime != null)
+		if (getScheduledTime() == null) {
+			if (other.getScheduledTime() != null)
 				return false;
-		} else if (!scheduledTime.equals(other.scheduledTime))
+		} else if (!getScheduledTime().equals(other.getScheduledTime()))
 			return false;
 		return true;
 	}

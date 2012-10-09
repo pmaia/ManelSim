@@ -1,14 +1,14 @@
 package simulation.beefs.event.filesystem;
 
+import simulation.beefs.event.MachineDelaybleEvent;
 import simulation.beefs.model.FileSystemClient;
-import core.Event;
 import core.Time;
 
 /**
  * 
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
  */
-public class Write extends Event {
+public class Write extends MachineDelaybleEvent {
 
 	private final long bytesTransfered;
 	private final long fileSize;
@@ -19,7 +19,7 @@ public class Write extends Event {
 	public Write(FileSystemClient client, Time scheduledTime, Time duration, String filePath, 
 			long bytesTransfered, long fileSize) {
 		
-		super(scheduledTime);
+		super(client.getHost(), scheduledTime);
 		
 		this.client = client;
 		this.bytesTransfered = bytesTransfered;

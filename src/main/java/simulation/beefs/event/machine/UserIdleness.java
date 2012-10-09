@@ -1,5 +1,6 @@
 package simulation.beefs.event.machine;
 
+import simulation.beefs.event.MachineDelaybleEvent;
 import simulation.beefs.model.Machine;
 import core.Event;
 import core.Time;
@@ -9,14 +10,14 @@ import core.Time;
  *
  * @author Patrick Maia
  */
-public class UserIdleness extends Event {
+public class UserIdleness extends MachineDelaybleEvent {
 	
 	private final Machine machine;
 	
 	private final Time duration;
 	
 	public UserIdleness(Machine machine, Time scheduledTime, Time duration) {
-		super(scheduledTime);
+		super(machine, scheduledTime);
 		
 		this.machine = machine;
 		this.duration = duration;

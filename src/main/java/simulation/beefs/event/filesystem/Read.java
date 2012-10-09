@@ -1,7 +1,7 @@
 package simulation.beefs.event.filesystem;
 
+import simulation.beefs.event.MachineDelaybleEvent;
 import simulation.beefs.model.FileSystemClient;
-import core.Event;
 import core.Time;
 
 /**
@@ -9,7 +9,7 @@ import core.Time;
  * @author Patrick Maia
  *
  */
-public class Read extends Event {
+public class Read extends MachineDelaybleEvent {
 
 	private final long bytesTransfered;
 	private final String filePath;
@@ -17,7 +17,7 @@ public class Read extends Event {
 	private final Time duration;
 
 	public Read(FileSystemClient client, Time scheduledTime, Time duration, String filePath, long bytesTransfered) {
-		super(scheduledTime);
+		super(client.getHost(), scheduledTime);
 		
 		this.duration = duration;
 		this.client = client;
