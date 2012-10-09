@@ -50,7 +50,7 @@ public class UserActivityTraceEventSource implements EventSource {
 				}
 				
 				String eventType = tokens[0];
-				Time aScheduledTime = new Time(Long.parseLong(tokens[1]), Unit.SECONDS);
+				Time aScheduledTime = new Time(Long.parseLong(tokens[1]), Unit.SECONDS).plus(machine.currentDelay());
 				Time duration = new Time(Long.parseLong(tokens[2]), Unit.SECONDS);
 				
 				if(eventType.equals("idleness")) {
