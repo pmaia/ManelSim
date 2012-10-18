@@ -64,7 +64,7 @@ public class MachineTransitionsFromWakingUpToIdleTest {
 	public void testTransitionToIdle() {
 		machineWakingUpToIdle.setIdle(TO_SLEEP_TIMEOUT.plus(TRANSITION_DURATION.times(2)), ONE_MINUTE);
 		assertEquals(State.IDLE, machineWakingUpToIdle.getState());
-		assertEquals(Time.GENESIS, machineWakingUpToIdle.currentDelay());
+		assertEquals(TRANSITION_DURATION, machineWakingUpToIdle.currentDelay());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

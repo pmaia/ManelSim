@@ -206,7 +206,7 @@ public class WriteTest {
 		Time theTimeJurupocaMustWakeUp = aTimeJurupocaIsSleeping.plus(TRANSITION_DURATION);
 
 		UserIdleness userIdleness = new UserIdleness(jurupoca, theTimeJurupocaMustWakeUp, 
-				new Time(18*60, Unit.SECONDS).minus(theTimeJurupocaMustWakeUp));
+				new Time(18*60, Unit.SECONDS).minus(theTimeJurupocaMustWakeUp), false);
 		assertTrue(eventsMultiplexer.contains(userIdleness));
 		
 		write = new Write(otherClient, theTimeJurupocaMustWakeUp.plus(ONE_SECOND), writeDuration, 

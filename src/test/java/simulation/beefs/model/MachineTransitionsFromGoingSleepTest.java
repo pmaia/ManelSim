@@ -66,7 +66,7 @@ public class MachineTransitionsFromGoingSleepTest {
 		assertEquals(transitionEnd.minus(activityStart), machineGoingSleep.currentDelay());
 		assertEquals(State.GOING_SLEEP, machineGoingSleep.getState());
 		
-		UserActivity activityEvent = new UserActivity(machineGoingSleep, transitionEnd, ONE_MINUTE);
+		UserActivity activityEvent = new UserActivity(machineGoingSleep, transitionEnd, ONE_MINUTE, false);
 		assertTrue(eventsMultiplexer.contains(activityEvent));
 	}
 	

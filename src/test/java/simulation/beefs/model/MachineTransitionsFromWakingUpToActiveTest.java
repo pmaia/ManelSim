@@ -102,7 +102,7 @@ public class MachineTransitionsFromWakingUpToActiveTest {
 		machineWakingUpToActive.setActive(TO_SLEEP_TIMEOUT.plus(ONE_MINUTE), ONE_MINUTE); 
 		assertEquals(State.WAKING_UP, machineWakingUpToActive.getState());
 		UserActivity userActivity = 
-			new UserActivity(machineWakingUpToActive, wakeOnLanTime.plus(TRANSITION_DURATION), ONE_MINUTE);
+			new UserActivity(machineWakingUpToActive, wakeOnLanTime.plus(TRANSITION_DURATION), ONE_MINUTE, false);
 		assertTrue(eventsMultiplexer.contains(userActivity));
 		
 		EventScheduler.start();
@@ -129,7 +129,7 @@ public class MachineTransitionsFromWakingUpToActiveTest {
 		machineWakingUpToActive.setActive(TO_SLEEP_TIMEOUT.plus(ONE_MINUTE), ONE_MINUTE); 
 		assertEquals(State.WAKING_UP, machineWakingUpToActive.getState());
 		UserActivity userActivity = 
-			new UserActivity(machineWakingUpToActive, wakeOnLanTime.plus(TRANSITION_DURATION), ONE_MINUTE);
+			new UserActivity(machineWakingUpToActive, wakeOnLanTime.plus(TRANSITION_DURATION), ONE_MINUTE, false);
 		assertTrue(eventsMultiplexer.contains(userActivity));
 		
 		machineWakingUpToActive.setActive(TO_SLEEP_TIMEOUT.plus(ONE_MINUTE), ONE_MINUTE);

@@ -207,7 +207,7 @@ public class ReadTest {
 		Time theTimeJurupocaMustWakeUp = aTimeJurupocaIsSleeping.plus(TRANSITION_DURATION);
 
 		UserIdleness userIdleness = new UserIdleness(jurupoca, theTimeJurupocaMustWakeUp, 
-				new Time(18*60, Unit.SECONDS).minus(theTimeJurupocaMustWakeUp));
+				new Time(18*60, Unit.SECONDS).minus(theTimeJurupocaMustWakeUp), false);
 		assertTrue(eventsMultiplexer.contains(userIdleness));
 		
 		read = new Read(otherClient, theTimeJurupocaMustWakeUp.plus(ONE_SECOND), readDuration, fullpath, 1024);
