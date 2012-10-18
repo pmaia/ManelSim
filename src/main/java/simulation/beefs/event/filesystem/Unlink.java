@@ -14,7 +14,7 @@ public class Unlink extends MachineDelaybleEvent {
 	private final FileSystemClient client;
 	
 	public Unlink(FileSystemClient client, Time aScheduledTime, String filePath) {
-		super(client.getHost(), aScheduledTime);
+		super(client.getHost(), aScheduledTime, true);
 		
 		this.client = client;
 		this.filePath = filePath;

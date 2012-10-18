@@ -19,7 +19,7 @@ public class Write extends MachineDelaybleEvent {
 	public Write(FileSystemClient client, Time scheduledTime, Time duration, String filePath, 
 			long bytesTransfered, long fileSize) {
 		
-		super(client.getHost(), scheduledTime);
+		super(client.getHost(), scheduledTime, true);
 		
 		this.client = client;
 		this.bytesTransfered = bytesTransfered;

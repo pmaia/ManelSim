@@ -127,8 +127,7 @@ public class FileSystemTraceEventSource implements EventSource {
 		String [] timestampAndDuration = traceTimestamp.split("-");
 		
 		parsedTimes[0] = 
-				new Time(Long.parseLong(timestampAndDuration[0]), Unit.MICROSECONDS).
-				plus(client.getHost().currentDelay());
+				new Time(Long.parseLong(timestampAndDuration[0]), Unit.MICROSECONDS);
 		parsedTimes[1] =
 				new Time(Long.parseLong(timestampAndDuration[1]), Unit.MICROSECONDS);
 		

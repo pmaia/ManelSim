@@ -14,7 +14,7 @@ public class Close extends MachineDelaybleEvent {
 	private final FileSystemClient client;
 
 	public Close(FileSystemClient client, Time scheduledTime, String filePath) {
-		super(client.getHost(), scheduledTime);
+		super(client.getHost(), scheduledTime, true);
 		
 		this.filePath = filePath;
 		this.client = client;
