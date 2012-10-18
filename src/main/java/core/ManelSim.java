@@ -57,7 +57,11 @@ public class ManelSim {
 		Time simulationEnd = new Time(Long.parseLong(config.getProperty("simulation_end")), Unit.SECONDS);
 		
 		EventScheduler.setup(simulationStart, simulationEnd, context.getEventSourceMultiplexer());
-		EventScheduler.start();
+		try {
+			EventScheduler.start();
+		} catch (Throwable t) {
+			throw new RuntimeException("Simulation failed at time: " + EventScheduler.now(), t);
+		}
 		
 		System.out.println(summarizer.summarize(context));
 		
