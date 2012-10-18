@@ -147,8 +147,9 @@ public class Machine {
 	private void checkContinuity(TimeInterval next) {
 		TimeInterval last = stateIntervals.get(stateIntervals.size() - 1).getInterval();
 		if(!last.isContiguous(next)) {
-			throw new IllegalArgumentException("The interval duration of the next state must be contiguous to the " +
-					"interval duration of the current state.");
+			String msg = String.format("The interval duration of the next state must be contiguous to the " +
+					"interval duration of the current state. Current interval is %s. You tried this %s.", last, next);
+			throw new IllegalArgumentException(msg);
 		}
 	}
 	
@@ -158,11 +159,11 @@ public class Machine {
 	}
 	
 	private void scheduleUserActivity(Time begin, Time duration) {
-		EventScheduler.schedule(new UserActivity(this, begin, duration));
+		EventScheduler.schedule(new UserActivity(this, begin, duration, false));
 	}
 	
 	private void scheduleUserIdleness(Time begin, Time duration) {
-		EventScheduler.schedule(new UserIdleness(this, begin, duration));
+		EventScheduler.schedule(new UserIdleness(this, begin, duration, false));
 	}
 	
 	private void scheduleWakeOnLan(Time when) {
@@ -375,13 +376,12 @@ public class Machine {
 		private final TimeInterval transitionInterval;
 		private final boolean expectTransitionToIdle;
 		
-		private Time delay = transitionDuration;
 		private boolean neverEnteredHereBefore = true;
 				
 		public WakingUp(Time time, boolean expectTransitionToIdle) {
 			transitionInterval = new TimeInterval(time, time.plus(transitionDuration));
 			stateIntervals.add(new MachineStateInterval(State.WAKING_UP, transitionInterval));
-			
+			currentDelay = currentDelay.plus(transitionDuration);
 			this.expectTransitionToIdle = expectTransitionToIdle;
 		}
 		@Override
@@ -391,19 +391,20 @@ public class Machine {
 			}
 			
 			if(interval.begin().compareTo(transitionInterval.begin()) >= 0 &&
-					interval.begin().compareTo(transitionInterval.end()) < 0) { 
+					interval.begin().compareTo(transitionInterval.end()) < 0) { //FIXME add a comment explaining when does it happen
 			
 				if(!neverEnteredHereBefore) {
 					throw new IllegalStateException("Right call, wrong time." +
 							" This was expected by the end of the current transition.");
 				}
 				scheduleUserActivity(transitionInterval.end(), interval.delta());
-				delay = transitionInterval.end().minus(interval.begin());
+				// adjusts the machine delay caused by this transition
+				currentDelay = 
+					currentDelay.minus(transitionDuration).plus(transitionInterval.end().minus(interval.begin()));
 				neverEnteredHereBefore = false;
 				return this;
 			} else {
 				checkContinuity(interval);
-				currentDelay = currentDelay.plus(delay);
 				return new Active(interval);
 			}
 		}

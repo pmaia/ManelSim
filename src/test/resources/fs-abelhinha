@@ -1,3 +1,6 @@
 read	0-1428	/home/thiagoepdc/.config/google-chrome/Default/Cookies/	16
 write	10-84	/home/thiagoepdc/.config/google-chrome/Default/Cookies-journal/	512
 close	20-22	/home/thiagoepdc/.config/google-chrome/Default/Cookies-journal/
+read  916000000-10 /home/thiagoepdc/file.txt  1024
+read  918000000-10 /home/thiagoepdc/file.txt  1024
+read  920000000-10 /home/thiagoepdc/file.txt  1024
