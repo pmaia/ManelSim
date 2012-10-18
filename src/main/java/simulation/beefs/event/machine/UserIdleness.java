@@ -17,7 +17,11 @@ public class UserIdleness extends MachineDelaybleEvent {
 	private final Time duration;
 	
 	public UserIdleness(Machine machine, Time scheduledTime, Time duration) {
-		super(machine, scheduledTime);
+		this(machine, scheduledTime, duration, true);
+	}
+	
+	public UserIdleness(Machine machine, Time scheduledTime, Time duration, boolean delayable) {
+		super(machine, scheduledTime, delayable);
 		
 		this.machine = machine;
 		this.duration = duration;

@@ -14,7 +14,11 @@ public class UserActivity extends MachineDelaybleEvent {
 	private final Time duration;
 	
 	public UserActivity(Machine host, Time scheduledTime, Time duration) {
-		super(host, scheduledTime);
+		this(host, scheduledTime, duration, true);
+	}
+	
+	public UserActivity(Machine host, Time scheduledTime, Time duration, boolean delayable) {
+		super(host, scheduledTime, delayable);
 		
 		this.host = host;
 		this.duration = duration;

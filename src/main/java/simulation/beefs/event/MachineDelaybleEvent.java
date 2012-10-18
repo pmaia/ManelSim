@@ -11,15 +11,19 @@ public abstract class MachineDelaybleEvent extends Event {
 
 	private final Machine machine;
 	
-	public MachineDelaybleEvent(Machine machine, Time scheduledTime) {
+	private final boolean delayable;
+	
+	public MachineDelaybleEvent(Machine machine, Time scheduledTime, boolean delayable) {
 		super(scheduledTime);
 		
 		this.machine = machine;
+		this.delayable = delayable;
 	}
 	
 	@Override
 	public Time getScheduledTime() {
-		return super.getScheduledTime().plus(machine.currentDelay());
+		Time delay = delayable ? machine.currentDelay() : Time.GENESIS;
+		return super.getScheduledTime().plus(delay);
 	}
 
 	@Override
