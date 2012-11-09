@@ -107,19 +107,19 @@ public class FileSystemClient {
 		metadataServer.delete(filePath);		
 	}
 
-	public long readsWhileClientSleeping() {
+	public long readsWhileClientSleeping() {//try to remove
 		return readsWhileClientSleeping;
 	}
 
-	public long readsWhileDataServerSleeping() {
+	public long readsWhileDataServerSleeping() {//try to remove
 		return readsWhileDataServerSleeping;
 	}
 
-	public long writesWhileDataServerSleeping() {
+	public long writesWhileDataServerSleeping() {//try to remove
 		return writesWhileDataServerSleeping;
 	}
 
-	public long writesWhileClientSleeping() {
+	public long writesWhileClientSleeping() {//try to remove
 		return writesWhileClientSleeping;
 	}
 

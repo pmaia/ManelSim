@@ -30,11 +30,13 @@ public class MetadataServer {
 
 	public MetadataServer(Set<DataServer> dataServers, String dataPlacementStrategy, 
 			int replicationLevel, Time timeToCoherence, Time timeToDelete) {
-		
+
+		//didn't like it. add a ds to a machine.
 		for(DataServer dataServer : dataServers) {
 			dataServerByHost.put(dataServer.getHost().getName(), dataServer);
 		}
 		
+		//FIXME: receive the placement alg. as arg
 		this.dataPlacement = DataPlacementAlgorithm.newDataPlacementAlgorithm(dataPlacementStrategy, dataServers);
 		this.replicationLevel = replicationLevel;
 		this.timeToCoherence = timeToCoherence;
@@ -78,6 +80,7 @@ public class MetadataServer {
 	}
 	
 	public DataServer getDataServer(String host) {
+		//FIXME: didn't like it
 		return dataServerByHost.get(host);
 	}
 

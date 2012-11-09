@@ -1,64 +1,60 @@
 package simulation.beefs.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import core.Time;
-import core.TimeInterval;
-
 /**
  * 
  * @author Patrick Maia
- *
  */
 public class DataServer {
 	
+	//DataServer does not track its own files. We keep this logic in ReplicatedFile. 
+	//It saves a lot of memory
+
+	private long totalSpaceBytes;
+	private long usedSpace = 0;
+	
 	private final Machine host;
 
-	private List<TimeInterval> writeIntervals = new ArrayList<TimeInterval>();
-	private List<TimeInterval> readIntervals = new ArrayList<TimeInterval>();
-	
-	public DataServer(Machine host) {
+	public DataServer(Machine host, long totalSpaceBytes) {
 		this.host = host;
-	}
-
-	public List<TimeInterval> getWriteIntervals() {
-		return new ArrayList<TimeInterval>(writeIntervals);
-	}
-	
-	public List<TimeInterval> getReadIntervals() {
-		return new ArrayList<TimeInterval>(readIntervals);
+		this.totalSpaceBytes = totalSpaceBytes;
 	}
 
 	public Machine getHost() {
 		return host;
 	}
-
-	public void reportWrite(Time start, Time duration) {
-		writeIntervals = reportOperation(start, duration, writeIntervals);
-	}
-
-	public void reportRead(Time start, Time duration) {
-		readIntervals = reportOperation(start, duration, readIntervals);
+	
+	public void consume(long bytesToConsume) {
+		
+		if (bytesToConsume < 0) {
+			throw new IllegalArgumentException("Cannot consume negative bytes: " +
+												+ bytesToConsume);
+		}
+		
+		if (availableSpace() < bytesToConsume) {
+			throw new RuntimeException("no space available: " + availableSpace()
+										+ " requestedSpace: " + bytesToConsume);
+		}
 	}
 	
-	private List<TimeInterval> reportOperation(Time start, Time duration, List<TimeInterval> originalIntervals) {
-		TimeInterval newInterval = new TimeInterval(start, start.plus(duration));
-
-		List<TimeInterval> updatedIntervalsList = new ArrayList<TimeInterval>();
-		updatedIntervalsList.add(newInterval);
-
-		for(TimeInterval interval : originalIntervals) {
-			if(interval.overlaps(newInterval)) {
-				updatedIntervalsList.remove(newInterval);
-				newInterval = interval.merge(newInterval);
-				updatedIntervalsList.add(newInterval);
-			} else {
-				updatedIntervalsList.add(interval);
-			}
+	public void release(long bytesToRelease) {
+		
+		if (bytesToRelease < 0) {
+			throw new IllegalArgumentException("Cannot release negative bytes: " +
+												+ bytesToRelease);
 		}
-
-		return updatedIntervalsList;
+		
+		if ((availableSpace() + bytesToRelease) > totalSpaceBytes) {
+			throw new RuntimeException("resource misbalance ? " +
+					"available: " + availableSpace() + 
+					"bytesToRelease: " + bytesToRelease +
+					"totalSpace: " + totalSpaceBytes);
+		}
+		
+		this.usedSpace -= bytesToRelease;
+	}
+	
+	public long availableSpace() {
+		return totalSpaceBytes - usedSpace;
 	}
 
 }

@@ -17,7 +17,16 @@ public class ReplicatedFile {
 	private long size = 0;
 	private boolean replicasAreConsistent = true;
 	
+	/**
+	 * Creates a {@link ReplicatedFile} abstraction to model
+	 * a distributed store. 
+	 * 
+	 * @param fullpath
+	 * @param primary
+	 * @param secondaries
+	 */
 	public ReplicatedFile(String fullpath, DataServer primary, Set<DataServer> secondaries) {
+		//FIXME: rlevel
 		this.fullpath = fullpath;
 		this.primary = primary;
 		this.secondaries = secondaries;
