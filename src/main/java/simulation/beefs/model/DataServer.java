@@ -1,56 +1,144 @@
 package simulation.beefs.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import core.Time;
+import core.TimeInterval;
+
 /**
  * 
  * @author Patrick Maia
+ * @author manel
  */
 public class DataServer {
 	
-	//DataServer does not track its own files. We keep this logic in ReplicatedFile. 
-	//It saves a lot of memory
+	private List<TimeInterval> writeIntervals = new ArrayList<TimeInterval>();
+	private List<TimeInterval> readIntervals = new ArrayList<TimeInterval>();
 
 	private long totalSpaceBytes;
 	private long usedSpace = 0;
 	
+	private Map<String, Long> primaries = new HashMap<String, Long>();
+	private Map<String, Long> secs = new HashMap<String, Long>();
+	
 	private final Machine host;
+	
+	public DataServer(Machine host) {
+		this(host, Long.MAX_VALUE);
+	}
 
 	public DataServer(Machine host, long totalSpaceBytes) {
 		this.host = host;
 		this.totalSpaceBytes = totalSpaceBytes;
 	}
 
-	public Machine getHost() {
+	public Machine getHost() {//can we remove it ?FIXME:
 		return host;
 	}
 	
-	public void consume(long bytesToConsume) {
+	public List<TimeInterval> getWriteIntervals() {
+		return new ArrayList<TimeInterval>(writeIntervals);
+	}
+	
+	public List<TimeInterval> getReadIntervals() {
+		return new ArrayList<TimeInterval>(readIntervals);
+	}
+	
+	public void reportWrite(Time start, Time duration) {
+		writeIntervals = reportOperation(start, duration, writeIntervals);
+	}
+
+	public void reportRead(Time start, Time duration) {
+		readIntervals = reportOperation(start, duration, readIntervals);
+	}
+	
+	private List<TimeInterval> reportOperation(Time start, Time duration, List<TimeInterval> originalIntervals) {
+		TimeInterval newInterval = new TimeInterval(start, start.plus(duration));
+
+		List<TimeInterval> updatedIntervalsList = new ArrayList<TimeInterval>();
+		updatedIntervalsList.add(newInterval);
+
+		for(TimeInterval interval : originalIntervals) {
+			if(interval.overlaps(newInterval)) {
+				updatedIntervalsList.remove(newInterval);
+				newInterval = interval.merge(newInterval);
+				updatedIntervalsList.add(newInterval);
+			} else {
+				updatedIntervalsList.add(interval);
+			}
+		}
+
+		return updatedIntervalsList;
+	}
+	
+	public void createReplica(String fullpath, boolean primary) {
 		
-		if (bytesToConsume < 0) {
-			throw new IllegalArgumentException("Cannot consume negative bytes: " +
-												+ bytesToConsume);
+		if (primaries.containsKey(fullpath) || secs.containsKey(fullpath)) {
+			throw new IllegalArgumentException("File: " + fullpath +
+					" already exists.");
 		}
 		
-		if (availableSpace() < bytesToConsume) {
-			throw new RuntimeException("no space available: " + availableSpace()
-										+ " requestedSpace: " + bytesToConsume);
+		((primary) ? primaries : secs).put(fullpath, 0L); 
+	}
+	
+	public void update(String fullpath, long newSize) {
+		
+		if (newSize < 0) {
+			throw new IllegalArgumentException("File sizes cannot be negative: " +
+				+ newSize);
+		}
+		
+		Map<String, Long> pool = selectPool(fullpath);
+		if (pool == null) {
+			throw new IllegalArgumentException("File not found: " + fullpath);
+		}
+		
+		long oldSize = pool.get(fullpath);
+		long increment = newSize - oldSize;
+		
+		if (increment > availableSpace()) {
+			throw new InsufficientSpaceException(increment, (increment - availableSpace())); 
+		}
+		
+		pool.put(fullpath, newSize);
+		this.usedSpace += increment;
+	}
+	 
+	public long size(String fullpath) {
+		
+		Map<String, Long> pool = selectPool(fullpath);
+		if (pool == null) {
+			throw new IllegalArgumentException("File not found: " + fullpath);
+		}
+		
+		return pool.get(fullpath);
+	}
+	
+	public class InsufficientSpaceException extends RuntimeException {
+		
+		public final long request;
+		public final long remainder;
+
+		public InsufficientSpaceException(long request, long remainder) {
+			this.request = request;
+			this.remainder = remainder;
 		}
 	}
 	
-	public void release(long bytesToRelease) {
+	private Map<String, Long> selectPool(String fullpath) {
 		
-		if (bytesToRelease < 0) {
-			throw new IllegalArgumentException("Cannot release negative bytes: " +
-												+ bytesToRelease);
+		if (primaries.containsKey(fullpath)) {
+			return primaries;
 		}
 		
-		if ((availableSpace() + bytesToRelease) > totalSpaceBytes) {
-			throw new RuntimeException("resource misbalance ? " +
-					"available: " + availableSpace() + 
-					"bytesToRelease: " + bytesToRelease +
-					"totalSpace: " + totalSpaceBytes);
+		if (secs.containsKey(fullpath)) {
+			return secs;
 		}
 		
-		this.usedSpace -= bytesToRelease;
+		return null;
 	}
 	
 	public long availableSpace() {

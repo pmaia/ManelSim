@@ -4,9 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 
  * @author Patrick Maia
- *
  */
 public class ReplicatedFile {
 	
@@ -14,13 +12,12 @@ public class ReplicatedFile {
 	private final DataServer primary;
 	private final Set<DataServer> secondaries;
 	
-	private long size = 0;
 	private boolean replicasAreConsistent = true;
 	
 	/**
 	 * Creates a {@link ReplicatedFile} abstraction to model
-	 * a distributed store. 
-	 * 
+	 * a distributed store.
+	 *  
 	 * @param fullpath
 	 * @param primary
 	 * @param secondaries
@@ -30,6 +27,11 @@ public class ReplicatedFile {
 		this.fullpath = fullpath;
 		this.primary = primary;
 		this.secondaries = secondaries;
+		
+		this.primary.createReplica(fullpath, true);
+		for (DataServer sec : secondaries) {
+			sec.createReplica(fullpath, false);
+		}
 	}
 
 	public DataServer getPrimary() {
@@ -45,11 +47,14 @@ public class ReplicatedFile {
 	}
 
 	public long getSize() {
-		return size;
+		return primary.size(getFullPath());
 	}
 	
 	public void setSize(long size) {
-		this.size = size;
+		primary.update(getFullPath(), size);
+		for (DataServer sec : secondaries) {
+			sec.update(getFullPath(), size);
+		}
 	}
 	
 	public boolean areReplicasConsistent() {
@@ -59,5 +64,5 @@ public class ReplicatedFile {
 	public void setReplicasAreConsistent(boolean replicasAreConsistent) {
 		this.replicasAreConsistent = replicasAreConsistent;
 	}
-
+	
 }

@@ -21,11 +21,16 @@ public class FileSystemTraceEventSource implements EventSource {
 
 	private final BufferedReader bufferedReader;
 
-	private final FileSystemClient client;
+	private FileSystemClient client;
 
 	public FileSystemTraceEventSource(FileSystemClient client, InputStream traceStream) {
+		
 		this.bufferedReader = new BufferedReader(new InputStreamReader(traceStream));
 		this.client = client;
+	}
+	
+	public void setClient(FileSystemClient newClient) {
+		this.client = newClient;
 	}
 
 	/**
