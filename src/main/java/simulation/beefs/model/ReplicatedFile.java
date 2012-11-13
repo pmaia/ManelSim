@@ -1,5 +1,6 @@
 package simulation.beefs.model;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,10 +78,33 @@ public class ReplicatedFile {
 	}
 	
 	public void setSize(long size) {
-		primary.update(getFullPath(), size);
-		for (DataServer sec : secondaries) {
-			sec.update(getFullPath(), size);
+		
+		try {
+			primary.update(getFullPath(), size);
+		} catch (InsufficientSpaceException e) {
+			
+			Collection<String> purgedReplicas = primary.purge(e.remainder);
+			if (purgedReplicas.isEmpty()) {
+				throw new InsufficientSpaceException(
+						"DataServer purge did not reclaim enough space",
+						e.request, e.remainder);
+			} else {
+				//FIXME: schedule repair process
+			}
 		}
+		
+		Set<DataServer> secsToRemove = new HashSet<DataServer>();
+		for (DataServer sec : secondaries) {
+			try {
+				sec.update(getFullPath(), size);
+			} catch (InsufficientSpaceException e) {
+				sec.delete(getFullPath());
+				secsToRemove.add(sec);
+			}
+		}
+		
+		secondaries.removeAll(secsToRemove);
+		//FIXME: schedule repair event
 	}
 	
 	public boolean areReplicasConsistent() {

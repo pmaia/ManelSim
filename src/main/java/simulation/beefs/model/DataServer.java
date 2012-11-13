@@ -1,9 +1,14 @@
 package simulation.beefs.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import core.Time;
@@ -113,7 +118,57 @@ public class DataServer {
 					" already exists.");
 		}
 		
-		((primary) ? primaries : secs).put(fullpath, 0L); 
+		((primary) ? primaries : secs).put(fullpath, 0L);
+	}
+	
+	/**
+	 * Remove a number of secondaries replicas until toReclaim bytes are
+	 * reclaimed. If it not possible to reclaim the requested amount of data
+	 * no replica is purged.
+	 * 
+	 * @param toReclaim
+	 * @return A {@link Set} of fullpath {@link String} from purged replicas. 
+	 * 	If we cannot reclaim the requested amount of data, we return an
+	 *  empty {@link Set}.
+	 */
+	public Collection<String> purge(long toReclaim) {
+		
+		if (usedSpace > toReclaim) {
+			return Collections.EMPTY_SET;
+		}
+		
+		Set<String> toPurge = new HashSet<String>();
+		
+		//It takes circa 0.6 ms to shuffle a 30k (my guess it will take 1ms
+		List<String> samplePaths = new LinkedList<String>(this.secs.keySet()); 
+		Collections.shuffle(samplePaths);
+		
+		long reclaimed = 0;
+		for (String fullpath : samplePaths) {
+			
+			toPurge.add(fullpath);
+			reclaimed += secs.get(fullpath);
+			
+			if (reclaimed >= toReclaim) {
+				for (String pathToPurge : toPurge) {
+					delete(pathToPurge);
+				}
+				break;
+			}
+		}
+		
+		return toPurge;
+	}
+	
+	public void delete(String fullpath) {
+		
+		Map<String, Long> pool = selectPool(fullpath);
+		if (pool == null) {
+			throw new IllegalArgumentException("File not found: " + fullpath);
+		}
+		
+		long fileSize = pool.remove(fullpath);
+		this.usedSpace -= fileSize;
 	}
 	
 	public void update(String fullpath, long newSize) {
@@ -147,17 +202,6 @@ public class DataServer {
 		}
 		
 		return pool.get(fullpath);
-	}
-	
-	public class InsufficientSpaceException extends RuntimeException {
-		
-		public final long request;
-		public final long remainder;
-
-		public InsufficientSpaceException(long request, long remainder) {
-			this.request = request;
-			this.remainder = remainder;
-		}
 	}
 	
 	private Map<String, Long> selectPool(String fullpath) {
