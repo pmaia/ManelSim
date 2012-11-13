@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
+import simulation.beefs.event.filesystem.MobileClientFSTraceEventSource;
 import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
 import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
@@ -85,16 +86,16 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 				config.getProperty(BeefsLocalitySimulationConstants.USER_MIGRATION_ALGORITHM);
 		double userMigrationProb = Double.valueOf(
 				config.getProperty(BeefsLocalitySimulationConstants.USER_MIGRATION_PROB));
-		Time userMigrationDelay = 
-				new Time(Long.valueOf(config.getProperty(BeefsLocalitySimulationConstants.USER_MIGRATION_DELAY)),
-						Unit.MILLISECONDS);
+		Time inactivityDelay = 
+				new Time(Long.valueOf(config.getProperty(BeefsLocalitySimulationConstants.USER_INACTIVITY_DELAY)),
+						Unit.SECONDS);
 		
 		List<FileSystemClient> otherClients = new LinkedList<FileSystemClient>(clients);
 		FileSystemClient firstClient = otherClients.remove(0);
 		
 		UserMigrationAlgorithm loginAlgorithm = createLoginAlgorithm(
 				userMigrationAlgorithmName,
-				userMigrationDelay, userMigrationProb,
+				inactivityDelay, userMigrationProb,
 				firstClient, otherClients);
 		
 		// setup context
@@ -225,8 +226,14 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 
 		try {
 			InputStream traceStream = new FileInputStream(fstraceFile);
-			EventSource [] parsers = new EventSource[] { 
-					new FileSystemTraceEventSource(firsClient, traceStream) };
+			FileSystemTraceEventSource fileSystemTraceEventSource =
+					new FileSystemTraceEventSource(firsClient, traceStream);
+			
+			MobileClientFSTraceEventSource mobileSource = 
+					new MobileClientFSTraceEventSource(
+							loginAlgorithm, fileSystemTraceEventSource);
+			
+			EventSource [] parsers = new EventSource[] {mobileSource};
 			
 			return new EventSourceMultiplexer(parsers);
 		} catch (FileNotFoundException e) {

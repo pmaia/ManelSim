@@ -21,7 +21,7 @@ public class BeefsLocalitySimulationConstants {
 	
 	public static final String USER_MIGRATION_ALGORITHM = "user_migration_algorithm";
 	public static final String USER_MIGRATION_PROB = "user_migration_probability";
-	public static final String USER_MIGRATION_DELAY = "user_migration_delay";//mseconds
+	public static final String USER_INACTIVITY_DELAY = "user_inactivity_delay";
 	
 	// Context keys
 	public static final String MACHINES = "machines";

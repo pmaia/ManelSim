@@ -6,6 +6,9 @@ package simulation.beefs.userMigration;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import simulation.beefs.model.FileSystemClient;
 import core.Time;
 
@@ -13,6 +16,9 @@ import core.Time;
  * @author manel
  */
 public class HomeLessAlgorithm implements UserMigrationAlgorithm {
+	
+	private static final Logger logger = LoggerFactory
+			.getLogger(HomeLessAlgorithm.class);
 
 	//FIXME: there is a lot of duplicated code between this class and SweetHome
 	private final double swapMachineProb;
@@ -61,7 +67,10 @@ public class HomeLessAlgorithm implements UserMigrationAlgorithm {
 		double sample = random.nextDouble();
 		FileSystemClient client = (sample <= swapMachineProb) 
 				? clients.get(random.nextInt(clients.size())) : lastSampledClient;
-		//FIXME log or report		Aggregator.getInstance().reportlogin(client, now);
+				
+		logger.info("Time: " + now.toString() + " " +
+					"client_host: " + client.getHost().getName());
+
 		return client;
 	}
 }

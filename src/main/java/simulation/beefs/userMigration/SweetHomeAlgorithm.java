@@ -3,6 +3,9 @@ package simulation.beefs.userMigration;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import simulation.beefs.model.FileSystemClient;
 import core.Time;
 
@@ -11,6 +14,9 @@ import core.Time;
  */
 public class SweetHomeAlgorithm implements UserMigrationAlgorithm {
 
+	private static final Logger logger = LoggerFactory
+			.getLogger(HomeLessAlgorithm.class);
+	
 	private final Random random;
 	
 	private final FileSystemClient sweetHomeClient;
@@ -68,7 +74,9 @@ public class SweetHomeAlgorithm implements UserMigrationAlgorithm {
 		FileSystemClient client = (sample <= migrationProb) 
 				? othersClients.get(random.nextInt(othersClients.size())) : sweetHomeClient;
 		
-		//FIXME: log or report Aggregator.getInstance().reportlogin(client, now);
+		logger.info("Time: " + now.toString() + " " +
+					"client_host: " + client.getHost().getName());
+		
 		return client;
 	}
 
