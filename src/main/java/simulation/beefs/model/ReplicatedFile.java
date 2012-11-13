@@ -33,6 +33,32 @@ public class ReplicatedFile {
 			sec.createReplica(fullpath, false);
 		}
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((fullpath == null) ? 0 : fullpath.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ReplicatedFile other = (ReplicatedFile) obj;
+		if (fullpath == null) {
+			if (other.fullpath != null)
+				return false;
+		} else if (!fullpath.equals(other.fullpath))
+			return false;
+		return true;
+	}
 
 	public DataServer getPrimary() {
 		return primary;

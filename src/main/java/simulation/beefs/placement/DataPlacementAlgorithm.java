@@ -18,7 +18,6 @@ package simulation.beefs.placement;
 import java.util.Set;
 
 import simulation.beefs.model.DataServer;
-import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.model.ReplicatedFile;
 
 /**
@@ -45,6 +44,7 @@ public abstract class DataPlacementAlgorithm {
 		}
 	}
 
-	public abstract ReplicatedFile createFile(FileSystemClient client, String fullpath, int replicationLevel);
+//	public abstract ReplicatedFile createFile(FileSystemClient client, String fullpath, int replicationLevel);
+	public abstract ReplicatedFile createFile(DataServer primary, String fullpath, int replicationLevel);
 	
 }

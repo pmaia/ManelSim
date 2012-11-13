@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import core.Time;
 import core.TimeInterval;
@@ -25,6 +26,7 @@ public class DataServer {
 	private Map<String, Long> secs = new HashMap<String, Long>();
 	
 	private final Machine host;
+	private final String id = UUID.randomUUID().toString();
 	
 	public DataServer(Machine host) {
 		this(host, Long.MAX_VALUE);
@@ -34,7 +36,37 @@ public class DataServer {
 		this.host = host;
 		this.totalSpaceBytes = totalSpaceBytes;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DataServer other = (DataServer) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return getHost().toString() + "-" + id;
+	}
+	
 	public Machine getHost() {//can we remove it ?FIXME:
 		return host;
 	}
@@ -139,6 +171,10 @@ public class DataServer {
 		}
 		
 		return null;
+	}
+	
+	public long totalSpace() {
+		return totalSpaceBytes;
 	}
 	
 	public long availableSpace() {

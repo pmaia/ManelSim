@@ -9,15 +9,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
 import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.model.Machine;
 import simulation.beefs.model.MetadataServer;
+import simulation.beefs.model.ReplicatedFile;
+import simulation.beefs.placement.CoLocatedWithSecondaryRandomPlacement;
+import simulation.beefs.placement.DataPlacementUtil;
+import simulation.beefs.placement.RandomDataPlacementAlgorithm;
 import simulation.beefs.userMigration.HomeLessAlgorithm;
 import simulation.beefs.userMigration.SweetHomeAlgorithm;
 import simulation.beefs.userMigration.UserMigrationAlgorithm;
+import simulation.util.FileSizeDistribution;
 import core.Context;
 import core.EventSource;
 import core.EventSourceMultiplexer;
@@ -51,20 +57,24 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		Set<Machine> machines = createMachines(numMachines, toSleepTimeout, transitionDuration);
 
 		// create data servers
-		//FIXME: fill data servers
 		Set<DataServer> dataServers = createDataServers(machines);
+		
+		//populate data server
+		Integer replicationLevel = Integer.valueOf(config.getProperty(BeefsLocalitySimulationConstants.REPLICATION_LEVEL));
+		Set<ReplicatedFile> namespace = populate(5, replicationLevel, dataServers);
 
 		//create metadata server
 		String placementPoliceName = config.getProperty(BeefsLocalitySimulationConstants.PLACEMENT_POLICE);
-		Integer replicationLevel = Integer.valueOf(config.getProperty(BeefsLocalitySimulationConstants.REPLICATION_LEVEL));
 		Time timeToCoherence = 
 				new Time(Long.valueOf(config.getProperty(BeefsLocalitySimulationConstants.TIME_TO_COHERENCE)), 
 						Unit.SECONDS);
 		Time timeToDelete = 
 				new Time(Long.valueOf(config.getProperty(BeefsLocalitySimulationConstants.TIME_TO_DELETE_REPLICAS)), 
 						Unit.SECONDS);
+		
 		MetadataServer metadataServer = 
-				new MetadataServer(dataServers, placementPoliceName, replicationLevel, timeToCoherence, timeToDelete); 
+				new MetadataServer(namespace, dataServers, placementPoliceName,
+						replicationLevel, timeToCoherence, timeToDelete); 
 
 		// create clients
 		Boolean wakeOnLan = Boolean.valueOf(config.getProperty(BeefsLocalitySimulationConstants.WAKE_ON_LAN));
@@ -110,6 +120,102 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 			return new HomeLessAlgorithm(migrationProb, migrationDelay, firstClient, otherClients);
 		} else {
 			throw new IllegalArgumentException(type + " is not a valid DataPlacementAlgorithm type.");
+		}
+	}
+	
+	//FIXME: we need to relate the brand new files created during the
+	//simulation and this pre-population. What we want to tell are
+	//the fractions: disk size, available size, created_files
+	/**
+	 * @param numFullDSs
+	 * @param rlevel
+	 * @param dataServers
+	 * @return
+	 * 	The generate namespace.
+	 */
+	private Set<ReplicatedFile> populate (int numFullDSs, int rlevel, 
+			Set<DataServer> dataServers) {
+		
+		Set<ReplicatedFile> namespace = new HashSet<ReplicatedFile>();
+		
+		long diskSize = 1024 * 1024 * 1024 * 1L;// 1 GiBytes
+		FileSizeDistribution fileSizeDistribution =
+				new FileSizeDistribution(8.46, 2.38, diskSize);
+		
+		Set<DataServer> halfFilled = new HashSet<DataServer>();
+
+		//phase 1. we need to fill, at least, 0.5 of their disk space
+		while (	halfFilled.size() < dataServers.size()) {
+			
+			double newFileSize = fileSizeDistribution.nextSampleSize();
+			Set<DataServer> candidates = filter(newFileSize, dataServers);
+			
+			String randomFullPath = UUID.randomUUID().toString();
+			ReplicatedFile replicatedFile = 
+					new RandomDataPlacementAlgorithm(candidates).
+					createFile(null, randomFullPath, rlevel);
+			replicatedFile.setSize((long) newFileSize);
+			
+			redistributed(replicatedFile.getPrimary(), halfFilled);
+			for (DataServer sec : replicatedFile.getSecondaries()) {
+				redistributed(sec, halfFilled);
+			}
+			
+			namespace.add(replicatedFile);
+		}
+		
+		//phase 2. we need to full N = numFullDSs
+		Set<DataServer> fullDSsCandidates = 
+				DataPlacementUtil.chooseRandomDataServers(dataServers, numFullDSs);
+		
+		for (DataServer toFill : fullDSsCandidates) {
+			namespace.addAll(fill(0.99, toFill, dataServers, fileSizeDistribution, rlevel));
+		}
+		
+		return namespace;
+	}
+	
+	private Set<ReplicatedFile> fill(double targetFullNess, DataServer targetPrimary, 
+			Set<DataServer> secCandidates, FileSizeDistribution sizeDistribution, 
+			int rlevel) {
+		
+		Set<ReplicatedFile> namespace = new HashSet<ReplicatedFile>();
+		
+		while ((targetPrimary.availableSpace() / targetPrimary.totalSpace()) 
+				< targetFullNess) {
+			
+			double newFileSize = 
+					Math.min(targetPrimary.availableSpace(),
+							sizeDistribution.nextSampleSize());
+			
+			Set<DataServer> candidates = filter(newFileSize, secCandidates);
+			
+			String randomFullPath = UUID.randomUUID().toString();
+			ReplicatedFile replicatedFile = 
+					new CoLocatedWithSecondaryRandomPlacement(candidates).
+					createFile(targetPrimary, randomFullPath, rlevel);
+		
+			replicatedFile.setSize((long) newFileSize);
+			namespace.add(replicatedFile);
+		}
+		
+		return namespace;
+	}
+	
+	private Set<DataServer> filter(double minAvailableSpace, Set<DataServer> servers) {
+		Set<DataServer> response = new HashSet<DataServer>();
+		for (DataServer dataServer : servers) {
+			if (dataServer.availableSpace() >= minAvailableSpace) {
+				response.add(dataServer);
+			}
+		}
+		return response;
+	}
+	
+	private void redistributed(DataServer target, Set<DataServer> halfFilled) {
+		
+		if ((target.availableSpace() / target.totalSpace()) >= 0.5) {
+			halfFilled.add(target);
 		}
 	}
 
