@@ -1,18 +1,27 @@
 #!/bin/bash
 
-if [ ! $# -eq 1 ]
+if [ ! $# -eq 2 ]
 then
-	echo "Usage:" $0 "configuration_file"
+	echo "Usage:" $0 "configuration_file manelsim_path"
 	exit 1
 fi
 
-config_file=$1
+#FIXME: after testing this, assume the layout manelsim_path/classes 
+#	manelsim_path/lib
 
-if [ -f $config_file ]
+config_file=$1
+manel_sim=$2
+
+if [ ! -f $config_file ]
 then
 	echo "File:" $config_file "is not available"
 	exit 1
 fi
 
-java -server -Xmx1024m -Xms1024m -cp lib/*:classes/ core.ManelSim $config_file
+if [ ! -d $manel_sim ]
+then
+	echo "File:" $manel_sim "is not available"
+	exit 1
+fi
 
+java -server -Xmx1024m -Xms1024m -cp ../../lib/*:$manel_sim/classes core.ManelSim $config_file
