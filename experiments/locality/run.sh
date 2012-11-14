@@ -24,4 +24,5 @@ then
 	exit 1
 fi
 
-java -server -Xmx1024m -Xms1024m -cp ../../lib/*:$manel_sim/classes core.ManelSim $config_file
+#java -server -Xmx1024m -Xms1024m -cp ../../lib/*:$manel_sim/classes core.ManelSim $config_file
+java -server -cp $manel_sim/dependency/*:$manel_sim/classes core.ManelSim $config_file

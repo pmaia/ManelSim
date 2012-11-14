@@ -1,5 +1,8 @@
 package simulation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,7 +40,11 @@ import core.Time.Unit;
  * @author manel
  */
 public class BeefsLocalitySimulationInitializer implements Initializer {
+
+	private static final Logger logger = LoggerFactory.getLogger(BeefsLocalitySimulationInitializer.class);
 	
+	private static long diskSize = 1024 * 1024 * 1024 * 1L;// 1 GiBytes
+
 	@Override
 	public Context initialize(Properties config) {
 		
@@ -139,30 +146,39 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		
 		Set<ReplicatedFile> namespace = new HashSet<ReplicatedFile>();
 		
-		long diskSize = 1024 * 1024 * 1024 * 1L;// 1 GiBytes
 		FileSizeDistribution fileSizeDistribution =
 				new FileSizeDistribution(8.46, 2.38, diskSize);
 		
 		Set<DataServer> halfFilled = new HashSet<DataServer>();
-
+		int count = 0;
 		//phase 1. we need to fill, at least, 0.5 of their disk space
 		while (	halfFilled.size() < dataServers.size()) {
 			
 			double newFileSize = fileSizeDistribution.nextSampleSize();
 			Set<DataServer> candidates = filter(newFileSize, dataServers);
 			
-			String randomFullPath = UUID.randomUUID().toString();
-			ReplicatedFile replicatedFile = 
-					new RandomDataPlacementAlgorithm(candidates).
-					createFile(null, randomFullPath, rlevel);
-			replicatedFile.setSize((long) newFileSize);
-			
-			redistributed(replicatedFile.getPrimary(), halfFilled);
-			for (DataServer sec : replicatedFile.getSecondaries()) {
-				redistributed(sec, halfFilled);
+			if ((count % 1000) == 0) {
+				for (DataServer server : dataServers) {
+					logger.info("available={} total={}",
+							server.availableSpace(), server.totalSpace());
+				}
 			}
 			
-			namespace.add(replicatedFile);
+			if (!candidates.isEmpty()) {
+				String randomFullPath = UUID.randomUUID().toString();
+				ReplicatedFile replicatedFile = 
+						new RandomDataPlacementAlgorithm(candidates).
+						createFile(null, randomFullPath, rlevel);
+				replicatedFile.setSize((long) newFileSize);
+				
+				redistributed(replicatedFile.getPrimary(), halfFilled);
+				for (DataServer sec : replicatedFile.getSecondaries()) {
+					redistributed(sec, halfFilled);
+				}
+				
+				namespace.add(replicatedFile);
+				++count;
+			}
 		}
 		
 		//phase 2. we need to full N = numFullDSs
@@ -182,7 +198,9 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		
 		Set<ReplicatedFile> namespace = new HashSet<ReplicatedFile>();
 		
-		while ((targetPrimary.availableSpace() / targetPrimary.totalSpace()) 
+		int count = 0;
+		
+		while (  (1 - ( ((float) targetPrimary.availableSpace()) / ((float)targetPrimary.totalSpace()) )) 
 				< targetFullNess) {
 			
 			double newFileSize = 
@@ -198,14 +216,25 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		
 			replicatedFile.setSize((long) newFileSize);
 			namespace.add(replicatedFile);
+			
+			if ((++count % 1000) == 0) {
+				logger.info("primary ratio={}", 
+						( 1 - ((float)targetPrimary.availableSpace()/ (float)targetPrimary.totalSpace())) );
+				for (DataServer server : secCandidates) {
+					logger.info("sec ratio={}",
+							( 1 - ((float)server.availableSpace()/ (float)server.totalSpace())) );
+				}
+			}
 		}
 		
 		return namespace;
 	}
 	
 	private Set<DataServer> filter(double minAvailableSpace, Set<DataServer> servers) {
+		
 		Set<DataServer> response = new HashSet<DataServer>();
 		for (DataServer dataServer : servers) {
+			
 			if (dataServer.availableSpace() >= minAvailableSpace) {
 				response.add(dataServer);
 			}
@@ -215,7 +244,7 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 	
 	private void redistributed(DataServer target, Set<DataServer> halfFilled) {
 		
-		if ((target.availableSpace() / target.totalSpace()) >= 0.5) {
+		if (((float)target.availableSpace() / (float)target.totalSpace()) <= 0.5) {
 			halfFilled.add(target);
 		}
 	}
@@ -270,7 +299,7 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 	
 		for (Machine machine : machines) {
-			dataServers.add(new DataServer(machine));
+			dataServers.add(new DataServer(machine, diskSize));
 		}
 	
 		return dataServers;

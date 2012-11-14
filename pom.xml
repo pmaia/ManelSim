@@ -18,6 +18,20 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+                		<executions>
+                        		<execution>
+                                		<phase>process-sources</phase>
+                                		<goals>
+                                    			<goal>copy-dependencies</goal>
+	                                	</goals>
+		                                <configuration>
+        			                        <outputDirectory>${targetdirectory}</outputDirectory>
+                        		        </configuration>
+                            		</execution>
+	                        </executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -28,10 +42,15 @@
 			<version>1.5.2</version>
 		</dependency>
 		<dependency>
-            <artifactId>commons-logging</artifactId>
-            <groupId>commons-logging</groupId>
-            <version>1.0.4</version>
-        </dependency>
+            		<artifactId>commons-logging</artifactId>
+            		<groupId>commons-logging</groupId>
+            		<version>1.0.4</version>
+        	</dependency>
+		<dependency>
+			<groupId>eduni</groupId>
+			<artifactId>eduni</artifactId>
+			<version>1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
