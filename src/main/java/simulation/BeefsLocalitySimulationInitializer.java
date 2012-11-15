@@ -115,6 +115,11 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		context.add(BeefsLocalitySimulationConstants.METADATA_SERVER, metadataServer);
 		context.add(BeefsLocalitySimulationConstants.CLIENTS, clients);
 
+		for (DataServer server : dataServers) {
+			logger.info("ds={} available={} total={}",	
+					new Object[] {server, server.availableSpace(), server.totalSpace()});
+		}
+		
 		return context;
 	}
 	
@@ -150,19 +155,12 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 				new FileSizeDistribution(8.46, 2.38, diskSize);
 		
 		Set<DataServer> halfFilled = new HashSet<DataServer>();
-		int count = 0;
+		
 		//phase 1. we need to fill, at least, 0.5 of their disk space
 		while (	halfFilled.size() < dataServers.size()) {
 			
 			double newFileSize = fileSizeDistribution.nextSampleSize();
 			Set<DataServer> candidates = filter(newFileSize, dataServers);
-			
-			if ((count % 1000) == 0) {
-				for (DataServer server : dataServers) {
-					logger.info("available={} total={}",
-							server.availableSpace(), server.totalSpace());
-				}
-			}
 			
 			if (!candidates.isEmpty()) {
 				String randomFullPath = UUID.randomUUID().toString();
@@ -177,7 +175,6 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 				}
 				
 				namespace.add(replicatedFile);
-				++count;
 			}
 		}
 		
@@ -198,8 +195,6 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		
 		Set<ReplicatedFile> namespace = new HashSet<ReplicatedFile>();
 		
-		int count = 0;
-		
 		while (  (1 - ( ((float) targetPrimary.availableSpace()) / ((float)targetPrimary.totalSpace()) )) 
 				< targetFullNess) {
 			
@@ -216,15 +211,6 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		
 			replicatedFile.setSize((long) newFileSize);
 			namespace.add(replicatedFile);
-			
-			if ((++count % 1000) == 0) {
-				logger.info("primary ratio={}", 
-						( 1 - ((float)targetPrimary.availableSpace()/ (float)targetPrimary.totalSpace())) );
-				for (DataServer server : secCandidates) {
-					logger.info("sec ratio={}",
-							( 1 - ((float)server.availableSpace()/ (float)server.totalSpace())) );
-				}
-			}
 		}
 		
 		return namespace;
