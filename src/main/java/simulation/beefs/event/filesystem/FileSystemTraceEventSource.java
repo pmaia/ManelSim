@@ -87,7 +87,7 @@ public class FileSystemTraceEventSource implements EventSource {
 	}
 	
 	private Unlink parseUnlinkEvent(StringTokenizer tokenizer) {
-		// unlink  begin-elapsed   fullpath
+		//begin-elapsed   fullpath
 		
 		Time time = parseTime(tokenizer.nextToken())[0];
 		String targetPath = tokenizer.nextToken();
@@ -96,7 +96,7 @@ public class FileSystemTraceEventSource implements EventSource {
 	}
 
 	private Close parseCloseEvent(StringTokenizer tokenizer) {
-		// close   begin-elapsed   fullpath
+		//begin-elapsed   fullpath
 
 		Time time = parseTime(tokenizer.nextToken())[0];
 		String targetPath = tokenizer.nextToken();
@@ -104,26 +104,51 @@ public class FileSystemTraceEventSource implements EventSource {
 		return new Close(client, time, targetPath);
 	}
 
+	private final static int EXPECTED_NUM_TOKENS_READ = 3;
+	
 	private Read parseReadEvent(StringTokenizer tokenizer) {
-		// read    begin-elapsed   fullpath        length
+		//begin-elapsed   fullpath        length
+		
+		//filePaths can have empty spaces
+		int actualNumTokens = tokenizer.countTokens();
 		
 		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
-		String filePath = tokenizer.nextToken();
+		String filePath = parsePath(1 + (actualNumTokens - EXPECTED_NUM_TOKENS_READ), tokenizer);
 		long length = Long.parseLong(tokenizer.nextToken());
 
 		return new Read(client, timestampAndDuration[0], timestampAndDuration[1], filePath, length);
 	}
 
+	private final static int EXPECTED_NUM_TOKENS_WRITE = 4;
+	
 	private Write parseWriteEvent(StringTokenizer tokenizer) {
-		// write   begin-elapsed   fullpath        bytes_transfered	file_size
+		//begin-elapsed   fullpath        bytes_transfered	file_size
+		
+		//filePaths can have empty spaces
+		int actualNumTokens = tokenizer.countTokens();
 		
 		Time [] timestampAndDuration = parseTime(tokenizer.nextToken());
-		String filePath = tokenizer.nextToken();
+		
+		String filePath = parsePath(1 + (actualNumTokens - EXPECTED_NUM_TOKENS_WRITE), tokenizer);
 		long bytesTransfered = Long.parseLong(tokenizer.nextToken());
 		long fileSize = Long.parseLong(tokenizer.nextToken());
 
 		return new Write(client, timestampAndDuration[0], timestampAndDuration[1], filePath,
 				bytesTransfered, fileSize); 
+	}
+	
+	private String parsePath(int numTokens, StringTokenizer tokenizer) {
+		
+		if (numTokens < 0) {
+			throw new IllegalArgumentException();
+		}
+		
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < numTokens; i++) {
+			buffer.append(tokenizer.nextToken());
+		}
+		
+		return buffer.toString();
 	}
 	
 	private Time [] parseTime(String traceTimestamp) {
