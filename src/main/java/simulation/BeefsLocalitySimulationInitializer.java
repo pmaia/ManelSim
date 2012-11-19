@@ -35,6 +35,8 @@ import core.Initializer;
 import core.Time;
 import core.Time.Unit;
 
+import static simulation.beefs.placement.DataPlacementUtil.*;
+
 /**
  * 
  * @author manel
@@ -214,18 +216,6 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		}
 		
 		return namespace;
-	}
-	
-	private Set<DataServer> filter(double minAvailableSpace, Set<DataServer> servers) {
-		
-		Set<DataServer> response = new HashSet<DataServer>();
-		for (DataServer dataServer : servers) {
-			
-			if (dataServer.availableSpace() >= minAvailableSpace) {
-				response.add(dataServer);
-			}
-		}
-		return response;
 	}
 	
 	private void redistributed(DataServer target, Set<DataServer> halfFilled) {

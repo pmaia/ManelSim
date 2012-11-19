@@ -52,7 +52,7 @@ public class RandomDataPlacementAlgorithm extends DataPlacementAlgorithm {
 			}
 		}
 		
-		return new ReplicatedFile(fileName, the_primary, secondaries);
+		return new ReplicatedFile(fileName, replicationLevel, the_primary, secondaries);
 		
 	}
 }

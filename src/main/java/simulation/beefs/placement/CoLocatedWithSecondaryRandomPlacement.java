@@ -45,7 +45,7 @@ public class CoLocatedWithSecondaryRandomPlacement extends DataPlacementAlgorith
 		
 		Set<DataServer> secondaries = chooseRandomDataServers(tmpAvailableDSs, replicationLevel);
 		
-		return new ReplicatedFile(fileName, primary, secondaries);
+		return new ReplicatedFile(fileName, replicationLevel, primary, secondaries);
 	}
 
 }

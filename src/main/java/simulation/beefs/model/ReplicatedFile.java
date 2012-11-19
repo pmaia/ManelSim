@@ -2,6 +2,7 @@ package simulation.beefs.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -9,6 +10,7 @@ import java.util.Set;
  */
 public class ReplicatedFile {
 	
+	private final int rLevel;
 	private final String fullpath;
 	private final DataServer primary;
 	private final Set<DataServer> secondaries;
@@ -20,12 +22,25 @@ public class ReplicatedFile {
 	 * a distributed store.
 	 *  
 	 * @param fullpath
+	 * @param rLevel The target number of secondary replicas.
 	 * @param primary
 	 * @param secondaries
 	 */
-	public ReplicatedFile(String fullpath, DataServer primary, Set<DataServer> secondaries) {
-		//FIXME: rlevel
+	public ReplicatedFile(String fullpath, int rLevel, DataServer primary,
+			Set<DataServer> secondaries) {
+		
+		if (rLevel < 0) {
+			throw new IllegalArgumentException("Replication Level cannot " +
+					"be negative");
+		}
+		
+		if (rLevel < secondaries.size()) {
+			throw new IllegalArgumentException("We have more secondaries than then" +
+					"desired  replication level !");
+		}
+		
 		this.fullpath = fullpath;
+		this.rLevel = rLevel;
 		this.primary = primary;
 		this.secondaries = secondaries;
 		
@@ -33,6 +48,47 @@ public class ReplicatedFile {
 		for (DataServer sec : secondaries) {
 			sec.createReplica(fullpath, false);
 		}
+	} 
+	
+	public boolean full() {
+		//assuming we cannot f*ck the system and get a collection of replicas
+		//large than the rLevel
+		return replicationLevel() == this.secondaries.size();
+	}
+	
+	public int replicationLevel() {
+		return this.rLevel;
+	}
+	
+	/**
+	 * It tries to repair this {@link ReplicatedFile}. It considers candidates
+	 * {@link Iterable} is ordered from less to high priority.  
+	 * 
+	 * @param candidates
+	 * @return
+	 */
+	public boolean repair(Iterable<DataServer> candidates) {
+		
+		long replicaSize = primary.size(getFullPath());
+		
+		for (DataServer dataServer : candidates) {
+			
+			if (full()) {
+				break;
+			}
+			
+			if (dataServer.availableSpace() >= replicaSize) {
+				
+				if (!getSecondaries().contains(dataServer) && 
+						!primary.equals(dataServer)) {
+					
+					dataServer.createReplica(getFullPath(), false);
+					dataServer.update(getFullPath(), replicaSize);
+				}
+			}
+		}
+
+		return full();
 	}
 	
 	@Override
@@ -88,8 +144,6 @@ public class ReplicatedFile {
 				throw new InsufficientSpaceException(
 						"DataServer purge did not reclaim enough space",
 						e.request, e.remainder);
-			} else {
-				//FIXME: schedule repair process
 			}
 		}
 		
@@ -104,7 +158,6 @@ public class ReplicatedFile {
 		}
 		
 		secondaries.removeAll(secsToRemove);
-		//FIXME: schedule repair event
 	}
 	
 	public boolean areReplicasConsistent() {

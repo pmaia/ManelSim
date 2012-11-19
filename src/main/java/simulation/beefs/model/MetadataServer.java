@@ -2,6 +2,8 @@ package simulation.beefs.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,7 +84,7 @@ public class MetadataServer {
 		
 		return theFile;
 	}
-
+	
 	private ReplicatedFile createFile(FileSystemClient client, String fullpath) {
 		DataServer primary = getDataServer(client.getHost().getName());
 		ReplicatedFile newFile = dataPlacement.createFile(primary, fullpath, replicationLevel);
@@ -90,6 +92,10 @@ public class MetadataServer {
 		files.put(fullpath, newFile);
 		
 		return newFile;
+	}
+
+	public List<DataServer> dataServers() {
+		return new LinkedList<DataServer>(dataServerByHost.values());
 	}
 	
 	public DataServer getDataServer(String host) {

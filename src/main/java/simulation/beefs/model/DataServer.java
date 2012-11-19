@@ -139,7 +139,9 @@ public class DataServer {
 		
 		Set<String> toPurge = new HashSet<String>();
 		
-		//It takes circa 0.6 ms to shuffle a 30k (my guess it will take 1ms
+		//It takes circa 0.6 ms to shuffle a 30k (my guess it will take 1ms)
+		//... and, even though there are a number of ways to make it efficient, I'm
+		//not going to make it.
 		List<String> samplePaths = new LinkedList<String>(this.secs.keySet()); 
 		Collections.shuffle(samplePaths);
 		

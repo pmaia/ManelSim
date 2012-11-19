@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import simulation.beefs.event.filesystem.Read;
+import simulation.beefs.event.filesystem.RepairReplicatedFile;
 import simulation.beefs.event.filesystem.Write;
 import core.EventScheduler;
 import core.Time;
@@ -89,7 +90,9 @@ public class FileSystemClient {
 			ReplicatedFile replicatedFile = createOrOpen(filePath);
 			
 			DataServer primary = replicatedFile.getPrimary();
+			
 			if(primary.getHost().isReachable()) {
+				
 				replicatedFile.setSize(fileSize);
 				
 				logger.info("op={}" +
@@ -104,9 +107,22 @@ public class FileSystemClient {
 							bytesTransfered, 
 							begin, duration}
 						);
+				
 				replicatedFile.setReplicasAreConsistent(false);
-
 				primary.reportWrite(begin, duration);
+				
+				//Yet another way to code is to schedule the event from
+				//ReplicatedFile itself. Instead, we check fullness here.
+				//It is not the best option because we are assuming the 
+				//write operation is the only way to change the number of 
+				//replicas in a replication group.
+				if (!replicatedFile.full()) {
+					Time now = EventScheduler.now();
+					EventScheduler.schedule(
+							new RepairReplicatedFile(this.metadataServer.dataServers(), 
+									replicatedFile, now.plus(RepairReplicatedFile.REPAIR_DELAY)));
+				}
+				
 			} else if(wakeOnLan) {
 				primary.getHost().wakeOnLan(begin);
 				
