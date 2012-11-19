@@ -50,7 +50,8 @@ public final class EventScheduler {
 				throw new RuntimeException("ERROR: emulation time(" + now()
 						+ ") " + "already ahead of event time("
 						+ eventTime
-						+ "). Event is outdated and will not be processed.");
+						+ "). Event(" + nextEvent
+						+ ") " + "is outdated and will not be processed.");
 			}
 
 			if (isEarlierThanEmulationEnd(eventTime)) {
