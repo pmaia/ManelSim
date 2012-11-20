@@ -1,0 +1,4 @@
+This experiments reproduces our beefs techreport work. It analyses how co-location data placement
+police leads to local access in read/write operations.
+
+In this reproduction we use LSD traces instead of LARS data.

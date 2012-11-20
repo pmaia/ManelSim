@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import simulation.beefs.model.DataServer;
-import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.model.ReplicatedFile;
 
 /**
@@ -38,40 +37,15 @@ public class CoLocatedWithSecondaryRandomPlacement extends DataPlacementAlgorith
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReplicatedFile createFile(FileSystemClient client, String fileName, int replicationLevel) {
+	public ReplicatedFile createFile(DataServer primary, String fileName, 
+			int replicationLevel) {
 		
-		DataServer primary = null;
-		Set<DataServer> secondaries;
+		Set<DataServer> tmpAvailableDSs = new HashSet<DataServer>(dataServers);
+		tmpAvailableDSs.remove(primary);
 		
-		DataServer colocatedDataServer = 
-			client.getMetadataServer().getDataServer(client.getHost().getName());
+		Set<DataServer> secondaries = chooseRandomDataServers(tmpAvailableDSs, replicationLevel);
 		
-		if(colocatedDataServer != null) {
-			Set<DataServer> copyOfAvailableDataServers = 
-				new HashSet<DataServer>(dataServers);
-			
-			copyOfAvailableDataServers.remove(colocatedDataServer);
-
-			primary = colocatedDataServer;
-			
-			secondaries = 
-				chooseRandomDataServers(copyOfAvailableDataServers, replicationLevel);
-			
-		} else {
-			
-			secondaries = new HashSet<DataServer>();
-			
-			for(DataServer dataServer : chooseRandomDataServers(dataServers, replicationLevel)) {
-				if(primary == null) {
-					primary = dataServer;
-				} else {
-					secondaries.add(dataServer);
-				}
-			}
-			
-		}
-
-		return new ReplicatedFile(fileName, primary, secondaries);
+		return new ReplicatedFile(fileName, replicationLevel, primary, secondaries);
 	}
 
 }

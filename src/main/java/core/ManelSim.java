@@ -21,9 +21,7 @@ import java.util.Properties;
 
 import core.Time.Unit;
 
-
 /**
- * 
  * @author Patrick Maia
  */
 public class ManelSim {
@@ -56,7 +54,10 @@ public class ManelSim {
 		Time simulationStart = new Time(Long.parseLong(config.getProperty("simulation_start")), Unit.SECONDS);
 		Time simulationEnd = new Time(Long.parseLong(config.getProperty("simulation_end")), Unit.SECONDS);
 		
-		EventScheduler.setup(simulationStart, simulationEnd, context.getEventSourceMultiplexer());
+		boolean stopOnError = Boolean.parseBoolean(config.getProperty("stop_on_error", "true"));
+		
+		EventScheduler.setup(simulationStart, simulationEnd, context.getEventSourceMultiplexer(), stopOnError);
+		
 		try {
 			EventScheduler.start();
 		} catch (Throwable t) {
@@ -64,7 +65,6 @@ public class ManelSim {
 		}
 		
 		System.out.println(summarizer.summarize(context));
-		
 	}		
 
 }

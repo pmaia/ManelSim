@@ -23,13 +23,22 @@ import java.util.Set;
 
 import simulation.beefs.model.DataServer;
 
-
 /**
- * TODO make doc
- * 
- * @author thiago - thiago@lsd.ufcg.edu.br
+ * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class DataPlacementUtil {
+	
+	public static Set<DataServer> filter(double minAvailableSpace, Iterable<DataServer> servers) {
+		
+		Set<DataServer> response = new HashSet<DataServer>();
+		for (DataServer dataServer : servers) {
+			
+			if (dataServer.availableSpace() >= minAvailableSpace) {
+				response.add(dataServer);
+			}
+		}
+		return response;
+	}
 
 	public static Set<DataServer> chooseRandomDataServers(Set<DataServer> availableServers, int numberOfWantedServers) {
 		

@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import simulation.beefs.model.DataServer;
-import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.model.ReplicatedFile;
 
 /**
@@ -35,24 +34,25 @@ public class RandomDataPlacementAlgorithm extends DataPlacementAlgorithm {
 	}
 
 	@Override
-	public ReplicatedFile createFile(FileSystemClient client, String fileName, int replicationLevel) {
+	public ReplicatedFile createFile(DataServer primary, String fileName,
+			int replicationLevel) {
 		
 		Set<DataServer> choosenDataServes = 
 			chooseRandomDataServers(dataServers, replicationLevel + 1);
 		
-		DataServer primary = null;
+		//We just ignore the parameter. It's a bit ugly but CoLocated code seems simpler now
+		DataServer the_primary = null;
 		Set<DataServer> secondaries = new HashSet<DataServer>();
 		
 		for(DataServer dataServer : choosenDataServes) {
-			if(primary == null) {
-				primary = dataServer;
+			if(the_primary == null) {
+				the_primary = dataServer;
 			} else {
 				secondaries.add(dataServer);
 			}
 		}
 		
-		return new ReplicatedFile(fileName, primary, secondaries);
+		return new ReplicatedFile(fileName, replicationLevel, the_primary, secondaries);
 		
 	}
-
 }

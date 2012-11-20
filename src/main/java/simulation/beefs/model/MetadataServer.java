@@ -1,6 +1,9 @@
 package simulation.beefs.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,18 +30,31 @@ public class MetadataServer {
 
 	// Patrick: I'm considering that there is just one DataServer per machine.
 	private final Map<String, DataServer> dataServerByHost = new HashMap<String, DataServer>();
-
-	public MetadataServer(Set<DataServer> dataServers, String dataPlacementStrategy, 
+	
+	public MetadataServer(Set<ReplicatedFile> namespace, Set<DataServer> dataServers, String dataPlacementStrategy, 
 			int replicationLevel, Time timeToCoherence, Time timeToDelete) {
 		
+		//didn't like it. add a ds to a machine.
 		for(DataServer dataServer : dataServers) {
 			dataServerByHost.put(dataServer.getHost().getName(), dataServer);
 		}
 		
+		//FIXME: receive the placement alg. as arg
 		this.dataPlacement = DataPlacementAlgorithm.newDataPlacementAlgorithm(dataPlacementStrategy, dataServers);
 		this.replicationLevel = replicationLevel;
 		this.timeToCoherence = timeToCoherence;
 		this.timeToDelete = timeToDelete;
+		
+		for (ReplicatedFile replicatedFile : namespace) {
+			files.put(replicatedFile.getFullPath(), replicatedFile);
+		}
+	}
+	
+	public MetadataServer(Set<DataServer> dataServers, String dataPlacementStrategy, 
+			int replicationLevel, Time timeToCoherence, Time timeToDelete) {
+		
+		this(new HashSet<ReplicatedFile>(), dataServers, dataPlacementStrategy, replicationLevel,
+				timeToCoherence, timeToDelete);
 	}
 	
 	public void close(String filePath) {
@@ -68,16 +84,22 @@ public class MetadataServer {
 		
 		return theFile;
 	}
-
+	
 	private ReplicatedFile createFile(FileSystemClient client, String fullpath) {
-		ReplicatedFile newFile = dataPlacement.createFile(client, fullpath, replicationLevel);
+		DataServer primary = getDataServer(client.getHost().getName());
+		ReplicatedFile newFile = dataPlacement.createFile(primary, fullpath, replicationLevel);
 		
 		files.put(fullpath, newFile);
 		
 		return newFile;
 	}
+
+	public List<DataServer> dataServers() {
+		return new LinkedList<DataServer>(dataServerByHost.values());
+	}
 	
 	public DataServer getDataServer(String host) {
+		//FIXME: didn't like it
 		return dataServerByHost.get(host);
 	}
 

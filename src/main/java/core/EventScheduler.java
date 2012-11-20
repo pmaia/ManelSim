@@ -1,5 +1,8 @@
 package core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import core.Time.Unit;
 
 /**
@@ -7,11 +10,15 @@ import core.Time.Unit;
  */
 public final class EventScheduler {
 
+	private static final Logger logger = LoggerFactory.getLogger(EventScheduler.class);
+	
 	private static Time emulationStart = null;
 	private static Time emulationEnd = null;
 	private static EventSourceMultiplexer eventSourceMultiplexer = null;
 	private static long processCount = 0;
 	private static Time now = new Time(0L, Unit.MILLISECONDS);
+	
+	private static boolean stopOnError = true;
 
 	private EventScheduler() { }
 	
@@ -25,6 +32,15 @@ public final class EventScheduler {
 	
 	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource) {
 		reset();
+		EventScheduler.emulationStart = emulationStart;
+		EventScheduler.emulationEnd = emulationEnd;
+		EventScheduler.eventSourceMultiplexer = eventSource;
+	}
+	
+	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource,
+			boolean stopOnError) {
+		reset();
+		EventScheduler.stopOnError = stopOnError;
 		EventScheduler.emulationStart = emulationStart;
 		EventScheduler.emulationEnd = emulationEnd;
 		EventScheduler.eventSourceMultiplexer = eventSource;
@@ -47,10 +63,18 @@ public final class EventScheduler {
 			Time eventTime = nextEvent.getScheduledTime();
 
 			if (eventTime.isEarlierThan(now())) {
-				throw new RuntimeException("ERROR: emulation time(" + now()
+				
+				String msg = "ERROR: emulation time(" + now()
 						+ ") " + "already ahead of event time("
 						+ eventTime
-						+ "). Event is outdated and will not be processed.");
+						+ "). Event(" + nextEvent
+						+ ") " + "is outdated and will not be processed.";
+				
+				if (stopOnError) {
+					throw new RuntimeException(msg);
+				} else {
+					logger.error(msg);
+				}
 			}
 
 			if (isEarlierThanEmulationEnd(eventTime)) {
