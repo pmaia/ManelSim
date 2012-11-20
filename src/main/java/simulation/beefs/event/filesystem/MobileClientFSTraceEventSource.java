@@ -7,6 +7,7 @@ import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.userMigration.UserMigrationAlgorithm;
 import core.Event;
 import core.EventSource;
+import core.Time;
 
 /**
  * This {@link EventSource} implementation allows changing the {@link FileSystemClient}
@@ -35,10 +36,13 @@ public class MobileClientFSTraceEventSource implements EventSource {
 	public Event getNextEvent() {
 		
 		Event newEvent = this.fileSystemTraceEventSource.getNextEvent();
-		FileSystemClient newClient = migrationAlgorithm.baseClient(newEvent.getScheduledTime());
-		//I dont't want to touch the scheduler, so we know now() just after event create event -- we can
-		//migrate with some delay (by one event) after migrationdelay.
-		this.fileSystemTraceEventSource.setClient(newClient);
+		if (newEvent != null) {
+			Time scheduledTime = newEvent.getScheduledTime();
+			FileSystemClient newClient = migrationAlgorithm.baseClient(scheduledTime);
+			//I dont't want to touch the scheduler, so we know now() just after event create event -- we can
+			//migrate with some delay (by one event) after migrationdelay.
+			this.fileSystemTraceEventSource.setClient(newClient);
+		}
 		
 		return newEvent; 
 	}
