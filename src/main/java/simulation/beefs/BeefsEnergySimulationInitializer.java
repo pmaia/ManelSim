@@ -1,4 +1,4 @@
-package simulation;
+package simulation.beefs;
 
 import java.io.File;
 import java.io.FileInputStream;
