@@ -22,8 +22,19 @@ import core.TimeInterval;
  */
 public class BeefsEnergySimulationSummarizer implements Summarizer {
 	
-	/*
-	 * TODO add javadoc explaining what the heck this method do. add ascii arts with examples of possible combinations
+	/**
+	 * Combines the information about user activity and file system activity. 
+	 * The result of calling this method is a list of intervals in which a machine was:
+	 * <li>Active</li>
+	 * <li>Idle</li>
+	 * <li>Sleeping</li>
+	 * <li>Transitioning</li>
+	 * <li>Active and read operations happened</li>
+	 * <li>Idle and read operations happened</li>
+	 * <li>Active and write operations happened</li>
+	 * <li>Idle and write operations happened</li>
+	 * <li>Active and both read and write operations happened</li>
+	 * <li>Idle and both read and write operations happened</li> 
 	 */
 	private List<EnergyStateInterval> combine(DataServer dataServer) { 
 		// convert MachineStateIntervals to EnergyStateIntervals
