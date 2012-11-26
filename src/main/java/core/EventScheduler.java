@@ -74,6 +74,7 @@ public final class EventScheduler {
 					throw new RuntimeException(msg);
 				} else {
 					logger.error(msg);
+					continue;
 				}
 			}
 
