@@ -117,9 +117,11 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		context.add(BeefsLocalitySimulationConstants.METADATA_SERVER, metadataServer);
 		context.add(BeefsLocalitySimulationConstants.CLIENTS, clients);
 
+		
 		for (DataServer server : dataServers) {
-			logger.info("ds={} available={} total={}",	
-					new Object[] {server, server.availableSpace(), server.totalSpace()});
+			logger.info("ds={} state={} available={} total={}",	
+					new Object[] {server, server.getHost().getState(),
+					server.availableSpace(), server.totalSpace()});
 		}
 		
 		return context;
