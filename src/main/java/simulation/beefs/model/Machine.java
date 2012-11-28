@@ -65,7 +65,11 @@ public class Machine {
 		this.hostname = hostname;
 		this.toSleepTimeout = toSleepTimeout;
 		this.transitionDuration = transitionDuration;
-		this.currentState = new Bootstrap();
+//		this.currentState = new Bootstrap();
+		//FIXME: My simulations are not related to this machine state abstraction, and I had problems
+		//do understand how to change it. So i add this hack to be active from the beginning. I know
+		//it's ugly.
+		this.currentState = new Active(new TimeInterval(Time.GENESIS, Time.THE_FINAL_JUDGMENT));
 	}
 	
 	public String getName() {
