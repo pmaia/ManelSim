@@ -4,10 +4,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Patrick Maia
  */
 public class ReplicatedFile {
+	
+	private static final Logger logger = LoggerFactory
+			.getLogger(ReplicatedFile.class);
 	
 	private final int rLevel;
 	private final String fullpath;
@@ -68,6 +74,17 @@ public class ReplicatedFile {
 	 */
 	public boolean repair(Iterable<DataServer> candidates) {
 		
+		StringBuffer buf = new StringBuffer();
+		buf.append("{ ");
+		for (DataServer dataServer : secondaries) {
+			buf.append(dataServer.toString());
+			buf.append(" ");
+		}
+		buf.append(" }");
+		
+		logger.info("repair file={} primary={} secs={}", 
+				new Object[] {getFullPath(),primary, buf.toString()});
+		
 		long replicaSize = primary.size(getFullPath());
 		
 		for (DataServer dataServer : candidates) {
@@ -83,6 +100,7 @@ public class ReplicatedFile {
 					
 					dataServer.createReplica(getFullPath(), false);
 					dataServer.update(getFullPath(), replicaSize);
+					secondaries.add(dataServer);
 				}
 			}
 		}
@@ -151,6 +169,10 @@ public class ReplicatedFile {
 			try {
 				sec.update(getFullPath(), size);
 			} catch (InsufficientSpaceException e) {
+				logger.info("Removing data_server={} from file_group={} " +
+						"due to insuf. space. file_size={} available={}",
+						new Object[] {sec.toString(), getFullPath(), size, sec.availableSpace()});
+				
 				sec.delete(getFullPath());
 				secsToRemove.add(sec);
 			}
