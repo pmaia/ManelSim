@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import simulation.beefs.event.filesystem.DeleteFileReplicas;
 import simulation.beefs.event.filesystem.UpdateFileReplicas;
 import simulation.beefs.placement.DataPlacementAlgorithm;
@@ -17,6 +20,9 @@ import core.Time;
  * @author Patrick Maia
  */
 public class MetadataServer {
+	
+	private static final Logger logger = LoggerFactory
+			.getLogger(MetadataServer.class);
 	
 	private final DataPlacementAlgorithm dataPlacement;
 	
@@ -86,6 +92,9 @@ public class MetadataServer {
 	}
 	
 	private ReplicatedFile createFile(FileSystemClient client, String fullpath) {
+		
+		logger.info("client={} request file creation path={}", 
+				client.toString(), fullpath);
 		DataServer primary = getDataServer(client.getHost().getName());
 		ReplicatedFile newFile = dataPlacement.createFile(primary, fullpath, replicationLevel);
 		

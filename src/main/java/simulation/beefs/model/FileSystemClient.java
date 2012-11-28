@@ -57,11 +57,11 @@ public class FileSystemClient {
 			
 			if(primaryHost.isReachable()) {
 				
-				logger.info("op={}" +
-							"client_host{} ds_host={}" +
+				logger.info("op={} " +
+							"client_host={} ds_host={} " +
 							"filepath={} " +
-							"bytesTransfered={}" +
-							"begin={} duration={}",
+							"bytesTransfered={} " +
+							"begin={} duration={} ",
 							new Object[] {
 								"read",
 								getHost().getName(), primaryHost.getName(), 
@@ -95,11 +95,11 @@ public class FileSystemClient {
 				
 				replicatedFile.setSize(fileSize);
 				
-				logger.info("op={}" +
-						"client_host{} ds_host={}" +
+				logger.info("op={} " +
+						"client_host={} ds_host={} " +
 						"filepath={} " +
-						"bytesTransfered={}" +
-						"begin={} duration={}",
+						"bytesTransfered={} " +
+						"begin={} duration={} ",
 						new Object[] {
 							"write",
 							getHost().getName(), primary.getHost().getName(), 

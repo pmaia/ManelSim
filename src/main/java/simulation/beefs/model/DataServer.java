@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import core.Time;
 import core.TimeInterval;
 
@@ -20,6 +23,9 @@ import core.TimeInterval;
  * @author manel
  */
 public class DataServer {
+	
+	private static final Logger logger = LoggerFactory
+			.getLogger(DataServer.class);
 	
 	private List<TimeInterval> writeIntervals = new ArrayList<TimeInterval>();
 	private List<TimeInterval> readIntervals = new ArrayList<TimeInterval>();
@@ -111,12 +117,18 @@ public class DataServer {
 		return updatedIntervalsList;
 	}
 	
+	public boolean contains(String fullpath) {
+		return (primaries.containsKey(fullpath) || secs.containsKey(fullpath));
+	}
+	
 	public void createReplica(String fullpath, boolean primary) {
 		
-		if (primaries.containsKey(fullpath) || secs.containsKey(fullpath)) {
+		if (contains(fullpath)) {
 			throw new IllegalArgumentException("File: " + fullpath +
 					" already exists.");
 		}
+		
+		logger.info("creating file={} primary={}", fullpath, primary);
 		
 		((primary) ? primaries : secs).put(fullpath, 0L);
 	}
