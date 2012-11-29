@@ -82,13 +82,17 @@ public class MetadataServer {
 	}
 
 	public ReplicatedFile createOrOpen(FileSystemClient client, String path) {
-		ReplicatedFile theFile = files.get(path);
+		ReplicatedFile theFile = open(path);
 		
 		if(theFile == null) {
 			theFile = createFile(client, path);
 		}
 		
 		return theFile;
+	}
+	
+	public ReplicatedFile open(String path) {
+		return files.get(path);
 	}
 	
 	private ReplicatedFile createFile(FileSystemClient client, String fullpath) {

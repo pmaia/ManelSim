@@ -1,7 +1,6 @@
 package simulation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static simulation.beefs.placement.DataPlacementUtil.filter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,8 +13,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-import simulation.beefs.event.filesystem.MobileClientFSTraceEventSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import simulation.beefs.event.filesystem.FileSystemTraceEventSource;
+import simulation.beefs.event.filesystem.MobileClientFSTraceEventSource;
 import simulation.beefs.model.DataServer;
 import simulation.beefs.model.FileSystemClient;
 import simulation.beefs.model.Machine;
@@ -35,8 +37,6 @@ import core.Initializer;
 import core.Time;
 import core.Time.Unit;
 
-import static simulation.beefs.placement.DataPlacementUtil.*;
-
 /**
  * 
  * @author manel
@@ -44,7 +44,6 @@ import static simulation.beefs.placement.DataPlacementUtil.*;
 public class BeefsLocalitySimulationInitializer implements Initializer {
 
 	private static final Logger logger = LoggerFactory.getLogger(BeefsLocalitySimulationInitializer.class);
-	
 	private static long diskSize = 1024 * 1024 * 1024 * 1L;// 1 GiBytes
 
 	@Override
@@ -116,6 +115,13 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		context.add(BeefsLocalitySimulationConstants.DATA_SERVERS, dataServers);
 		context.add(BeefsLocalitySimulationConstants.METADATA_SERVER, metadataServer);
 		context.add(BeefsLocalitySimulationConstants.CLIENTS, clients);
+		
+		for (DataServer ds : dataServers) {
+			logger.info("ds={} available={} usedSec={} total={}", 
+					new Object[] { ds.toString(), ds.availableSpace(),
+					ds.secondaryUsedSpace(),
+					ds.totalSpace()});
+		}
 		
 		return context;
 	}

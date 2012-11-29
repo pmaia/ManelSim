@@ -1,5 +1,7 @@
 package simulation.beefs.model;
 
+import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,14 @@ public class FileSystemClient {
 								begin, duration}
 							);
 				primary.reportRead(begin, duration);
+				
+				if (!file.full()) {
+					Time now = EventScheduler.now();
+					EventScheduler.schedule(
+							new RepairReplicatedFile(this.metadataServer.dataServers(), 
+									file, now.plus(RepairReplicatedFile.REPAIR_DELAY)));
+				}
+				
 			} else if(wakeOnLan){
 				primaryHost.wakeOnLan(begin);
 				
@@ -93,7 +103,8 @@ public class FileSystemClient {
 			
 			if(primary.getHost().isReachable()) {
 				
-				replicatedFile.setSize(fileSize);
+				Collection<String> staledReplicationFiles 
+					= replicatedFile.setSize(fileSize);
 				
 				logger.info("op={} " +
 						"client_host={} ds_host={} " +
@@ -117,10 +128,16 @@ public class FileSystemClient {
 				//write operation is the only way to change the number of 
 				//replicas in a replication group.
 				if (!replicatedFile.full()) {
-					Time now = EventScheduler.now();
-					EventScheduler.schedule(
-							new RepairReplicatedFile(this.metadataServer.dataServers(), 
-									replicatedFile, now.plus(RepairReplicatedFile.REPAIR_DELAY)));
+					repair(replicatedFile);
+				}
+				
+				for (String staledPath : staledReplicationFiles) {
+					
+					ReplicatedFile file =  this.metadataServer.open(staledPath);
+					//primary data server purge secondary replicas. we need to
+					//remove this data server them from their replication groups.
+					file.removeSecondary(primary);
+					repair(file);
 				}
 				
 			} else if(wakeOnLan) {
@@ -133,6 +150,16 @@ public class FileSystemClient {
 				writesWhileDataServerSleeping++;
 			}
 		}
+	}
+	
+	private void repair(ReplicatedFile file) {
+		
+		Time now = EventScheduler.now();
+		
+		RepairReplicatedFile repairEvent =
+				new RepairReplicatedFile(this.metadataServer.dataServers(), file,
+						now.plus(RepairReplicatedFile.REPAIR_DELAY));
+		EventScheduler.schedule(repairEvent);
 	}
 	
 	public MetadataServer getMetadataServer() {

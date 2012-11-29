@@ -16,8 +16,6 @@
 package simulation.beefs.model;
 
 /**
- * TODO make doc
- *
  * @author thiagoepdc - thiagoepdc@lsd.ufcg.edu.br
  */
 public class InsufficientSpaceException extends RuntimeException {

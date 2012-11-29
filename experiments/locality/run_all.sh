@@ -28,12 +28,17 @@ function create_config {
     local trace_path=$1
     local config_path=$2
     local new_config_path=$3
+    local pMigration=$4
+    local migrationPolice=$5
 
     local replacement="fs_trace_file="$trace_path
 
+    local new_prob="user_migration_probability="$pMigration
+    local new_police="user_migration_algorithm="$migrationPolice
+
     #as the config_path have slashes "/" I'm using "," as sed delimiter
     #assuming we do not have "," char in our strings
-    sed 's,fs_trace_file=.*,'"$replacement"',' $config_path > $new_config_path
+    sed -e 's,fs_trace_file=.*,'"$replacement"',' -e 's/user_migration_algorithm=.*/'"$new_police"'/' -e 's/user_migration_probability=.*/'"$new_prob"'/' $config_path > $new_config_path
 }
 
 function machine {
@@ -44,12 +49,24 @@ function machine {
 
 #assuming all file withing $trace_dir are trace files
 #also, trace files follow a machine.* patttern
-for file in `find $trace_dir -type f`
-do
-    mac=`machine $file`
-    create_config $file conf/run.conf $out_dir/$mac.run.conf
-    rm ddg.log
-    bash run.sh $out_dir/$mac.run.conf ../../target 2> $mac.err
-    mv ddg.log $out_dir/$mac.ddg.log
-    mv *err $out_dir
+for prob in "0.2" "0.5" "0.8"
+do 
+    for police in "sweet_home" "homeless"
+    do
+        sim_out_dir=$out_dir/$prob/$police
+        if [ ! -d $sim_out_dir ]
+        then
+            mkdir -p $sim_out_dir
+        fi
+
+        for file in `find $trace_dir -type f`
+        do
+            mac=`machine $file`
+            create_config $file conf/run.conf $sim_out_dir/$mac.run.conf $prob $police
+            rm ddg.log
+            bash run.sh $sim_out_dir/$mac.run.conf ../../target 1> $mac.out 2> $mac.err
+            mv ddg.log $sim_out_dir//$mac.ddg.log
+            mv *err *out $sim_out_dir/
+        done
+    done
 done

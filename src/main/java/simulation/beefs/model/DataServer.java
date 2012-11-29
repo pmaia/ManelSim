@@ -24,8 +24,7 @@ import core.TimeInterval;
  */
 public class DataServer {
 	
-	private static final Logger logger = LoggerFactory
-			.getLogger(DataServer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataServer.class);
 	
 	private List<TimeInterval> writeIntervals = new ArrayList<TimeInterval>();
 	private List<TimeInterval> readIntervals = new ArrayList<TimeInterval>();
@@ -128,9 +127,18 @@ public class DataServer {
 					" already exists.");
 		}
 		
-		logger.info("creating file={} primary={}", fullpath, primary);
+		logger.debug("creating file={} primary={} ds={}", new Object[] {fullpath, primary, this});
 		
 		((primary) ? primaries : secs).put(fullpath, 0L);
+	}
+
+	public long secondaryUsedSpace() {
+		//for the debug purpose, takes time, take care
+		long space = 0;
+		for(Long size: this.secs.values()) {
+			space += size;
+		}
+		return space;
 	}
 	
 	/**
@@ -145,9 +153,9 @@ public class DataServer {
 	 */
 	public Collection<String> purge(long toReclaim) {
 		
-		if (usedSpace > toReclaim) {
-			return Collections.EMPTY_SET;
-		}
+		//if (usedSpace > toReclaim) {
+		//	return Collections.EMPTY_SET;
+		//}
 		
 		Set<String> toPurge = new HashSet<String>();
 		
@@ -180,6 +188,8 @@ public class DataServer {
 		if (pool == null) {
 			throw new IllegalArgumentException("File not found: " + fullpath);
 		}
+		
+		logger.info("deleting file={} from ds={}", fullpath, toString());
 		
 		long fileSize = pool.remove(fullpath);
 		this.usedSpace -= fileSize;
