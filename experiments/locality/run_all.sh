@@ -2,11 +2,11 @@
 
 # It run a parameter sweep to a collection of traces
 
-EXPECTED_ARGS=2
+EXPECTED_ARGS=3
 
 if [ $# -ne $EXPECTED_ARGS ]
 then 
-    echo "Usage:" $0 "trace_dir" "out_dir"
+    echo "Usage:" $0 "trace_dir" "out_dir" "num_samples"
     exit 1
 fi
 
@@ -23,6 +23,9 @@ then
     echo "out_dir:" $out_dir "is not accessible"
     exit 1
 fi
+
+#TODO: validate this value
+samples=$3
 
 function create_config {
     local trace_path=$1
@@ -61,12 +64,15 @@ do
 
         for file in `find $trace_dir -type f`
         do
-            mac=`machine $file`
-            create_config $file conf/run.conf $sim_out_dir/$mac.run.conf $prob $police
-            rm ddg.log
-            bash run.sh $sim_out_dir/$mac.run.conf ../../target 1> $mac.out 2> $mac.err
-            mv ddg.log $sim_out_dir//$mac.ddg.log
-            mv *err *out $sim_out_dir/
+            for sample in `seq $samples`
+            do 
+                mac=`machine $file`
+                create_config $file conf/run.conf $sim_out_dir/$mac.run.conf $prob $police
+                rm ddg.log
+                bash run.sh $sim_out_dir/$mac.run.conf ../../target 1> $mac.$sample.out 2> $mac.$sample.err
+                mv ddg.log $sim_out_dir/$mac.$sample.ddg.log
+                mv $mac.$sample.out $mac.$sample.err $sim_out_dir/
+            done
         done
     done
 done
