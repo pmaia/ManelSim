@@ -87,7 +87,7 @@ public class EventSourceMultiplexer {
 			}
 		}
 		
-		//FIXME: below code is not sexy. I'm wondering if it's possible to handle
+		//FIXME: code below is not sexy. I'm wondering if it's possible to handle
 		//this generatedEvents at the same above loop
 		//One option is to add them to a generatedEventsSource and add this new source
 		//to eventSources array.
