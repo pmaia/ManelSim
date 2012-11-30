@@ -25,6 +25,8 @@ import java.util.PriorityQueue;
  */
 public class EventSourceMultiplexer {
 	
+	//FIXME: shouldn't be a Event source type ?
+	
 	private final PushBackEventSource [] eventSources;
 	
 	private final PriorityQueue<Event> generatedEventsQueue;
