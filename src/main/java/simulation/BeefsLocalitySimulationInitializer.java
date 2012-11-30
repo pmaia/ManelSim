@@ -45,6 +45,8 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 
 	private static final Logger logger = LoggerFactory.getLogger(BeefsLocalitySimulationInitializer.class);
 	private static long diskSize = 1024 * 1024 * 1024 * 1L;// 1 GiBytes
+	
+	private static final Boolean DO_DATA_SERVER_REPORT = false;
 
 	@Override
 	public Context initialize(Properties config) {
@@ -276,7 +278,7 @@ public class BeefsLocalitySimulationInitializer implements Initializer {
 		Set<DataServer> dataServers = new HashSet<DataServer>();
 	
 		for (Machine machine : machines) {
-			dataServers.add(new DataServer(machine, diskSize));
+			dataServers.add(new DataServer(machine, diskSize, DO_DATA_SERVER_REPORT));
 		}
 	
 		return dataServers;

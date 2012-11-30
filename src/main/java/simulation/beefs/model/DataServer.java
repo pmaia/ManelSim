@@ -37,14 +37,23 @@ public class DataServer {
 	
 	private final Machine host;
 	private final String id = UUID.randomUUID().toString();
+
+	private final boolean reportOps;
 	
 	public DataServer(Machine host) {
 		this(host, Long.MAX_VALUE);
 	}
 
 	public DataServer(Machine host, long totalSpaceBytes) {
+		this(host, totalSpaceBytes, true);
+	}
+	
+	public DataServer(Machine host, long totalSpaceBytes, boolean reportOps) {
 		this.host = host;
 		this.totalSpaceBytes = totalSpaceBytes;
+		//read and write reports are burns cpu. I do not have time to improve the code
+		//so I added this flags to bypass them.
+		this.reportOps = reportOps;
 	}
 	
 	@Override
@@ -90,11 +99,15 @@ public class DataServer {
 	}
 	
 	public void reportWrite(Time start, Time duration) {
-		writeIntervals = reportOperation(start, duration, writeIntervals);
+		if (reportOps) {
+			writeIntervals = reportOperation(start, duration, writeIntervals);
+		}
 	}
 
 	public void reportRead(Time start, Time duration) {
-		readIntervals = reportOperation(start, duration, readIntervals);
+		if (reportOps) {
+			readIntervals = reportOperation(start, duration, readIntervals);
+		}
 	}
 	
 	private List<TimeInterval> reportOperation(Time start, Time duration, List<TimeInterval> originalIntervals) {
