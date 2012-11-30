@@ -29,6 +29,7 @@ public class EventSourceMultiplexer {
 	
 	private final PushBackEventSource [] eventSources;
 	
+	//peak and pool methods return minimum elements
 	private final PriorityQueue<Event> generatedEventsQueue;
 
 	public EventSourceMultiplexer(EventSource[] eventSources) {
@@ -107,8 +108,9 @@ public class EventSourceMultiplexer {
 		//FIXME: If I understand it correctly, events added via addNewEvent(Event event)
 		//are kept unordered. Dispatch order is achieved transversing the source array and
 		//the priority queue and pushing event back when necessary. I think it makes sense
-		//for patrick simulation but can hurt someone else performance when addNewEvent is 
-		//a common call (probably)
+		//for patrick simulation but can hurt (not sure) someone else performance when addNewEvent 
+		//is a common call
+		//FIXME: comment above is likely to be wrong. PriorityQueue keep some order via peak and pool
 		return smallestTimeEvent;
 	}
 	
