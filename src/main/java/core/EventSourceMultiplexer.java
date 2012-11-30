@@ -104,6 +104,11 @@ public class EventSourceMultiplexer {
 			}
 		}
 		
+		//FIXME: If I understand it correctly, events added via addNewEvent(Event event)
+		//are kept unordered. Dispatch order is achieved transversing the source array and
+		//the priority queue and pushing event back when necessary. I think it makes sense
+		//for patrick simulation but can hurt someone else performance when addNewEvent is 
+		//a common call (probably)
 		return smallestTimeEvent;
 	}
 	
