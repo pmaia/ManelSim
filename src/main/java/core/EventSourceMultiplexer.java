@@ -68,7 +68,7 @@ public class EventSourceMultiplexer {
 			//this loop transverse the source array from smallestTimeEventSourceId
 			//search for a non-null event earlier than the smallestTimeEvent
 			//FIXME: i actually didn't understand why not making a single pass (it's likely
-			//because getNextEvent() implies in push them back if it the the earliest)
+			//because getNextEvent() implies in push them back if it's not the earliest)
 			//FIXME: that's a reason to add a peak() method ? (i'm not sure if it possible
 			//is the particular case)
 			for(int i = smallestTimeEventSourceId + 1; i < this.eventSources.length; i++) {
