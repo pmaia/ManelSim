@@ -53,6 +53,10 @@ public class EventSourceMultiplexer {
 		Event smallestTimeEventCandidate = null;
 		
 		if(eventSources.length > 0) {
+			
+			//It seems this loop finds the index of the first source with a non-null event (and it assign it
+			//to the smallestTimeEventSourceId variable)
+			//it also assigns the time of this non-null event to the smallestTimeEvent variable
 			while((smallestTimeEvent = eventSources[smallestTimeEventSourceId].getNextEvent()) == null) {
 				smallestTimeEventSourceId++;
 				
@@ -61,6 +65,12 @@ public class EventSourceMultiplexer {
 				}
 			}
 
+			//this loop transverse the source array from smallestTimeEventSourceId
+			//search for a non-null event earlier than the smallestTimeEvent
+			//FIXME: i actually didn't understand why not making a single pass (it's likely
+			//because getNextEvent() implies in push them back if it the the earliest)
+			//FIXME: that's a reason to add a peak() method ? (i'm not sure if it possible
+			//is the particular case)
 			for(int i = smallestTimeEventSourceId + 1; i < this.eventSources.length; i++) {
 				smallestTimeEventCandidate = eventSources[i].getNextEvent();
 				
@@ -77,6 +87,10 @@ public class EventSourceMultiplexer {
 			}
 		}
 		
+		//FIXME: below code is not sexy. I'm wondering if it's possible to handle
+		//this generatedEvents at the same above loop
+		//One option is to add them to a generatedEventsSource and add this new source
+		//to eventSources array.
 		smallestTimeEventCandidate = generatedEventsQueue.poll();
 		if(smallestTimeEventCandidate != null) {
 			Time smallestTimeCandidate = smallestTimeEventCandidate.getScheduledTime();
