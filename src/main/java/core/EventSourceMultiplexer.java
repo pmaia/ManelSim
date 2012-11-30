@@ -46,6 +46,8 @@ public class EventSourceMultiplexer {
 	}
 
 	public Event getNextEvent() {
+		
+		//FIXME: I don't understand this code
 		int smallestTimeEventSourceId = 0;
 		Event smallestTimeEvent = null;
 		Event smallestTimeEventCandidate = null;
