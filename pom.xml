@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ManelSim</groupId>
 	<artifactId>ManelSim</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>ManelSim</name>
 	<description>The discrete events simulator originally written by Manel, the legendary programmer.</description>
 
