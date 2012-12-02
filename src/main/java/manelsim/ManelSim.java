@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package core;
+package manelsim;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import core.Time.Unit;
+import manelsim.Time.Unit;
+
 
 
 /**

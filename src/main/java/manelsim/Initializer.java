@@ -1,4 +1,4 @@
-package core;
+package manelsim;
 
 import java.util.Properties;
 

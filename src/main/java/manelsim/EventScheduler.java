@@ -1,6 +1,6 @@
-package core;
+package manelsim;
 
-import core.Time.Unit;
+import manelsim.Time.Unit;
 
 /**
  * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
