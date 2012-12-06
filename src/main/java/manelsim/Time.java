@@ -58,19 +58,19 @@ public final class Time implements Comparable<Time> {
 		return timeMicroSeconds;
 	}
 	
-	public long asMilliseconds() {
+	public double asMilliseconds() {
 		return asMicroseconds() / 1000;
 	}
 	
-	public long asSeconds() {
+	public double asSeconds() {
 		return asMilliseconds() / 1000;
 	}
 	
-	public long asMinutes() {
+	public double asMinutes() {
 		return asSeconds() / 60;
 	}
 	
-	public long asHours() {
+	public double asHours() {
 		return asMinutes() / 60;
 	}
 
