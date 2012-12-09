@@ -10,6 +10,7 @@ public final class EventScheduler {
 	private static Time emulationStart = null;
 	private static Time emulationEnd = null;
 	private static EventSourceMultiplexer eventSourceMultiplexer = null;
+	private static boolean stopOnError = true;
 	private static long processCount = 0;
 	private static Time now = new Time(0L, Unit.MILLISECONDS);
 
@@ -23,8 +24,9 @@ public final class EventScheduler {
 		now = new Time(0L, Unit.MILLISECONDS);
 	}
 	
-	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource) {
+	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource, boolean stopOnError) {
 		reset();
+		EventScheduler.stopOnError = stopOnError;
 		EventScheduler.emulationStart = emulationStart;
 		EventScheduler.emulationEnd = emulationEnd;
 		EventScheduler.eventSourceMultiplexer = eventSource;
@@ -47,10 +49,16 @@ public final class EventScheduler {
 			Time eventTime = nextEvent.getScheduledTime();
 
 			if (eventTime.isEarlierThan(now())) {
-				throw new RuntimeException("ERROR: emulation time(" + now()
+				String msg = "ERROR: emulation time(" + now()
 						+ ") " + "already ahead of event time("
 						+ eventTime
-						+ "). Event is outdated and will not be processed.");
+						+ "). Event is outdated and will not be processed.";
+
+				if(stopOnError) {
+					throw new RuntimeException(msg);
+				} else {
+					System.err.println(msg);
+				}
 			}
 
 			if (isEarlierThanEmulationEnd(eventTime)) {

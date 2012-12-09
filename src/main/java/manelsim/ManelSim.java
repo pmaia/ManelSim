@@ -56,8 +56,10 @@ public class ManelSim {
 		
 		Time simulationStart = new Time(Long.parseLong(config.getProperty("simulation_start")), Unit.SECONDS);
 		Time simulationEnd = new Time(Long.parseLong(config.getProperty("simulation_end")), Unit.SECONDS);
+		boolean stopOnError = Boolean.parseBoolean(config.getProperty("stop_on_error", "true"));
 		
-		EventScheduler.setup(simulationStart, simulationEnd, context.getEventSourceMultiplexer());
+		EventScheduler.setup(simulationStart, simulationEnd, context.getEventSourceMultiplexer(), stopOnError);
+
 		try {
 			EventScheduler.start();
 		} catch (Throwable t) {
