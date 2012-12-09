@@ -15,7 +15,10 @@
  */
 package manelsim;
 
+import java.util.Comparator;
+import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.WeakHashMap;
 
 
 /**
@@ -25,14 +28,20 @@ import java.util.PriorityQueue;
  */
 public class EventSourceMultiplexer {
 	
+	private static final int QUEUE_INITIAL_CAPACITY = 1000;
+	
 	private final PushBackEventSource [] eventSources;
 	
 	private final PriorityQueue<Event> generatedEventsQueue;
+	
+	private final Map<Event, Long> arrivalOrderMap = new WeakHashMap<Event, Long>();
+	
+	private long arrivalCount = 0;
 
 	public EventSourceMultiplexer(EventSource[] eventSources) {
 		this.eventSources = new PushBackEventSource[eventSources.length];
 		
-		this.generatedEventsQueue = new PriorityQueue<Event>();
+		this.generatedEventsQueue = new PriorityQueue<Event>(QUEUE_INITIAL_CAPACITY, new FIFOWhenSamePriority());
 		
 		for(int i = 0; i < eventSources.length; i++) {
 			this.eventSources[i] = new PushBackEventSource(eventSources[i]);
@@ -40,6 +49,7 @@ public class EventSourceMultiplexer {
 	}
 	
 	public void addNewEvent(Event event) {
+		arrivalOrderMap.put(event, arrivalCount++);
 		generatedEventsQueue.add(event);
 	}
 
@@ -119,6 +129,22 @@ public class EventSourceMultiplexer {
 			this.pushedBackEvent = event;
 		}
 		
+	}
+	
+	//TODO add comment explaining why this is necessary
+	private class FIFOWhenSamePriority implements Comparator<Event> {
+		@Override
+		public int compare(Event e1, Event e2) {
+			if(e1.compareTo(e2) == 0) {
+				long diff = arrivalOrderMap.get(e1) - arrivalOrderMap.get(e2);
+				if (diff < 0) {
+					return -1;
+				} else if (diff > 0) {
+					return 1;
+				}
+			}
+			return e1.compareTo(e2);
+		}
 	}
 
 }
