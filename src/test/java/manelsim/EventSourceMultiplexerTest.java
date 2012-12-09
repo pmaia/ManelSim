@@ -140,6 +140,10 @@ public class EventSourceMultiplexerTest {
 		}
 		@Override
 		public void process() { /* does nothing */ }
+		@Override
+		public boolean equals(Object obj) {
+			return obj == this; // without this all same time TestEvents would be considered the same
+		}
 	}
 	
 	private static class TestEventSource implements EventSource {
