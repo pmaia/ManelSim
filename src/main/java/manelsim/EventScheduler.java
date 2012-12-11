@@ -24,6 +24,10 @@ public final class EventScheduler {
 		now = new Time(0L, Unit.MILLISECONDS);
 	}
 	
+	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource) {
+		setup(emulationStart, emulationEnd, eventSource, true);
+	}
+	
 	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource, boolean stopOnError) {
 		reset();
 		EventScheduler.stopOnError = stopOnError;
