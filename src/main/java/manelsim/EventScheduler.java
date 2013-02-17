@@ -106,4 +106,8 @@ public final class EventScheduler {
 		return now;
 	}
 
+  public static Time getEmulationStart() {
+    return emulationStart;
+  }
+
 }
