@@ -93,7 +93,7 @@ public class EventSourceMultiplexerTest {
 	}
 	
 	@Test
-	public void testSameTimeEventsObeyFIFO1() {
+	public void testAddedEventsHavePriorityWhenSameTime() {
 		TestEvent event0 = new TestEvent(new Time(1, Unit.SECONDS));
 		TestEvent event1 = new TestEvent(new Time(1, Unit.SECONDS));
 		TestEvent event2 = new TestEvent(new Time(1, Unit.SECONDS));
@@ -107,10 +107,10 @@ public class EventSourceMultiplexerTest {
 		eventsMultiplexer.addNewEvent(event2);
 		eventsMultiplexer.addNewEvent(event3);
 
-		assertEquals(event0, eventsMultiplexer.getNextEvent());
-		assertEquals(event1, eventsMultiplexer.getNextEvent());
 		assertEquals(event2, eventsMultiplexer.getNextEvent());
 		assertEquals(event3, eventsMultiplexer.getNextEvent());
+		assertEquals(event0, eventsMultiplexer.getNextEvent());
+		assertEquals(event1, eventsMultiplexer.getNextEvent());
 		assertNull(eventsMultiplexer.getNextEvent());
 	}
 	

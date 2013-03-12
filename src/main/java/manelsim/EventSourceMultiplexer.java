@@ -88,11 +88,15 @@ public class EventSourceMultiplexer {
 			Time smallestTimeCandidate = smallestTimeEventCandidate.getScheduledTime();
 			if(smallestTimeEvent == null) {
 				smallestTimeEvent = smallestTimeEventCandidate;
-			} else if(smallestTimeCandidate.isEarlierThan(smallestTimeEvent.getScheduledTime())) {
-				eventSources[smallestTimeEventSourceId].pushBack(smallestTimeEvent);
-				smallestTimeEvent = smallestTimeEventCandidate;
 			} else {
-				generatedEventsQueue.add(smallestTimeEventCandidate);
+				Time timeOfSmallestTimeEvent = smallestTimeEvent.getScheduledTime();
+				if(smallestTimeCandidate.equals(timeOfSmallestTimeEvent) || // because generated events have precedence over regular ones
+						smallestTimeCandidate.isEarlierThan(timeOfSmallestTimeEvent)) {
+					eventSources[smallestTimeEventSourceId].pushBack(smallestTimeEvent);
+					smallestTimeEvent = smallestTimeEventCandidate;
+				} else {
+					generatedEventsQueue.add(smallestTimeEventCandidate);
+				}
 			}
 		}
 		
