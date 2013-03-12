@@ -12,7 +12,8 @@ public class TimeInterval {
 
 	public TimeInterval(Time begin, Time end) {
 		if(end.isEarlierThan(begin)) {
-			throw new IllegalArgumentException("Interval must begin before end.");
+			throw new IllegalArgumentException(
+					String.format("Interval must begin before end. You tried [%s, %s]", begin, end));
 		}
 		this.begin = begin;
 		this.end = end;
