@@ -15,7 +15,7 @@ public final class EventScheduler {
 	private static Time now = new Time(0L, Unit.MILLISECONDS);
 
 	private EventScheduler() { }
-	
+
 	public static void reset() {
 		emulationStart = null;
 		emulationEnd = null;
@@ -23,11 +23,11 @@ public final class EventScheduler {
 		processCount = 0;
 		now = new Time(0L, Unit.MILLISECONDS);
 	}
-	
+
 	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource) {
 		setup(emulationStart, emulationEnd, eventSource, true);
 	}
-	
+
 	public static void setup(Time emulationStart, Time emulationEnd, EventSourceMultiplexer eventSource, boolean stopOnError) {
 		reset();
 		EventScheduler.stopOnError = stopOnError;
@@ -35,20 +35,20 @@ public final class EventScheduler {
 		EventScheduler.emulationEnd = emulationEnd;
 		EventScheduler.eventSourceMultiplexer = eventSource;
 	}
-	
+
 	private static boolean isConfigured() {
 		return !(emulationStart == null || emulationEnd == null || eventSourceMultiplexer == null);
 	}
-	
+
 	public static void start() {
-		
+
 		if(!isConfigured()) {
 			throw new IllegalStateException("EventScheduler is not configured. " +
 					"Are you sure you called EventScheduler.setup()?");
 		}
 
 		Event nextEvent;
-		
+
 		while ((nextEvent = eventSourceMultiplexer.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
 			Time eventTime = nextEvent.getScheduledTime();
 
@@ -68,7 +68,7 @@ public final class EventScheduler {
 			if (isEarlierThanEmulationEnd(eventTime)) {
 				if(isLaterThanEmulationStart(eventTime)) {
 					now = eventTime;
-					processEvent(nextEvent);
+					nextEvent.process();
 					processCount++;
 				}
 			} else {
@@ -86,14 +86,10 @@ public final class EventScheduler {
 		return eventTime.isEarlierThan(emulationEnd);
 	}
 
-	private static void processEvent(Event nextEvent) {
-		nextEvent.process();
-	}
-	
 	public static void schedule(Event event) {
 		eventSourceMultiplexer.addNewEvent(event);
 	}
-	
+
 	/**
 	 * 
 	 * @return the number of {@link Event}s processed.
@@ -106,8 +102,8 @@ public final class EventScheduler {
 		return now;
 	}
 
-  public static Time getEmulationStart() {
-    return emulationStart;
-  }
+	public static Time getEmulationStart() {
+		return emulationStart;
+	}
 
 }
