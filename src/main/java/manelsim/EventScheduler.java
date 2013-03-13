@@ -63,9 +63,7 @@ public final class EventScheduler {
 				} else {
 					System.err.println(msg);
 				}
-			}
-
-			if (isEarlierThanEmulationEnd(eventTime)) {
+			} else if (isEarlierThanEmulationEnd(eventTime)) {
 				if(isLaterThanEmulationStart(eventTime)) {
 					now = eventTime;
 					nextEvent.process();
