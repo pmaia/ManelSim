@@ -74,18 +74,10 @@ public final class Time implements Comparable<Time> {
 		return asMinutes() / 60;
 	}
 
-	/**
-	 * @param otherTime
-	 * @return
-	 */
 	public boolean isEarlierThan(Time otherTime) {
 		return (compareTo(otherTime) < 0);
 	}
 
-	/**
-	 * @param o
-	 * @return
-	 */
 	@Override
 	public int compareTo(Time otherTime) {
 		long diff = timeMicroSeconds - otherTime.timeMicroSeconds;

@@ -9,7 +9,7 @@ public final class EventScheduler {
 
 	private static Time emulationStart = null;
 	private static Time emulationEnd = null;
-	private static EventSourceMultiplexer eventSourceMultiplexer = null;
+	public static EventSourceMultiplexer eventSourceMultiplexer = null;
 	private static boolean stopOnError = true;
 	private static long processCount = 0;
 	private static Time now = new Time(0L, Unit.MILLISECONDS);
@@ -49,7 +49,8 @@ public final class EventScheduler {
 
 		Event nextEvent;
 
-		while ((nextEvent = eventSourceMultiplexer.getNextEvent()) != null && isEarlierThanEmulationEnd(now())) {
+		while ((nextEvent = eventSourceMultiplexer.getNextEvent()) != null) {
+			System.out.println("#################### " + nextEvent);
 			Time eventTime = nextEvent.getScheduledTime();
 
 			if (eventTime.isEarlierThan(now())) {

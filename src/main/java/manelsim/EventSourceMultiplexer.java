@@ -32,7 +32,7 @@ public class EventSourceMultiplexer {
 	
 	private final PushBackEventSource [] eventSources;
 	
-	private final PriorityQueue<Event> generatedEventsQueue;
+	public final PriorityQueue<Event> generatedEventsQueue;
 	
 	private final Map<Event, Long> arrivalOrderMap = new WeakHashMap<Event, Long>();
 	
