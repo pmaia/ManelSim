@@ -23,6 +23,8 @@ package manelsim;
 public abstract class Event implements Comparable<Event> {
 
 	private final Time scheduledTime;
+	
+	private boolean processed = false;
 
 	public Event(Time scheduledTime) {
 		this.scheduledTime = scheduledTime;
@@ -32,6 +34,14 @@ public abstract class Event implements Comparable<Event> {
 
 	public Time getScheduledTime() {
 		return scheduledTime;
+	}
+	
+	public void setProcessed() {
+		processed = true;
+	}
+	
+	public boolean wasProcessed() {
+		return processed;
 	}
 
 	@Override

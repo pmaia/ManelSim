@@ -67,6 +67,7 @@ public final class EventScheduler {
 				if(isLaterThanEmulationStart(eventTime)) {
 					now = eventTime;
 					nextEvent.process();
+					nextEvent.setProcessed();
 					processCount++;
 				}
 			} else {
@@ -86,6 +87,10 @@ public final class EventScheduler {
 
 	public static void schedule(Event event) {
 		eventSourceMultiplexer.addNewEvent(event);
+	}
+	
+	public static void cancel(Event event) {
+		eventSourceMultiplexer.removeEvent(event);
 	}
 
 	/**
