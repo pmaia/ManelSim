@@ -1,13 +1,10 @@
 package manelsim;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.WeakHashMap;
 
 public class EventSourceMultiplexer {
-	
-	private static final int QUEUE_INITIAL_CAPACITY = 1000;
 	
 	private final PushBackEventSource [] eventSources;
 	
@@ -20,7 +17,7 @@ public class EventSourceMultiplexer {
 	public EventSourceMultiplexer(EventSource[] eventSources) {
 		this.eventSources = new PushBackEventSource[eventSources.length];
 		
-		this.generatedEventsQueue = new PriorityQueue<Event>(QUEUE_INITIAL_CAPACITY, new FIFOWhenSamePriority());
+		this.generatedEventsQueue = new PriorityQueue<Event>();
 		
 		for(int i = 0; i < eventSources.length; i++) {
 			this.eventSources[i] = new PushBackEventSource(eventSources[i]);
@@ -38,11 +35,11 @@ public class EventSourceMultiplexer {
 
 	public Event getNextEvent() {
 		int smallestTimeEventSourceId = 0;
-		Event smallestTimeEvent = null;
-		Event smallestTimeEventCandidate = null;
+		Event nextEvent = null;
+		Event nextEventCandidate = null;
 		
 		if(eventSources.length > 0) {
-			while((smallestTimeEvent = eventSources[smallestTimeEventSourceId].getNextEvent()) == null) {
+			while((nextEvent = eventSources[smallestTimeEventSourceId].getNextEvent()) == null) {
 				smallestTimeEventSourceId++;
 				
 				if(smallestTimeEventSourceId == this.eventSources.length){
@@ -51,39 +48,39 @@ public class EventSourceMultiplexer {
 			}
 
 			for(int i = smallestTimeEventSourceId + 1; i < this.eventSources.length; i++) {
-				smallestTimeEventCandidate = eventSources[i].getNextEvent();
+				nextEventCandidate = eventSources[i].getNextEvent();
 				
-				if(smallestTimeEventCandidate != null){
-					if(smallestTimeEvent.getScheduledTime().isEarlierThan(smallestTimeEventCandidate.getScheduledTime())) {
-						eventSources[i].pushBack(smallestTimeEventCandidate);
+				if(nextEventCandidate != null){
+					if(nextEvent.getScheduledTime().isEarlierThan(nextEventCandidate.getScheduledTime())) {
+						eventSources[i].pushBack(nextEventCandidate);
 					} else {
-						eventSources[smallestTimeEventSourceId].pushBack(smallestTimeEvent);
+						eventSources[smallestTimeEventSourceId].pushBack(nextEvent);
 						
 						smallestTimeEventSourceId = i;
-						smallestTimeEvent = smallestTimeEventCandidate;
+						nextEvent = nextEventCandidate;
 					}
 				}
 			}
 		}
 		
-		smallestTimeEventCandidate = generatedEventsQueue.poll();
-		if(smallestTimeEventCandidate != null) {
-			Time smallestTimeCandidate = smallestTimeEventCandidate.getScheduledTime();
-			if(smallestTimeEvent == null) {
-				smallestTimeEvent = smallestTimeEventCandidate;
+		nextEventCandidate = generatedEventsQueue.poll();
+		if(nextEventCandidate != null) {
+			Time nextEventCandidateTime = nextEventCandidate.getScheduledTime();
+			if(nextEvent == null) {
+				nextEvent = nextEventCandidate;
 			} else {
-				Time timeOfSmallestTimeEvent = smallestTimeEvent.getScheduledTime();
-				if(smallestTimeCandidate.equals(timeOfSmallestTimeEvent) || // because generated events have precedence over regular ones
-						smallestTimeCandidate.isEarlierThan(timeOfSmallestTimeEvent)) {
-					eventSources[smallestTimeEventSourceId].pushBack(smallestTimeEvent);
-					smallestTimeEvent = smallestTimeEventCandidate;
+				Time nextEventTime = nextEvent.getScheduledTime();
+				if(nextEventCandidateTime.equals(nextEventTime) || // because generated events have precedence over regular ones
+						nextEventCandidateTime.isEarlierThan(nextEventTime)) {
+					eventSources[smallestTimeEventSourceId].pushBack(nextEvent);
+					nextEvent = nextEventCandidate;
 				} else {
-					generatedEventsQueue.add(smallestTimeEventCandidate);
+					generatedEventsQueue.add(nextEventCandidate);
 				}
 			}
 		}
 		
-		return smallestTimeEvent;
+		return nextEvent;
 	}
 	
 	/**
@@ -116,22 +113,6 @@ public class EventSourceMultiplexer {
 			this.pushedBackEvent = event;
 		}
 		
-	}
-	
-	//TODO add comment explaining why this is necessary
-	private class FIFOWhenSamePriority implements Comparator<Event> {
-		@Override
-		public int compare(Event e1, Event e2) {
-			if(e1.compareTo(e2) == 0) {
-				long diff = arrivalOrderMap.get(e1) - arrivalOrderMap.get(e2);
-				if (diff < 0) {
-					return -1;
-				} else if (diff > 0) {
-					return 1;
-				}
-			}
-			return e1.compareTo(e2);
-		}
 	}
 
 }
