@@ -1,18 +1,18 @@
 package manelsim;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import manelsim.Time.Unit;
 
-/**
- * @author Patrick Maia - patrickjem@lsd.ufcg.edu.br
- */
 public final class EventScheduler {
 
 	private static Time emulationStart = null;
 	private static Time emulationEnd = null;
 	private static EventSourceMultiplexer eventSourceMultiplexer = null;
 	private static boolean stopOnError = true;
-	private static long processCount = 0;
 	private static Time now = new Time(0L, Unit.MILLISECONDS);
+	private static Map<String, Long> eventsCountByType = new HashMap<String, Long>();
 
 	private EventScheduler() { }
 
@@ -20,7 +20,7 @@ public final class EventScheduler {
 		emulationStart = null;
 		emulationEnd = null;
 		eventSourceMultiplexer = null;
-		processCount = 0;
+		eventsCountByType = new HashMap<String, Long>();
 		now = new Time(0L, Unit.MILLISECONDS);
 	}
 
@@ -68,7 +68,10 @@ public final class EventScheduler {
 					now = eventTime;
 					nextEvent.process();
 					nextEvent.setProcessed();
-					processCount++;
+					
+					String eventType = nextEvent.getClass().getName();
+					Long currentCount = eventsCountByType.get(eventType) == null ? 0 : eventsCountByType.get(eventType);
+					eventsCountByType.put(eventType, currentCount + 1);
 				}
 			} else {
 				now = emulationEnd;
@@ -92,12 +95,16 @@ public final class EventScheduler {
 	public static void cancel(Event event) {
 		eventSourceMultiplexer.removeEvent(event);
 	}
+	
+	public static Map<String, Long> eventsCountByType() {
+		return new HashMap<String, Long>(eventsCountByType);
+	}
 
-	/**
-	 * 
-	 * @return the number of {@link Event}s processed.
-	 */
-	public static long processCount() {
+	public static long eventsCount() {
+		long processCount = 0;
+		for(Long count : eventsCountByType.values()) {
+			processCount += count;
+		}
 		return processCount;
 	}
 
